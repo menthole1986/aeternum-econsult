@@ -273,9 +273,10 @@ const DEMO = {
   drugWhy: 'máte vyšší BMI a zároveň jste uvedla, že se potřebujete zbavit chutí mezi jídly',
   blocked: false, blockReason: '',
   variants: [
-    { name: 'Starter', months: 7, price: 13970, desc: 'Přesný počet měsíců dle matematicky odhadované délky programu.' },
-    { name: 'Transform', months: 8, price: 12970, desc: 'Aby byla terapie úspěšná, vždy doporučujeme raději o něco delší délku z důvodu individuální odezvy.', rec: true },
-    { name: 'Aeternum', months: 10, price: 11970, desc: 'Transformační program s následnou udržovací fází, kterou lze flexibilně prodloužit.' }
+    { key: 'standard', name: 'Telehealth Standard', months: 8, price: 6970, drugIncluded: false,
+      desc: 'Celá péče na dálku pod přímým dohledem lékaře. Lék si vyzvednete v lékárně na náš e-recept.', rec: true },
+    { key: 'premium', name: 'Telehealth Premium', months: 8, price: 9970, drugIncluded: false,
+      desc: 'Všechno ze Standardu a k tomu prioritní konzultace a vlastní tým — trenér, výživový specialista, psycholog.' }
   ]
 };
 
@@ -414,8 +415,8 @@ expect: [
 
 /* 10 · Kalkulačka a varianty */
 plan: [
-  { t: () => `Teď k penězům. Podle Vašich čísel Vám vychází program na zhruba ${D.months} ${mesice(D.months)} a připravil jsem Vám tři varianty.` },
-  { t: 'Liší se délkou, a protože delší spolupráce nám umožní nastavit nižší měsíční cenu, platí jednoduchá logika — <b>čím delší program, tím nižší částka za měsíc</b> a delší stabilizační fáze.' },
+  { t: () => `Teď k penězům. Podle Vašich čísel Vám vychází program na zhruba ${D.months} ${mesice(D.months)} — počítejte radši s rezervou dvou měsíců navíc na individuální odezvu a na udržovací fázi.` },
+  { t: 'Programy se neliší délkou, ale tím, co je v nich. <b>Cena je za měsíc péče a je u všech délek stejná</b> — neúčtujeme podle toho, jak dlouho terapie potrvá, protože délku dopředu nikdo neví a program jde kdykoli ukončit i prodloužit, bez poplatku.' },
   { vars: true },
   { t: () => `Pro představu: abyste se dostal${ova()} do pásma normálního BMI, tedy někam k hodnotě ${String(CFG.healthyBmi).replace('.', ',')}, je to <b>${bmiTarget()} kg</b>. Nemusí to být Váš cíl — jen ať víte, kde to pásmo začíná.` },
   { chips: [{ label: 'Jak se to platí?', go: 'price' }] }
@@ -839,20 +840,48 @@ async function submitAsk() {
     return;
   }
 
-  /* Volný dotaz. Dokud nejsem napojený na model, nesmí dotaz spadnout do
-     prázdna — klient za konzultaci zaplatil mimo jiné proto, aby se mohl ptát.
-     Posílá se tedy na kliniku a odpoví člověk e-mailem. Až model přijde,
-     nahradí se tenhle blok a zbytek stránky se nemění. */
+  /* Volný dotaz. Odpovídá model na serveru — podklady i instrukce jsou tam,
+     ne tady, takže si je nikdo nemůže přepsat v prohlížeči.
+
+     Když model z jakéhokoli důvodu odpoví chybou, dotaz nesmí spadnout do
+     prázdna: pošle se na kliniku a odpoví člověk. Klient si konzultaci
+     zaplatil mimo jiné proto, aby se mohl ptát. */
   busy = true;
   const t = typing();
+  let answer = '';
+  let failed = '';
+  try {
+    if (DEMO_MODE || !CFG.apiUrl || !S.id) {
+      failed = 'demo';
+    } else {
+      const hist = S.log.slice(-6).map(l => ({ role: l.who === 'klient' ? 'user' : 'assistant', text: l.text }));
+      const r = await api('advisorAsk', { id: S.id, text, history: hist }, 60000);
+      answer = String(r.text || '');
+    }
+  } catch (e) { failed = e.code || 'api'; }
+
+  if (answer) {
+    t.remove();
+    // Model píše odstavce, ne HTML. Prázdný řádek dělá nový odstavec.
+    bubble(answer.split(/\n{2,}/).map(x => esc(x.trim()).replace(/\n/g, '<br>')).filter(Boolean).join('<br><br>'));
+    logLine('marcel', answer);
+    busy = false;
+    backToFlow();
+    persist('dotaz');
+    return;
+  }
+
+  // Odpověď nepřišla. Předáme dotaz lidem a řekneme to rovnou.
   let sent = false;
   try {
     if (CFG.apiUrl && S.id && !DEMO_MODE) { await api('question', { id: S.id, text }, 15000); sent = true; }
   } catch (e) { /* hláška níž to řekne i tak, dotaz zůstává v přepisu */ }
-  await wait(500);
+  await wait(400);
   t.remove();
-  bubble(sent
-    ? 'Tohle je otázka na člověka — poslal jsem ji kolegům na kliniku a odpovíme Vám e-mailem, obvykle do druhého dne. Zatím můžeme pokračovat dál.'
+  bubble(failed === 'advisor_limit'
+    ? `Tolik otázek už jsem dneska zodpověděl — radši Vás teď předám kolegům. Napište na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)}.`
+    : sent
+    ? 'Na tuhle otázku Vám radši odpoví člověk — poslal jsem ji kolegům na kliniku a ozveme se e-mailem, obvykle do druhého dne. Zatím můžeme pokračovat dál.'
     : `Tuhle otázku si poznamenávám, ale radši ji pošlete i na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)} — ať nezapadne.`);
   busy = false;
   backToFlow();
