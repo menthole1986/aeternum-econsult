@@ -839,12 +839,21 @@ async function submitAsk() {
     return;
   }
 
-  // volný dotaz — zatím zástupná odpověď, napojení na model přijde vzápětí
+  /* Volný dotaz. Dokud nejsem napojený na model, nesmí dotaz spadnout do
+     prázdna — klient za konzultaci zaplatil mimo jiné proto, aby se mohl ptát.
+     Posílá se tedy na kliniku a odpoví člověk e-mailem. Až model přijde,
+     nahradí se tenhle blok a zbytek stránky se nemění. */
   busy = true;
   const t = typing();
-  await wait(900);
+  let sent = false;
+  try {
+    if (CFG.apiUrl && S.id && !DEMO_MODE) { await api('question', { id: S.id, text }, 15000); sent = true; }
+  } catch (e) { /* hláška níž to řekne i tak, dotaz zůstává v přepisu */ }
+  await wait(500);
   t.remove();
-  bubble('Na tohle Vám odpovím, jakmile mě napojíme na model — zatím si dotaz poznamenávám. <span class="note">(zástupná odpověď v testovací verzi)</span>');
+  bubble(sent
+    ? 'Tohle je otázka na člověka — poslal jsem ji kolegům na kliniku a odpovíme Vám e-mailem, obvykle do druhého dne. Zatím můžeme pokračovat dál.'
+    : `Tuhle otázku si poznamenávám, ale radši ji pošlete i na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)} — ať nezapadne.`);
   busy = false;
   backToFlow();
 }
@@ -972,6 +981,5 @@ try {
   }).observe(document.body, { childList: true, subtree: true });
 } catch (e) { /* bez tohohle stránka funguje dál, jen se hůř láme */ }
 </script>
-<div style="position:fixed;left:12px;bottom:12px;z-index:99;background:#F2B45A;color:#1a1300;font:700 11px/1 Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:6px">Testovací verze</div>
 </body>
 </html>
