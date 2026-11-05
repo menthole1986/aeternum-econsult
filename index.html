@@ -256,7 +256,7 @@ function countUp(el, to, ms = 900) {
 }
 
 /* ---------- stav ---------- */
-const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, log: [], answers: {},
+const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat: 0, log: [], answers: {},
   consent: false, consents: {}, variant: null, asked: {} });
 let S = blank();
 let D = null;                       // data z e‑screeningu
@@ -618,7 +618,17 @@ document.addEventListener('pointerdown', e => {
   if (!skipNow || e.target.closest('.dock')) return;
   skipNow();
 });
-const pace = txt => Math.min(1500, 420 + String(txt).replace(/<[^>]*>/g, '').length * 11);
+/* Jak dlouho se tváří, že píše. Skutečný člověk u delší věty přemýšlí dýl
+   a neodpovídá na takt metronomu, proto délka plus trocha náhody. Strop je
+   nahoře proto, že čekání nad čtyři vteřiny už není rozmýšlení, ale porucha. */
+const pace = txt => {
+  const n = String(txt).replace(/<[^>]*>/g, '').length;
+  return Math.round(Math.min(4000, 700 + n * 19) * (0.85 + Math.random() * 0.3));
+};
+
+/* Kolik zpráv za sebou smí napsat, než nechá klienta reagovat. Bez tohohle
+   sype celou kapitolu v jednom bloku a je z toho cedule, ne rozhovor. */
+const MAX_RUN = 2;
 
 /* Cesta klienta, stejná trojice jako na webu. Ukazatel prvního kroku se plní
    podle toho, jak daleko je v konzultaci — druhý a třetí ho teprve čekají. */
@@ -726,11 +736,25 @@ async function play(key) {
   renderProgress(CHAPTER_OF[key] || key);
   setChips([]);
   const beats = SCRIPT[key] || [];
-  for (const beat of beats) {
+  /* Od kolikáté repliky kapitoly se pokračuje. Když klient čekání přerušil
+     tlačítkem, vrátíme se sem a dopíšeme zbytek. */
+  let i = S.beat || 0;
+  S.beat = 0;
+  let run = 0;
+  for (; i < beats.length; i++) {
+    const beat = beats[i];
     if (beat.chips) { setChips(beat.chips); break; }
     if (beat.ask) { askMode(beat); busy = false; return; }
     if (beat.vars) { await renderVariants(); busy = false; return; }
     if (beat.cons) { renderConsents(); busy = false; return; }
+    /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
+       repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
+    if (run >= MAX_RUN && i < beats.length - 1) {
+      S.beat = i; save();
+      setChips([{ label: 'Pokračovat', go: key, resume: true }]);
+      busy = false;
+      return;
+    }
     const txt = typeof beat.t === 'function' ? beat.t() : beat.t;
     const t = typing();
     await wait(pace(txt));
@@ -739,7 +763,8 @@ async function play(key) {
     bubble(txt + card, { cls: beat.cls });
     logLine('marcel', txt);
     if (beat.final) { finalScreen(key); }
-    await wait(260);
+    run++;
+    await wait(420);
   }
   busy = false;
 }
@@ -776,8 +801,12 @@ document.addEventListener('click', async e => {
   const c = list[Number(b.dataset.i)];
   if (!c) return;
   if (c.href) { location.href = c.href; return; }
-  bubble(esc(c.label), { me: true });
-  logLine('klient', c.label);
+  /* „Pokračovat" není odpověď, jen pokyn psát dál. Do bubliny ani do přepisu
+     nepatří — přepis je důkaz o tom, co klientovi řekl a co odsouhlasil. */
+  if (!c.resume) {
+    bubble(esc(c.label), { me: true });
+    logLine('klient', c.label);
+  }
   setChips([]);
   if (c.store) { S.answers[c.store[0]] = c.store[1]; save(); }
   if (c.consent) { S.consent = true; save(); }
