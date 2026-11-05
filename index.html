@@ -815,11 +815,11 @@ async function renderSlots(expand) {
     if (t) t.remove();
   }
 
-  const blizke = nextSlots(SLOTS.all, expand ? 12 : 2);
+  const blizke = nextSlots(SLOTS.all, expand ? 20 : 4);
 
   if (!blizke.length) {
-    await marcelSays('Volný termín se mi teď nepodařilo načíst. ' +
-      'Zavolejte nám prosím na ' + esc(CFG.phone) + ' a domluvíme ho spolu.');
+    await marcelSays('Volné termíny se mi teď nepodařilo načíst. Zkuste to prosím ' +
+      'za chvíli znovu — nebo mi napište a ozvu se Vám s termínem e-mailem.');
     return;
   }
 
@@ -901,6 +901,11 @@ async function pickSlot(isoUtc) {
   SLOTS.picked = lidsky; SLOTS.vs = r.vs; save();
 
   await marcelSays('Termín <b>' + lidsky + '</b> je zabraný. Potvrdí se v okamžiku, kdy dorazí platba.');
+  await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
+    'Vám pošlu e-mailem hned po platbě a odběr musíte stihnout <b>nejpozději dva dny před vyšetřením</b> — ' +
+    'laboratoř potřebuje čas na výsledky a bez nich Vám lékař terapii neschválí.');
+  await marcelSays('A až odběr absolvujete, <b>klepnete u sebe v rezervaci na „Byl jsem na odběru“</b>. ' +
+    'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
   await marcelSays(payCard(r, lidsky));
   persist('book-hold');
 }
@@ -916,13 +921,15 @@ async function marcelSays(html) {
 }
 
 function payCard(r, lidsky) {
-  const odber = 'Žádanku na odběr krve Vám pošlu e-mailem hned po platbě. ' +
-    '<b>Odběr musíte stihnout před vyšetřením</b> — bez výsledků Vám lékař terapii neschválí.';
-  const presun = '<b>Termín jde zdarma přesunout</b>, stačí nám dát vědět nejpozději ' +
-    (D.rescheduleHours || 12) + ' hodin předem.';
+  /* Co klient podepisuje svou platbou, se říká před ní, ne pod tlačítkem.
+     Pod tlačítkem to přečte až ten, kdo váhá — a to je pozdě. */
+  const presun = 'Termín <b>přesunete nebo zrušíte sám</b> ve své rezervaci, odkaz máte ' +
+    'v potvrzovacím e-mailu, nebo rovnou v pozvánce v kalendáři. Zdarma, nejpozději ' +
+    (D.rescheduleHours || 12) + ' hodin předem. <b>Nevolejte nám</b> — udělejte to elektronicky, ' +
+    'ať se to u nás propíše hned a termín může dostat někdo jiný.';
   const btn = r.checkoutUrl
     ? '<a class="pay" href="' + esc(r.checkoutUrl) + '">Zaplatit kartou · ' + fmt(CFG.screeningPrice) + ' Kč</a>'
-    : '<div class="paynote">Platební bránu se mi teď nepodařilo otevřít. Zavolejte nám prosím na ' + esc(CFG.phone) + '.</div>';
+    : '<div class="paynote">Platební bránu se mi teď nepodařilo otevřít. Napište mi a pošlu Vám odkaz na platbu e-mailem.</div>';
   return '<div class="sum"><div class="sh">' +
       '<div class="se">Vstupní screening</div>' +
       '<div class="sn">' + esc(lidsky) + '</div>' +
@@ -932,7 +939,8 @@ function payCard(r, lidsky) {
       '<div class="kv"><span>Forma</span><b>' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') + '</b></div>' +
       '<div class="kv"><span>Celkem</span><b>' + fmt(CFG.screeningPrice) + ' Kč jednorázově</b></div>' +
     '</div></div>' + btn +
-    '<div class="paynote">' + odber + '<br>' + presun + '</div>';
+    '<div class="paynote">Platba běží přes zabezpečenou bránu Stripe. ' +
+      'Údaje o kartě vidí jen ona, my se k nim nedostaneme.<br><br>' + presun + '</div>';
 }
 
 /* ---------- běh scénáře ---------- */
