@@ -148,6 +148,27 @@ p{margin:0}
 .cons span{font-size:.88em;line-height:1.55;color:var(--muted)}
 
 /* ---------- shrnutí na konec ---------- */
+/* ── Výběr termínu a platba ─────────────────────────────────────────────────
+   Tři čtvrtiny lidí sem chodí z telefonu, takže karta termínu je velký
+   terč přes celou šířku a datum je to první, co je na ní vidět. Žádné
+   dva sloupce — na úzké obrazovce se z nich dělá mlha. */
+.slots{display:grid;gap:10px;margin-top:14px}
+.slot{text-align:left;width:100%;min-height:62px;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;background:rgba(255,255,255,.04);cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:pop .36s ease both;color:inherit;font:inherit}
+.slot:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.07)}
+.slot.sel{border-color:transparent;background:linear-gradient(135deg,rgba(122,62,158,.3),rgba(47,134,204,.22));box-shadow:0 0 0 1.5px rgba(162,122,210,.75)}
+.slot .sd{font-weight:700;font-size:1.02em;line-height:1.25}
+.slot .sw{display:block;font-size:.8em;font-weight:500;color:var(--muted);margin-top:2px}
+.slot .st{font-weight:700;font-size:clamp(17px,calc(1.4*var(--u)),calc(24px*var(--k)));font-variant-numeric:tabular-nums;white-space:nowrap}
+.slot.more{justify-content:center;min-height:52px;border-style:dashed}
+.slot.more .sd{font-weight:600;font-size:.92em;color:var(--muted)}
+
+/* Platba je poslední krok a nesmí se v ní dát ztratit: jedno tlačítko přes
+   celou šířku, pod ním to, co klient potřebuje vědět, a nic jiného. */
+.pay{display:block;width:100%;margin-top:14px;border:0;border-radius:14px;padding:16px 20px;background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:clamp(15px,calc(1.1*var(--u)),calc(18px*var(--k)));cursor:pointer;text-align:center;text-decoration:none;transition:filter .15s}
+.pay:hover{filter:brightness(1.12)}
+.pay[aria-busy="true"]{opacity:.6;pointer-events:none}
+.paynote{margin-top:10px;font-size:.8em;color:var(--muted);line-height:1.55}
+.paynote b{color:var(--ink);font-weight:600}
 .sum{margin-top:12px;border:1px solid var(--line2);border-radius:18px;overflow:hidden;background:linear-gradient(135deg,rgba(122,62,158,.16),rgba(47,134,204,.1))}
 .sum .sh{padding:16px 18px 13px;border-bottom:1px solid var(--line)}
 .sum .se{font-size:.6em;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
@@ -530,23 +551,46 @@ consent: [
 ],
 
 book: [
-  { t: 'Děkuju. Teď si vyberete termín lékařského vyšetření a rovnou ho potvrdíte platbou — termín je Váš v okamžiku, kdy platba dorazí.' },
-  { t: 'Vyšetření probíhá osobně v Praze, nebo online. Platit můžete kartou nebo převodem přes QR kód.' },
-  { t: 'Tady máte shrnutí toho, na čem jsme se domluvili. Těším se, že se u nás potkáme.',
+  { t: 'Děkuju. Zbývá poslední krok — domluvit vyšetření. Než se pustíme do termínu, chci mít jistotu, že víte přesně, za co platíte.',
     card: () => `<div class="sum">
       <div class="sh">
-        <div class="se">Vaše úvodní konzultace</div>
-        <div class="sn">${esc(D.fullName || D.name)}</div>
+        <div class="se">Vstupní screening</div>
+        <div class="sn">${fmt(CFG.screeningPrice)} Kč jednorázově</div>
       </div>
       <div class="sb">
-        ${S.variant ? `<div class="kv"><span>Vybraný program</span><b>${esc(S.variant.name)} · ${S.variant.months} ${mesice(S.variant.months)}</b></div>
-        <div class="kv"><span>Cena programu</span><b>${fmt(S.variant.price)} Kč/měs.</b></div>` : ''}
-        <div class="kv"><span>Preparát podle dotazníku</span><b>${esc(D.drug)}</b></div>
-        <div class="kv"><span>Startovací dávka</span><b>${startDose()}</b></div>
-        <div class="kv"><span>Předpokládaný úbytek</span><b>≈ ${D.lose} kg</b></div>
-        <div class="kv"><span>Vstupní screening</span><b>${fmt(CFG.screeningPrice)} Kč jednorázově</b></div>
-        <div class="kv"><span>Následuje</span><b>odběr krve a vyšetření lékařem</b></div>
-      </div></div>`, final: true }
+        <div class="kv"><span>Odběr krve v Synlabu</span><b>v ceně</b></div>
+        <div class="kv"><span>Vyšetření lékařem</span><b>v ceně</b></div>
+        <div class="kv"><span>Posouzení vhodnosti terapie</span><b>v ceně</b></div>
+        <div class="kv"><span>Rezervace termínu</span><b>úhradou</b></div>
+      </div></div>` },
+  { t: 'Obojí je v té částce — odběr i vyšetření. Platí se jednou a úhradou se Vám zároveň drží termín. Nic dalšího se za screening nedoplácí.' },
+  { t: 'Rozhovor je pořád nezávazný a bez Vašeho souhlasu se nikam neposunu. Dává Vám ta částka smysl?' },
+  { chips: [
+      { label: 'Ano, pojďme vybrat termín', go: 'bookForm', primary: true },
+      { label: 'Mám k tomu otázku', prompt: 'Jasně, ptejte se. Co Vás na tom zarazilo?' },
+      { label: 'Teď ne', go: 'bookLater' }
+    ] }
+],
+
+bookLater: [
+  { t: 'Naprosto v pořádku, nikam Vás netlačím.' },
+  { t: () => `Shrnutí téhle konzultace Vám pošlu na ${esc(D.email || 'Váš e-mail')}, ať se k tomu můžete vrátit v klidu. Kdykoli se rozhodnete, stačí odepsat nebo zavolat na ${esc(CFG.phone)}.`,
+    final: true }
+],
+
+bookForm: [
+  { t: 'Výborně. Vyšetření můžete mít osobně u nás v Praze, nebo online přes video — lékař má v obou případech stejné podklady a rozhoduje stejně.' },
+  { t: () => D.praha
+      ? 'Vy jste z Prahy, takže se nabízí osobně. Jak to chcete?'
+      : 'Vzhledem k tomu, odkud jste, bude nejspíš pohodlnější online. Jak to chcete?' },
+  { chips: [
+      { label: 'Osobně v Praze', go: 'bookSlots', form: 'osobne' },
+      { label: 'Online přes video', go: 'bookSlots', form: 'online' }
+    ] }
+],
+
+bookSlots: [
+  { slots: true }
 ],
 
 blocked: [
@@ -722,11 +766,181 @@ function setChips(list) {
   el._list = list;
 }
 
+/* ---------- výběr termínu a platba ---------- */
+
+const DNY = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+const MESICE_2P = ['ledna','února','března','dubna','května','června',
+                   'července','srpna','září','října','listopadu','prosince'];
+
+/* Server posílá termín jako místní čas bez zóny („2026-11-12T09:00"). Kdyby
+   se to prohnalo new Date() rovnou, prohlížeč v jiné zóně by ho posunul. */
+function parseSlot(iso) {
+  const m = String(iso).match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : new Date(iso);
+}
+function slotDay(d) {
+  const dnes = new Date(); dnes.setHours(0, 0, 0, 0);
+  const den = new Date(d); den.setHours(0, 0, 0, 0);
+  const za = Math.round((den - dnes) / 86400000);
+  if (za === 0) return 'dnes';
+  if (za === 1) return 'zítra';
+  return DNY[d.getDay()];
+}
+const slotDate = d => d.getDate() + '. ' + MESICE_2P[d.getMonth()];
+const slotTime = d => d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+
+/* Nejbližší termíny, přednostně do sedmi dnů: do té doby klient stihne odběr
+   a delší odstup znamená, že si to rozmyslí. Když do týdne nic volného není,
+   nabídneme nejbližší pozdější — poslat rozhodnutého člověka telefonovat je
+   to nejhorší, co se v tuhle chvíli dá udělat. */
+function nextSlots(all, limit) {
+  const dny = all.map(parseSlot).sort((a, b) => a - b);
+  const doTydne = dny.filter(d => d.getTime() <= Date.now() + 7 * 86400000);
+  return (doTydne.length ? doTydne : dny).slice(0, limit);
+}
+
+
+let SLOTS = { all: [], form: '', picked: null, vs: null };
+
+async function renderSlots(expand) {
+  /* Nejdřív data, teprve pak mluvíme. Uvedení záleží na tom, co vyšlo —
+     kdyby se skládalo dřív, tvrdilo by něco o termínech, které ještě nejsou
+     načtené. Tečky zatím drží pozornost, načítání trvá vteřiny. */
+  if (!SLOTS.all.length) {
+    const t = expand ? null : typing();
+    try {
+      const r = await api('slots', { kind: 'exam' });
+      SLOTS.all = (r && r.slots) || [];
+    } catch (e) { SLOTS.all = []; }
+    if (t) t.remove();
+  }
+
+  const blizke = nextSlots(SLOTS.all, expand ? 12 : 2);
+
+  if (!blizke.length) {
+    await marcelSays('Volný termín se mi teď nepodařilo načíst. ' +
+      'Zavolejte nám prosím na ' + esc(CFG.phone) + ' a domluvíme ho spolu.');
+    return;
+  }
+
+  if (!expand) {
+    const doTydne = blizke[0].getTime() <= Date.now() + 7 * 86400000;
+    await marcelSays(doTydne
+      ? 'Tady jsou nejbližší volné termíny. Do vyšetření musíte stihnout odběr krve — žádanku Vám pošlu e-mailem hned po platbě, takže na to budete mít čas.'
+      : 'Nejbližší volno mám bohužel až tady. Pro odběr krve je to vlastně dobře, budete ho mít v klidu — žádanku Vám pošlu e-mailem hned po platbě.');
+  }
+
+  const row = expand ? null : bubble('<div class="slots" id="slotbox"></div>');
+  const host = expand || (row && row.querySelector('#slotbox'));
+  host.innerHTML = '';
+  for (const d of blizke) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'slot';
+    el.dataset.iso = d.toISOString();
+    el.innerHTML = '<span><span class="sd">' + slotDay(d) + ' ' + slotDate(d) +
+      '</span><span class="sw">' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') +
+      ' · ' + (D.examMinutes || 30) + ' minut</span></span>' +
+      '<span class="st">' + slotTime(d) + '</span>';
+    host.appendChild(el);
+    buzz(6); scroll();
+    await wait(260);
+  }
+  if (!expand && SLOTS.all.length > blizke.length) {
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'slot more';
+    more.dataset.more = '1';
+    more.innerHTML = '<span class="sd">Chci jiný termín</span>';
+    host.appendChild(more);
+    scroll();
+  }
+
+  host.addEventListener('click', async e => {
+    const el = e.target.closest('.slot');
+    if (!el || host._done) return;
+    if (el.dataset.more) { host._done = true; await renderSlots(host); return; }
+    host._done = true;
+    host.querySelectorAll('.slot').forEach(x => x.classList.remove('sel'));
+    el.classList.add('sel');
+    host.querySelectorAll('.slot.more').forEach(x => x.remove());
+    buzz(12);
+    await pickSlot(el.dataset.iso);
+  }, { once: false });
+}
+
+/* Zabere termín a ukáže platbu. Rezervace drží, dokud nedorazí platba —
+   proto se tu nic neslibuje dřív, než server termín opravdu zapíše. */
+async function pickSlot(isoUtc) {
+  const d = new Date(isoUtc);
+  const lidsky = slotDay(d) + ' ' + slotDate(d) + ' v ' + slotTime(d);
+  logLine('klient', 'Vybral termín ' + lidsky);
+  const local = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') +
+    ':' + String(d.getMinutes()).padStart(2, '0');
+
+  const t = typing();
+  let r = null, chyba = '';
+  try {
+    r = await api('hold', { kind: 'exam', slot: local, type: SLOTS.form || 'osobne',
+      id: S.id, name: D.fullName || D.name, email: D.email, phone: D.phone,
+      /* Souhlasy klient odklikl v předchozí kapitole. Posíláme je tak, jak
+         jsou — když je neodklikl, rezervaci server odmítne, a to je správně. */
+      consent: S.consent === true, src: 'econsult' }, 25000);
+  } catch (e) { chyba = (e && e.message) || 'nepodarilo'; }
+  t.remove();
+
+  if (!r || !r.ok) {
+    bubble(chyba === 'slot_taken'
+      ? 'Ten termín mi právě vzali před nosem. Vyberte si prosím jiný.'
+      : 'Termín se mi nepodařilo zabrat. Zkuste to prosím ještě jednou, nebo nám zavolejte na ' + esc(CFG.phone) + '.');
+    SLOTS.all = [];
+    await renderSlots();
+    return;
+  }
+  SLOTS.picked = lidsky; SLOTS.vs = r.vs; save();
+
+  await marcelSays('Termín <b>' + lidsky + '</b> je zabraný. Potvrdí se v okamžiku, kdy dorazí platba.');
+  await marcelSays(payCard(r, lidsky));
+  persist('book-hold');
+}
+
+/* Jedna bublina od Marcela, i mimo scénář: tečky, pauza, text. */
+async function marcelSays(html) {
+  const t = typing();
+  await wait(pace(html));
+  t.remove();
+  bubble(html);
+  logLine('marcel', html);
+  await wait(300);
+}
+
+function payCard(r, lidsky) {
+  const odber = 'Žádanku na odběr krve Vám pošlu e-mailem hned po platbě. ' +
+    '<b>Odběr musíte stihnout před vyšetřením</b> — bez výsledků Vám lékař terapii neschválí.';
+  const presun = '<b>Termín jde zdarma přesunout</b>, stačí nám dát vědět nejpozději ' +
+    (D.rescheduleHours || 12) + ' hodin předem.';
+  const btn = r.checkoutUrl
+    ? '<a class="pay" href="' + esc(r.checkoutUrl) + '">Zaplatit kartou · ' + fmt(CFG.screeningPrice) + ' Kč</a>'
+    : '<div class="paynote">Platební bránu se mi teď nepodařilo otevřít. Zavolejte nám prosím na ' + esc(CFG.phone) + '.</div>';
+  return '<div class="sum"><div class="sh">' +
+      '<div class="se">Vstupní screening</div>' +
+      '<div class="sn">' + esc(lidsky) + '</div>' +
+    '</div><div class="sb">' +
+      '<div class="kv"><span>Odběr krve v Synlabu</span><b>v ceně</b></div>' +
+      '<div class="kv"><span>Vyšetření lékařem</span><b>v ceně</b></div>' +
+      '<div class="kv"><span>Forma</span><b>' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') + '</b></div>' +
+      '<div class="kv"><span>Celkem</span><b>' + fmt(CFG.screeningPrice) + ' Kč jednorázově</b></div>' +
+    '</div></div>' + btn +
+    '<div class="paynote">' + odber + '<br>' + presun + '</div>';
+}
+
 /* ---------- běh scénáře ---------- */
 const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', howAsk: 'how', how: 'how', drug: 'drug',
   form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
   care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
-  book: 'book', blocked: 'intro' };
+  book: 'book', bookLater: 'book', bookForm: 'book',
+  bookSlots: 'book', blocked: 'intro' };
 
 async function play(key) {
   if (busy) return;
@@ -746,6 +960,7 @@ async function play(key) {
     if (beat.chips) { setChips(beat.chips); break; }
     if (beat.ask) { askMode(beat); busy = false; return; }
     if (beat.vars) { await renderVariants(); busy = false; return; }
+    if (beat.slots) { await renderSlots(); busy = false; return; }
     if (beat.cons) { renderConsents(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
@@ -810,6 +1025,22 @@ document.addEventListener('click', async e => {
   setChips([]);
   if (c.store) { S.answers[c.store[0]] = c.store[1]; save(); }
   if (c.consent) { S.consent = true; save(); }
+  if (c.form) { SLOTS.form = c.form; save(); }
+  /* Klient se chce na něco zeptat. Nikam ho nepřesouváme — zůstane v téhle
+     kapitole, odpoví mu model a backToFlow mu pak vrátí tytéž nabídky. */
+  if (c.prompt) {
+    busy = true;
+    const t = typing();
+    await wait(pace(c.prompt));
+    t.remove();
+    bubble(c.prompt);
+    logLine('marcel', c.prompt);
+    busy = false;
+    const ta = $('#ask');
+    ta.placeholder = 'Napište mi, co Vám na tom nesedí…';
+    ta.focus();
+    return;
+  }
   if (c.faq) { await answerFaq(c.faq); return; }
   if (c.go) play(c.go);
 });
