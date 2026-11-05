@@ -269,7 +269,7 @@ const CFG = {
   screeningPrice: 4970,                         // stejné číslo jako CONFIG.ENTRY_SCREENING_PRICE na serveru
   consultPrice: 570,                            // konzultace se živým koordinátorem
   advisorPrice: 121,                            // 100 Kč + 21 % DPH, odečítá se z první platby za program
-  validHours: 48,                               // jak dlouho po zaplacení se sem dá vracet
+  validHours: 72,                               // jak dlouho po zaplacení se sem dá vracet
   healthyBmi: 21.7,
   phone: '+420 775 481 700',
   email: 'info@aeternumclinic.cz',
@@ -1257,16 +1257,38 @@ function dataError(msg) {
 /* Zamčeno: konzultace není zaplacená, nebo jí vypršela platnost. Není to
    chyba, je to stav — proto se nechová jako chybová hláška, ale jako nabídka
    s tlačítkem. Klient se sem vrací přes rezervaci, kde se platí. */
+/* Zavřená konzultace. Rozlišujeme dva úplně jiné lidi:
+
+   Kdo nezaplatil, konzultaci teprve zvažuje — tomu ji nabídneme.
+
+   Komu vypršela, ten už jednou zaplatil a byl na půl cesty k termínu.
+   Poslat ho zpátky k pokladně s tím, ať si koupí další konzultaci, je
+   nepochopení situace: on chtěl k lékaři. Proto je hlavní tlačítko
+   rezervace vyšetření a další konzultace až jako vedlejší nabídka. */
 function lockedPanel(expired) {
   $('#way').style.display = 'none';
   $('#askbox').style.display = 'none';
-  const url = CFG.bookingUrl + '/?id=' + encodeURIComponent(S.id || '');
-  bubble(expired
-    ? `Platnost téhle konzultace vypršela. Odkaz platí ${CFG.validHours} hodin od zaplacení — během nich se dá vracet, kolikrát chcete, ale pak se zavře.`
-    : 'Tahle konzultace ještě není zaplacená.');
-  bubble(`Vstupní konzultace se mnou stojí <b>${fmt(CFG.advisorPrice)} Kč</b> a tu částku Vám odečteme z první platby za program. ` +
-    `Po zaplacení se mnou můžete začít hned a ${CFG.validHours} hodin se sem vracet.` +
-    `<span class="note"><a href="${esc(url)}" style="color:inherit">Objednat konzultaci ›</a></span>`, { cls: 'stop' });
+  const id = encodeURIComponent(S.id || '');
+  const konzultace = CFG.bookingUrl + '/?id=' + id;
+  const vysetreni = CFG.bookingUrl + '/?kind=exam&id=' + id;
+
+  if (!expired) {
+    bubble('Tahle konzultace ještě není zaplacená.');
+    bubble(`Vstupní konzultace se mnou stojí <b>${fmt(CFG.advisorPrice)} Kč</b> a tu částku Vám odečteme ` +
+      `z první platby za program. Po zaplacení se mnou můžete začít hned a ${CFG.validHours} hodin se sem vracet.` +
+      `<span class="note"><a href="${esc(konzultace)}" style="color:inherit">Objednat konzultaci ›</a></span>`,
+      { cls: 'stop' });
+    return;
+  }
+
+  bubble(`Platnost téhle konzultace vypršela — odkaz žije ${CFG.validHours} hodin od zaplacení.`);
+  bubble('Pokud jste si z ní odnesl to podstatné, dalším krokem je <b>vstupní screening</b>: ' +
+    `odběr krve v Synlabu a vyšetření lékařem, <b>${fmt(CFG.screeningPrice)} Kč</b> jednorázově. ` +
+    'Termín si vyberete rovnou tady.' +
+    `<a class="pay" href="${esc(vysetreni)}">Vybrat termín vyšetření</a>` +
+    `<div class="paynote">Chcete si ještě popovídat? Další konzultace stojí ${fmt(CFG.advisorPrice)} Kč ` +
+    `a taky se odečítá z první platby za program. <a href="${esc(konzultace)}" style="color:inherit">` +
+    'Objednat konzultaci ›</a></div>');
 }
 
 async function boot() {
