@@ -186,6 +186,46 @@ p{margin:0}
   .chip{flex:1 1 100%;text-align:center}
   .cards{grid-template-columns:1fr}
 }
+
+/* ---------- Světlý vzhled ----------------------------------------------
+   Pozadí, černý text a limetkové tlačítko podle www.aeternumclinic.cz,
+   stejně jako na screeningu a v rezervaci. Blok je schválně až na konci
+   sešitu: přebíjí tmavé hodnoty výše, takže se dá celý smazat a stránka
+   se vrátí do původní tmavé podoby. */
+:root{
+  --ground:#ECECEC; --ink:#141414;
+  --muted:rgba(20,20,20,.68); --dim:rgba(20,20,20,.46);
+  --line:rgba(20,20,20,.12); --line2:rgba(20,20,20,.22);
+  --karta:rgba(255,255,255,.72);          /* plocha karet na světlém pozadí */
+  --karta-line:rgba(20,20,20,.1);
+}
+html,body{background:var(--ground);color:var(--ink)}
+.bg{background:var(--ground)}
+/* barevné záře byly kreslené na tmavé pozadí, na světlém dělají špínu */
+.glow{opacity:.1;filter:blur(70px)}
+
+/* bubliny: Marcelova bílá, klientova zůstává v gradientu s bílým textem */
+.bub{background:var(--karta);border-color:var(--karta-line)}
+.typing span{background:rgba(20,20,20,.42)}
+
+/* nabídky a karty */
+.chip{background:rgba(255,255,255,.6);border-color:rgba(20,20,20,.2)}
+.chip:hover{border-color:rgba(20,20,20,.5);background:rgba(255,255,255,.85)}
+.var,.slot,.plan{background:rgba(255,255,255,.6);border-color:rgba(20,20,20,.14)}
+.var:hover,.slot:hover{border-color:rgba(20,20,20,.45);background:rgba(255,255,255,.9)}
+.cons label:hover{background:rgba(255,255,255,.6)}
+
+/* ukazatele postupu */
+.prog i{background:rgba(20,20,20,.14)}
+.way .st .bar{background:rgba(20,20,20,.14)}
+
+/* pole na dotaz a lišta pod ním */
+.ask{background:rgba(255,255,255,.75);border-color:rgba(20,20,20,.16)}
+.ask textarea::placeholder{color:rgba(20,20,20,.38)}
+.dock{background:linear-gradient(180deg,rgba(236,236,236,0),rgba(236,236,236,.94) 28%)}
+
+/* čekací kolečko mělo bílý okraj, na světlém by zmizelo */
+.sp{border-color:rgba(20,20,20,.22);border-top-color:#141414}
 </style>
 </head>
 <body>
