@@ -303,6 +303,8 @@ const CHAPTERS = [
    preparátu, který klientovi vychází, ne natvrdo. OVĚŘIT LÉKAŘEM. */
 const startDose = () => /wegovy/i.test(String(D && D.drug || '')) ? '0,25 mg' : '2,5 mg';
 const ova = () => D && D.sex === 'M' ? '' : 'a';
+/* „sám/sama" se příponou ohnout nedá, je to jiné slovo. */
+const sam = () => D && D.sex === 'M' ? 'sám' : 'sama';
 
 /* Každý beat je jedna replika. `t` je text (nebo funkce), `chips` nabídka,
    `ask` otevřená otázka, `store` kam uložit odpověď. */
@@ -497,6 +499,7 @@ faq: [
       { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' },
       { label: 'Jak rychle budu hubnout?', faq: 'speed' },
       { label: 'Jak se lék podává? Bolí to?', faq: 'needle' },
+      { label: 'Jaký je rozdíl mezi Mounjaro a Wegovy?', faq: 'diff' },
       { label: 'Můžu program kdykoli ukončit?', faq: 'quit' },
       { label: 'Hradí to pojišťovna?', faq: 'insurance' },
       { label: 'Musím k tomu držet dietu?', faq: 'diet' },
@@ -556,13 +559,13 @@ blocked: [
 
 /* ---------- odpovědi na časté dotazy ---------- */
 const FAQ = {
-  side: 'Nejčastěji jde o zažívací potíže v prvních týdnech — pocit plnosti, nevolnost, občas zácpa nebo naopak. U většiny lidí to odezní, jak si tělo zvykne, a dá se tomu předcházet menšími porcemi a tím, že nebudete jíst do přeplnění. Právě proto začínáme na nejnižší dávce a zvyšujeme ji pomalu. Vážnější reakce jsou vzácné a vstupní screening děláme mimo jiné proto, abychom je uměli vyloučit předem. Po celou dobu jste pod dohledem lékaře, takže na to nejste sama.',
+  side: () => `Nejčastěji jde o zažívací potíže v prvních týdnech — pocit plnosti, nevolnost, občas zácpa nebo naopak. U většiny lidí to odezní, jak si tělo zvykne, a dá se tomu předcházet menšími porcemi a tím, že nebudete jíst do přeplnění. Právě proto začínáme na nejnižší dávce a zvyšujeme ji pomalu. Vážnější reakce jsou vzácné a vstupní screening děláme mimo jiné proto, abychom je uměli vyloučit předem. Po celou dobu jste pod dohledem lékaře, takže na to nejste ${sam()}.`,
   yoyo: 'Budu upřímný: když se váha shodí rychle a drasticky, riziko návratu je vysoké — a to platí u jakékoli metody, nejen u GLP‑1. Proto u nás jedeme změnu dlouhodobou místo rychlé. Program počítá s udržovací fází a s tím, že si za tu dobu přenastavíte návyky kolem jídla, pohybu a spánku. Cílem není číslo na váze za tři měsíce, ale to, aby Vám výsledek zůstal.',
   speed: 'Záleží na vstupní váze, dávce a na tom, jak tělo reaguje — proto Vám neslíbím konkrétní číslo. Obecně platí, že zdravé tempo je pozvolné a první týdny bývají spíš o zvykání než o váze. Přesnější odhad Vám dá lékař, až uvidí krevní testy a složení těla.',
   diff: 'Oba léky působí na stejném principu, Mounjaro ale cílí ještě na druhý receptor navíc, takže u části lidí bývá účinek silnější. Neznamená to, že je automaticky lepší — co bude vhodné pro Vás, rozhodne lékař podle vyšetření a Vašich výsledků.',
   needle: 'Podává se podkožní injekcí jednou týdně, perem s velmi tenkou jehlou — do břicha, stehna nebo paže. Jehla je kratší a tenčí než při odběru krve a většina lidí popisuje, že to prakticky necítí. Pero je navržené tak, aby to zvládl kdokoli: jehlu ani nevidíte, přiložíte a zmáčknete. Aplikaci si uděláte doma a při zahájení programu Vám ji ukážeme a projdeme s Vámi, dokud si nebudete jistí.',
   miss: 'Nic dramatického se neděje. Postupuje se podle pravidel z příbalové informace a záleží na tom, kolik dní uplynulo — v žádném případě se nedávkuje dvojitě. Kdyby to nastalo, napište nám a poradíme Vám.',
-  cravings: 'To je přesně ta situace, kdy chceme vědět. Když se chutě vrátí nebo se váha zastaví na víc než 28 dní, dáte nám vědět a lékař rozhodne o úpravě dávkování na další měsíc. Neřešte to sama zvyšováním dávky.',
+  cravings: () => `To je přesně ta situace, kdy chceme vědět. Když se chutě vrátí nebo se váha zastaví na víc než 28 dní, dáte nám vědět a lékař rozhodne o úpravě dávkování na další měsíc. Neřešte to ${sam()} zvyšováním dávky.`,
   muscle: 'Při hubnutí tělo bere i ze svalů, to platí vždycky. Dá se to z velké části zvrátit dvěma věcmi: dostatkem bílkovin a silovým tréninkem alespoň každý druhý den. Obojí je součástí protokolu, který od nás dostanete, a složení těla sledujeme, abychom o tom nemuseli jen spekulovat.',
   quit: 'Ano. Program nemá žádnou vázanost, lze ho zkrátit i prodloužit bez pokuty nebo doplácení. Jen bych Vám doporučil to vždycky probrat s lékařem, ať se ukončení udělá rozumně a ne ze dne na den.',
   insurance: 'Ne, tahle terapie není hrazená z veřejného zdravotního pojištění. Program i vstupní screening si klient hradí sám. Proto je u nás cena programu all‑inclusive, ať víte dopředu, co Vás to celé bude stát.',
@@ -782,13 +785,21 @@ document.addEventListener('click', async e => {
   if (c.go) play(c.go);
 });
 
+/* Většina odpovědí je prostý text, dvě se ohýbají podle pohlaví a jsou
+   proto funkce. Tohle je srovná, ať se volající nemusí ptát která je která. */
+function faqText(key) {
+  const a = FAQ[key];
+  return typeof a === 'function' ? a() : (a || '');
+}
+
 async function answerFaq(key) {
   S.asked[key] = Date.now(); save();
+  const answer = faqText(key);
   const t = typing();
-  await wait(pace(FAQ[key] || ''));
+  await wait(pace(answer));
   t.remove();
-  bubble(FAQ[key] || 'Na tohle Vám radši odpoví lékař — poznamenám si to.');
-  logLine('marcel', FAQ[key] || '');
+  bubble(answer || 'Na tohle Vám radši odpoví lékař — poznamenám si to.');
+  logLine('marcel', answer);
   await wait(200);
   backToFlow();
 }
