@@ -612,10 +612,17 @@ book: [
     ] }
 ],
 
+/* „Teď ne" neznamená konec hovoru. Konzultace je zaplacená na 24 hodin,
+   klient se do ní může vracet a ptát se dál — zavřít mu ji ve chvíli, kdy
+   zaváhal nad cenou, by bylo to nejhloupější, co můžeme udělat. Proto tu
+   není final: pole na dotaz zůstává a cesta zpátky k termínu taky. */
 bookLater: [
   { t: 'Naprosto v pořádku, nikam Vás netlačím.' },
-  { t: () => `Shrnutí téhle konzultace Vám pošlu na ${esc(D.email || 'Váš e-mail')}, ať se k tomu můžete vrátit v klidu. Kdykoli se rozhodnete, stačí odepsat nebo zavolat na ${esc(CFG.phone)}.`,
-    final: true }
+  { t: () => `Konzultace Vám běží ještě ${hodin(D.hoursLeft || 24)} a odkaz na ni máte v e-mailu — můžete se sem kdykoli vrátit a dokončit to v klidu. Ptát se mě můžete dál, jsem tu.` },
+  { chips: [
+      { label: 'Ještě se na něco zeptám', prompt: 'Povídejte, co Vás zajímá.' },
+      { label: 'Tak pojďme k termínu', go: 'bookForm', primary: true }
+    ] }
 ],
 
 bookForm: [
