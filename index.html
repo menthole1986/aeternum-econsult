@@ -1154,11 +1154,17 @@ function faqText(key) {
 async function answerFaq(key) {
   S.asked[key] = Date.now(); save();
   const answer = faqText(key);
+  /* Když scénář zrovna běží, počkáme. Dvě odpovědi psané přes sebe si
+     navzájem přepisují tečky a jedna z nich se ztratí — klient pak klepne
+     na otázku a nedostane nic. */
+  for (let i = 0; i < 100 && busy; i++) await new Promise(r => setTimeout(r, 150));
+  busy = true;
   const t = typing();
   await wait(pace(answer));
   t.remove();
   bubble(answer || 'Na tohle Vám radši odpoví lékař — poznamenám si to.');
   logLine('marcel', answer);
+  busy = false;
   await wait(200);
   backToFlow();
 }
