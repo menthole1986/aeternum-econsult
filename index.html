@@ -564,7 +564,8 @@ screening: [
       <div class="kv"><span>Lékařské vyšetření</span><b>2 000 Kč</b></div>
       <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
     </div>` },
-  { t: 'Důležité: <b>screening není součástí léčby</b> a hradí se před zahájením terapie. Je to vstupenka k posouzení, ne první platba za program.' },
+  { t: 'Důležité: <b>screening není součástí léčby</b> a hradí se před zahájením terapie. Je to vstupenka k posouzení, ne první platba za program.',
+    dal: 'Dobře, rozumím, můžeme dál' },
   { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
   { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
   { chips: [{ label: 'Rozumím', go: 'faq' }] }
@@ -739,6 +740,21 @@ const pace = txt => {
 /* Kolik zpráv za sebou smí napsat, než nechá klienta reagovat. Bez tohohle
    sype celou kapitolu v jednom bloku a je z toho cedule, ne rozhovor. */
 const MAX_RUN = 2;
+
+/* Co klient klepne, aby Marcel psal dál. Je to jeho replika, ne ovládací
+   prvek, takže pořád stejné „Pokračovat" zní jako software. Střídají se
+   po pořadí, ne náhodně — aby dvě stejné nepřišly za sebou a aby druhé
+   projití konzultace vypadalo stejně jako první.
+
+   Když se k nějaké replice hodí něco konkrétnějšího, napíše se té replice
+   do `dal` a tenhle seznam se pro ni přeskočí. */
+const DAL = ['Rozumím', 'Dobře', 'Jasně, pokračujte', 'Chápu', 'Dobře, můžeme dál', 'Rozumím, dál'];
+let dalI = 0;
+let dalTed = '';                       // co zrovna na tlačítku stojí
+function dalLabel(beat) {
+  dalTed = (beat && beat.dal) || DAL[dalI++ % DAL.length];
+  return dalTed;
+}
 
 /* Cesta klienta, stejná trojice jako na webu. Ukazatel prvního kroku se plní
    podle toho, jak daleko je v konzultaci — druhý a třetí ho teprve čekají. */
@@ -1047,7 +1063,7 @@ async function play(key) {
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
     if (run >= MAX_RUN && i < beats.length - 1) {
       S.beat = i; save();
-      setChips([{ label: 'Pokračovat', go: key, resume: true }]);
+      setChips([{ label: dalLabel(beats[i - 1]), go: key, resume: true }]);
       busy = false;
       return;
     }
@@ -1150,6 +1166,13 @@ async function answerFaq(key) {
 function backToFlow() {
   const k = S.chapter;
   const beats = SCRIPT[k] || [];
+  /* Klient se zeptal ve chvíli, kdy Marcel čekal na pokyn psát dál. Vrátit
+     ho na konec kapitoly by mu sebralo zbytek výkladu, za který zaplatil —
+     nabídneme mu tutéž repliku, u které jsme stáli. */
+  if (S.beat > 0 && S.beat < beats.length) {
+    setChips([{ label: dalTed || 'Pokračovat', go: k, resume: true }]);
+    return;
+  }
   const last = beats.filter(b => b.chips).pop();
   if (last) setChips(last.chips);
 }
