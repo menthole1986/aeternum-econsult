@@ -269,6 +269,9 @@ const CFG = {
   screeningPrice: 4970,                         // stejné číslo jako CONFIG.ENTRY_SCREENING_PRICE na serveru
   consultPrice: 570,                            // konzultace se živým koordinátorem
   advisorPrice: 121,                            // 100 Kč + 21 % DPH, odečítá se z první platby za program
+  // Obchodní podmínky. Server posílá platnou adresu; tahle je záloha,
+  // kdyby odpověď nedorazila. Prázdno = odkaz se nikde neukáže.
+  termsUrl: 'https://www.aeternumclinic.cz/obchodni-podminky',
   validHours: 72,                               // jak dlouho po zaplacení se sem dá vracet
   healthyBmi: 21.7,
   phone: '+420 775 481 700',
@@ -837,12 +840,13 @@ const CONSENTS = [
   { k: 'ai', t: 'Beru na vědomí, že jsem úvodní konzultaci absolvoval(a) s digitálním asistentem, nikoli s lékařem, a že poskytnuté informace nejsou lékařskou radou ani diagnózou.' },
   { k: 'lekar', t: 'Rozumím tomu, že o vhodnosti terapie, volbě léku i dávkování rozhoduje výhradně lékař na základě výsledků vstupního screeningu.' },
   { k: 'platba', t: () => `Rozumím tomu, že vstupní screening (${fmt(CFG.screeningPrice)} Kč) není součástí léčby a hradí se předem.` },
-  { k: 'gdpr', t: 'Souhlasím se zpracováním osobních údajů v rozsahu nezbytném pro poskytnutí péče.' }
+  { k: 'gdpr', t: 'Souhlasím se zpracováním osobních údajů v rozsahu nezbytném pro poskytnutí péče.' },
+  { k: 'podminky', t: 'Seznámil(a) jsem se s obchodními podmínkami a souhlasím s nimi.', odkaz: true }
 ];
 
 function renderConsents() {
   const row = bubble('<div class="cons" id="cons">' + CONSENTS.map((c, i) =>
-    `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(consentText(c))}</span></label>`).join('') + '</div>');
+    `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(consentText(c))}${c.odkaz && podminky() ? ' ' + odkazPodminky('Otevřít') : ''}</span></label>`).join('') + '</div>');
   const box = row.querySelector('#cons');
   box.addEventListener('change', () => {
     const all = Array.from(box.querySelectorAll('input'));
@@ -1027,6 +1031,14 @@ async function marcelSays(html) {
   await wait(300);
 }
 
+/* Odkaz na obchodní podmínky. Server posílá platnou adresu, CFG má zálohu;
+   když ani jedno není, odkaz se prostě neukáže — vést klienta na stránku,
+   která neexistuje, je horší než neodkazovat nikam. */
+const podminky = () => String((D && D.termsUrl) || CFG.termsUrl || '').trim();
+const odkazPodminky = (text) => podminky()
+  ? '<a href="' + esc(podminky()) + '" target="_blank" rel="noopener" style="color:inherit">' + text + ' \u203a</a>'
+  : '';
+
 // Lékařská část screeningu; laboratorní je zbytek do celkové ceny.
 const lekarskaCast = () => Number(D && D.examDoctorPart) || 2500;
 
@@ -1053,7 +1065,9 @@ function payCard(r, lidsky) {
       '<div class="kv"><span>Celkem</span><b>' + fmt(CFG.screeningPrice) + ' Kč jednorázově</b></div>' +
     '</div></div>' + btn +
     '<div class="paynote">Platba běží přes zabezpečenou bránu Stripe. ' +
-      'Údaje o kartě vidí jen ona, my se k nim nedostaneme.<br><br>' + presun + '</div>';
+      'Údaje o kartě vidí jen ona, my se k nim nedostaneme.<br><br>' + presun +
+      (podminky() ? '<br><br>Úhradou potvrzujete, že jste se seznámil s obchodními podmínkami. ' +
+        odkazPodminky('Přečíst obchodní podmínky') : '') + '</div>';
 }
 
 /* ---------- běh scénáře ---------- */
