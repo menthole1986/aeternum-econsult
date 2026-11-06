@@ -362,7 +362,8 @@ const CHAPTERS = [
 ];
 
 /* Mounjaro se titruje od 2,5 mg, Wegovy od 0,25 mg — dávku bereme podle
-   preparátu, který klientovi vychází, ne natvrdo. OVĚŘIT LÉKAŘEM. */
+   preparátu, který klientovi vychází, ne natvrdo. Dávky ověřila lékařka
+   6. 11. 2026. */
 const startDose = () => /wegovy/i.test(String(D && D.drug || '')) ? '0,25 mg' : '2,5 mg';
 const ova = () => D && D.sex === 'M' ? '' : 'a';
 /* „sám/sama" se příponou ohnout nedá, je to jiné slovo. */
