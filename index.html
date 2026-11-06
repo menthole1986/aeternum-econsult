@@ -519,7 +519,10 @@ benefits: [
     card: () => `<div class="cards">
       <div class="card"><b>Lékařský dohled</b><span>Pravidelné kontroly, úprava protokolu, monitoring parametrů.</span></div>
       <div class="card"><b>Pravidelné krevní testy</b><span>Sledování metabolických parametrů a reakce organismu po celou dobu programu.</span></div>
-      <div class="card"><b>Léky v ceně programu</b><span>All‑inclusive — vše zahrnuto, bez skrytých poplatků a bez doplácení za lék.</span></div>
+      ${S.variant && S.variant.drugIncluded
+        ? '<div class="card"><b>Léky v ceně programu</b><span>All‑inclusive — vše zahrnuto, bez skrytých poplatků a bez doplácení za lék.</span></div>'
+        : '<div class="card"><b>Léčivo na e‑recept</b><span>Lék si vyzvednete v kterékoli lékárně na náš e‑recept a platíte ho tam sám. Cenu balení znáte dopředu.</span></div>'}
+      <div class="card"><b>Tým po celou dobu</b><span>Program manager, výživový specialista a fitness trenér. Nejste na to sám${ova()} ani mezi kontrolami.</span></div>
       <div class="card"><b>Flexibilní program</b><span>Bez vázanosti a bez storno poplatku. Program lze zkrátit nebo prodloužit podle toho, jak se váha vyvíjí.</span></div>
       <div class="card"><b>Aeternum Longevity Protokol</b><span>Individuální nutriční, suplementační, tréninkový a regenerační plán sestavený z Vašeho dotazníku, krevních testů a lékařské konzultace.</span></div>
     </div>` },
@@ -787,7 +790,10 @@ async function renderVariants() {
     const v = vs[Number(el.dataset.i)];
     box.querySelectorAll('.var').forEach(x => x.classList.remove('sel'));
     el.classList.add('sel');
-    S.variant = { name: v.name, months: v.months, price: v.price }; save();
+    // drugIncluded si pamatujeme kvůli kartám: u programů na dálku
+    // si léčivo kupuje klient sám a tvrdit mu opak by byla lež.
+    S.variant = { name: v.name, months: v.months, price: v.price,
+      key: v.key, drugIncluded: !!v.drugIncluded }; save();
     buzz(12);
     logLine('klient', 'Vybral variantu ' + v.name + ' · ' + v.months + ' měsíců · ' + v.price + ' Kč/měs.');
     setChips([{ label: 'Pokračovat s variantou ' + v.name, go: 'benefits', primary: true }]);
