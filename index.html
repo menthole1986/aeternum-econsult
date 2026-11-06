@@ -535,7 +535,9 @@ benefits: [
 care: [
   { t: 'Terapie je u každého trochu jiná — někdo zhubne první měsíc pět kilo, někdo dvě a pak to srovná. Proto program vedeme individuálně a neřídíme se tabulkou.' },
   { t: 'Abychom to uměli, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
-  { t: () => `Máte na to připravené místo ve <b>své klientské zóně</b> a vždycky Vám přijde e‑mail s připomenutím, abyste na to nemusel${ova()} myslet. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
+  { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
+    dal: 'To se mi líbí' },
+  { t: () => `Máte na to připravené místo ve <b>své klientské sekci</b> a vždycky Vám přijde e‑mail s připomenutím, abyste na to nemusel${ova()} myslet. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
   { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy' }] }
 ],
 
@@ -618,17 +620,18 @@ consent: [
 
 book: [
   { t: 'Děkuju. Zbývá poslední krok — domluvit vyšetření. Než se pustíme do termínu, chci mít jistotu, že víte přesně, za co platíte.',
-    card: () => `<div class="sum">
+    card: () => {
+      const lekar = Number(D.examDoctorPart) || 2500;
+      return `<div class="sum">
       <div class="sh">
         <div class="se">Vstupní screening</div>
         <div class="sn">${fmt(CFG.screeningPrice)} Kč jednorázově</div>
       </div>
       <div class="sb">
-        <div class="kv"><span>Odběr krve v Synlabu</span><b>v ceně</b></div>
-        <div class="kv"><span>Vyšetření lékařem</span><b>v ceně</b></div>
-        <div class="kv"><span>Posouzení vhodnosti terapie</span><b>v ceně</b></div>
-        <div class="kv"><span>Rezervace termínu</span><b>úhradou</b></div>
-      </div></div>` },
+        <div class="kv"><span>Odběr a rozbor krve v Synlabu</span><b>${fmt(CFG.screeningPrice - lekar)} Kč</b></div>
+        <div class="kv"><span>Vyšetření lékařem</span><b>${fmt(lekar)} Kč</b></div>
+        <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
+      </div></div>`; } },
   { t: 'Obojí je v té částce — odběr i vyšetření. Platí se jednou a úhradou se Vám zároveň drží termín. Nic dalšího se za screening nedoplácí.' },
   { t: 'Rozhovor je pořád nezávazný a bez Vašeho souhlasu se nikam neposunu. Dává Vám ta částka smysl?' },
   { chips: [
@@ -929,7 +932,7 @@ async function renderSlots(expand) {
     const doTydne = blizke[0].getTime() <= Date.now() + 7 * 86400000;
     await marcelSays(doTydne
       ? 'Tady jsou nejbližší volné termíny. Do vyšetření musíte stihnout odběr krve — žádanku Vám pošlu e-mailem hned po platbě, takže na to budete mít čas.'
-      : 'Nejbližší volno mám bohužel až tady. Pro odběr krve je to vlastně dobře, budete ho mít v klidu — žádanku Vám pošlu e-mailem hned po platbě.');
+      : 'Nejbližší volné termíny mám až tady. Pro odběr krve se to hodí — budete na něj mít čas v klidu a nemusíte nikam spěchat. Žádanku Vám pošlu e-mailem hned po platbě.');
   }
 
   const row = expand ? null : bubble('<div class="slots" id="slotbox"></div>');
@@ -1002,11 +1005,12 @@ async function pickSlot(isoUtc) {
   }
   SLOTS.picked = lidsky; SLOTS.vs = r.vs; save();
 
-  await marcelSays('Termín <b>' + lidsky + '</b> je zabraný. Potvrdí se v okamžiku, kdy dorazí platba.');
+  await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
   await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
     'Vám pošlu e-mailem hned po platbě a odběr musíte stihnout <b>nejpozději dva dny před vyšetřením</b> — ' +
     'laboratoř potřebuje čas na výsledky a bez nich Vám lékař terapii neschválí.');
-  await marcelSays('A až odběr absolvujete, <b>klepnete u sebe v rezervaci na „Byl jsem na odběru“</b>. ' +
+  await marcelSays('A až odběr absolvujete, otevřete si svoji rezervaci — odkaz na ni máte ' +
+    'v potvrzovacím e-mailu — a klepnete tam na tlačítko <b>„Byl jsem na odběru“</b>. ' +
     'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
   await marcelSays(payCard(r, lidsky));
   persist('book-hold');
@@ -1022,6 +1026,9 @@ async function marcelSays(html) {
   await wait(300);
 }
 
+// Lékařská část screeningu; laboratorní je zbytek do celkové ceny.
+const lekarskaCast = () => Number(D && D.examDoctorPart) || 2500;
+
 function payCard(r, lidsky) {
   /* Co klient podepisuje svou platbou, se říká před ní, ne pod tlačítkem.
      Pod tlačítkem to přečte až ten, kdo váhá — a to je pozdě. */
@@ -1036,8 +1043,8 @@ function payCard(r, lidsky) {
       '<div class="se">Vstupní screening</div>' +
       '<div class="sn">' + esc(lidsky) + '</div>' +
     '</div><div class="sb">' +
-      '<div class="kv"><span>Odběr krve v Synlabu</span><b>v ceně</b></div>' +
-      '<div class="kv"><span>Vyšetření lékařem</span><b>v ceně</b></div>' +
+      '<div class="kv"><span>Odběr a rozbor krve v Synlabu</span><b>' + fmt(CFG.screeningPrice - lekarskaCast()) + ' Kč</b></div>' +
+      '<div class="kv"><span>Vyšetření lékařem</span><b>' + fmt(lekarskaCast()) + ' Kč</b></div>' +
       '<div class="kv"><span>Forma</span><b>' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') + '</b></div>' +
       '<div class="kv"><span>Celkem</span><b>' + fmt(CFG.screeningPrice) + ' Kč jednorázově</b></div>' +
     '</div></div>' + btn +
