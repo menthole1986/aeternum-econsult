@@ -400,16 +400,32 @@ vas2: [
       if (r === 'směnný provoz') return 'Díky. U směn je nejtěžší pravidelnost jídla a spánku, a to na váhu dopadá víc, než si lidi myslí. Budeme s tím počítat.';
       return 'Díky. Nepravidelnost je nejčastější důvod, proč diety padají — s tou si poradíme jinak než rozpisem na každý den.';
     } },
-  { t: 'A teď to podstatnější: co Vás k nám přivádí a co už máte za sebou? Napište mi to vlastními slovy, klidně stručně.' },
-  { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
-  { t: 'Děkuju. Poznamenám si to k Vaší dokumentaci — lékař to bude mít před vyšetřením k dispozici.' },
   { t: 'A co od terapie čekáte nejvíc?' },
   { chips: [
-      { label: 'Shodit a hlavně si to udržet', store: ['expect', 'udržet výsledek'], go: 'howAsk' },
-      { label: 'Zbavit se chutí a myšlenek na jídlo', store: ['expect', 'zvládnout chutě'], go: 'howAsk' },
-      { label: 'Zlepšit zdraví, ne jen vzhled', store: ['expect', 'zdraví'], go: 'howAsk' },
-      { label: 'Zvládnout to konečně pod dohledem', store: ['expect', 'vedení odborníkem'], go: 'howAsk' }
+      { label: 'Shodit a hlavně si to udržet', store: ['expect', 'udržet výsledek'], go: 'vas3' },
+      { label: 'Zbavit se chutí a myšlenek na jídlo', store: ['expect', 'zvládnout chutě'], go: 'vas3' },
+      { label: 'Zlepšit zdraví, ne jen vzhled', store: ['expect', 'zdraví'], go: 'vas3' },
+      { label: 'Zvládnout to konečně pod dohledem', store: ['expect', 'vedení odborníkem'], go: 'vas3' }
     ] }
+],
+
+/* Nejdřív nabídka, pak teprve vyprávění. Obráceně to působilo, jako by
+   Marcel klientovu odpověď přeslechl: nechal ho napsat vlastními slovy,
+   co ho přivádí, a hned nato mu nabídl tlačítka na skoro totéž. Takhle
+   si klient nejdřív vybere jedním klepnutím, Marcel na jeho volbu
+   odpoví konkrétně a teprve pak se ptá na to, co se do tlačítek nevejde. */
+vas3: [
+  { t: () => {
+      const e = S.answers.expect || '';
+      if (e === 'udržet výsledek') return 'To je podle mě ta správná odpověď. Shodit umí leccos — udržet je ta těžší půlka a program je postavený hlavně na ní.';
+      if (e === 'zvládnout chutě') return 'Tohle slyším nejčastěji a je to přesně to, s čím tahle léčiva pomáhají nejvíc. Za chvíli si řekneme, jak to dělají.';
+      if (e === 'zdraví') return 'Dobře. Čísla z krve uvidíte černé na bílém hned na začátku a pak znovu při kontrolách, takže to nezůstane u pocitu.';
+      return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
+    } },
+  { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí a co už máte za sebou? Klidně stručně — lékař si to přečte před vyšetřením.' },
+  { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
+  { t: 'Děkuju, tohle mi pomůže. Nechám to u Vaší dokumentace, ať to lékař má před sebou.' },
+  { chips: [{ label: 'Pokračujme', go: 'howAsk', primary: true }] }
 ],
 
 /* 3 · Jak terapie funguje — dvě tlačítka, výklad je stejný */
@@ -811,6 +827,10 @@ function setChips(list) {
   el.innerHTML = list.map((c, i) =>
     `<button type="button" class="chip${c.primary || c.go && list.length === 1 ? ' go' : ''}${c.faq ? ' faq' : ''}" data-i="${i}">${esc(c.label)}</button>`).join('');
   el._list = list;
+  /* Nabídka ukrojí z výšky konverzace, takže poslední replika skončí schovaná
+     za ní. Dorolujeme až po přepočtu rozvržení — hned po innerHTML prohlížeč
+     novou výšku ještě nezná. */
+  requestAnimationFrame(scroll);
 }
 
 /* ---------- výběr termínu a platba ---------- */
@@ -991,7 +1011,7 @@ function payCard(r, lidsky) {
 }
 
 /* ---------- běh scénáře ---------- */
-const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', howAsk: 'how', how: 'how', drug: 'drug',
+const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug',
   form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
   care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
   book: 'book', bookLater: 'book', bookForm: 'book',
@@ -1056,6 +1076,8 @@ function askMode(beat) {
   const ta = $('#ask');
   ta.placeholder = beat.placeholder || 'Napište mi to…';
   ta.focus();
+  // Na mobilu vyjede klávesnice a ukrojí půl obrazovky. Totéž co u nabídky.
+  requestAnimationFrame(scroll);
 }
 
 function logLine(who, text) {
