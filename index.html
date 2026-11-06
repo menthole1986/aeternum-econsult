@@ -1034,8 +1034,11 @@ function payCard(r, lidsky) {
      Pod tlačítkem to přečte až ten, kdo váhá — a to je pozdě. */
   const presun = 'Termín <b>přesunete nebo zrušíte sám</b> ve své rezervaci, odkaz máte ' +
     'v potvrzovacím e-mailu, nebo rovnou v pozvánce v kalendáři. Zdarma, nejpozději ' +
-    (D.rescheduleHours || 12) + ' hodin předem. <b>Nevolejte nám</b> — udělejte to elektronicky, ' +
-    'ať se to u nás propíše hned a termín může dostat někdo jiný.';
+    (D.rescheduleHours || 12) + ' hodin předem.' +
+    /* Vlastní odstavec: je to jediný pokyn v celé kartě a v jednom bloku
+       se čtyřmi řádky kolem něj se ztratí. */
+    '<br><br><b>Nevolejte nám</b> — udělejte to elektronicky, ať se to u nás ' +
+    'propíše hned a termín může dostat někdo jiný.';
   const btn = r.checkoutUrl
     ? '<a class="pay" href="' + esc(r.checkoutUrl) + '">Zaplatit kartou · ' + fmt(CFG.screeningPrice) + ' Kč</a>'
     : '<div class="paynote">Platební bránu se mi teď nepodařilo otevřít. Napište mi a pošlu Vám odkaz na platbu e-mailem.</div>';
