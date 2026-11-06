@@ -1135,13 +1135,30 @@ $('#ask').addEventListener('keydown', e => {
 });
 $('#sendBtn').addEventListener('click', submitAsk);
 
+/* Dotaz, který čeká, až Marcel dopíše rozepsanou repliku. */
+let fronta = null;
+
 async function submitAsk() {
   const ta = $('#ask');
   const text = ta.value.trim();
-  if (!text || busy) return;
+  if (!text) return;
   ta.value = ''; ta.style.height = 'auto';
   bubble(esc(text), { me: true });
   logLine('klient', text);
+
+  /* Klient napsal uprostřed toho, co Marcel zrovna píše. Jeho bublina
+     naskočila hned — vidí, že zpráva dorazila — a my počkáme, až Marcel
+     dopíše, a teprve pak odpovíme. Dřív se v takové chvíli nestalo vůbec
+     nic a na telefonu to vypadalo, že appka zamrzla.
+
+     Když mezitím pošle další dotaz, ten novější vyhrává a tenhle se tiše
+     vzdá: odpovídat na dvě otázky najednou nedává smysl. */
+  if (busy) {
+    fronta = text;
+    for (let i = 0; i < 150 && busy; i++) await new Promise(r => setTimeout(r, 200));
+    if (fronta !== text) return;
+    fronta = null;
+  }
 
   if (pending) {                       // odpověď na otázku ze scénáře
     const beat = pending; pending = null;
