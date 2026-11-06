@@ -559,9 +559,12 @@ screening: [
   { t: 'Než se k programu vůbec dostaneme, čeká Vás jeden <b>povinný krok</b> — vstupní screening.' },
   { t: 'Je to posouzení, jestli je pro Vás terapie vhodná. Jeho cílem je vyloučit nebezpečné kontraindikace — věci, které z dotazníku nevyčtu a které by Vám mohly ublížit.' },
   { t: () => `Stojí <span class="hl">${fmt(CFG.screeningPrice)} Kč</span> jednorázově a jsou v tom dvě věci: <b>laboratorní vyšetření krve</b> a navazující <b>lékařské vyšetření</b>.`,
+    /* Rozpis po položkách tu byl z dřívější ceny: 3 170 + 2 000 dávalo 5 170,
+       ale celkem svítilo 4 970. Dokud nebude po položkách rozdělená nová
+       cena, ukazujeme jen to, co je v ní obsažené. */
     card: () => `<div class="plan">
-      <div class="kv"><span>Laboratorní vyšetření krve</span><b>3 170 Kč</b></div>
-      <div class="kv"><span>Lékařské vyšetření</span><b>2 000 Kč</b></div>
+      <div class="kv"><span>Laboratorní vyšetření krve</span><b>v ceně</b></div>
+      <div class="kv"><span>Lékařské vyšetření</span><b>v ceně</b></div>
       <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
     </div>` },
   { t: 'Důležité: <b>screening není součástí léčby</b> a hradí se před zahájením terapie. Je to vstupenka k posouzení, ne první platba za program.',
@@ -819,20 +822,27 @@ async function renderVariants() {
 
 /* Souhlasy. Každý zvlášť, žádné „souhlasím se vším“ — a ukládá se přesné
    znění, protože to je to, co klient opravdu viděl. */
+/* Znění souhlasu se ukládá do přepisu, takže se nesmí lišit od toho, co
+   klient viděl. Cena se proto bere z ceníku, ne opisuje do textu. */
+const consentText = c => typeof c.t === 'function' ? c.t() : c.t;
+
 const CONSENTS = [
   { k: 'ai', t: 'Beru na vědomí, že jsem úvodní konzultaci absolvoval(a) s digitálním asistentem, nikoli s lékařem, a že poskytnuté informace nejsou lékařskou radou ani diagnózou.' },
   { k: 'lekar', t: 'Rozumím tomu, že o vhodnosti terapie, volbě léku i dávkování rozhoduje výhradně lékař na základě výsledků vstupního screeningu.' },
-  { k: 'platba', t: 'Rozumím tomu, že vstupní screening (5 170 Kč) není součástí léčby, hradí se předem, a že v případě zjištěné kontraindikace se laboratorní část (3 170 Kč) nevrací.' },
+  { k: 'platba', t: () => `Rozumím tomu, že vstupní screening (${fmt(CFG.screeningPrice)} Kč) není součástí léčby a hradí se předem.` },
   { k: 'gdpr', t: 'Souhlasím se zpracováním osobních údajů v rozsahu nezbytném pro poskytnutí péče.' }
 ];
 
 function renderConsents() {
   const row = bubble('<div class="cons" id="cons">' + CONSENTS.map((c, i) =>
-    `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(c.t)}</span></label>`).join('') + '</div>');
+    `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(consentText(c))}</span></label>`).join('') + '</div>');
   const box = row.querySelector('#cons');
   box.addEventListener('change', () => {
     const all = Array.from(box.querySelectorAll('input'));
-    all.forEach(i => { S.consents[i.dataset.k] = i.checked ? { at: Date.now(), text: CONSENTS[Number(i.dataset.i)].t } : null; });
+    /* Ukládá se vyhodnocený text, ne předpis — do důkazní stopy patří přesně
+       ta věta, kterou klient viděl na obrazovce, i s cenou v ní. */
+    all.forEach(i => { S.consents[i.dataset.k] = i.checked
+      ? { at: Date.now(), text: consentText(CONSENTS[Number(i.dataset.i)]) } : null; });
     save();
     buzz(10);
     const done = all.every(i => i.checked);
