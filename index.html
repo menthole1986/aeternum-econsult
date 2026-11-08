@@ -142,6 +142,13 @@ p{margin:0}
 .cons{margin-top:12px;display:grid;gap:2px}
 .cons label{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;transition:background .15s}
 .cons label:hover{background:rgba(255,255,255,.04)}
+/* Řádek s textovým polem uvnitř souhlasů: popisek nad polem, ne vedle
+   zaškrtávátka — datum a rodné číslo se píšou, neodklikávají. */
+.cons label.lf{display:block;cursor:default}
+.cons label.lf:hover{background:none}
+.cons label.lf span{display:block;font-size:.78em;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.cons label.lf input{appearance:auto;width:100%;height:auto;padding:11px 12px;border:1.5px solid var(--line2);border-radius:12px;background:transparent;color:var(--ink);font:inherit;cursor:text}
+.cons label.lf input:focus{outline:none;border-color:var(--purple,#A27AD2)}
 .cons input{appearance:none;flex:none;width:21px;height:21px;margin:1px 0 0;border:1.5px solid var(--line2);border-radius:6px;cursor:pointer;position:relative;transition:background .15s,border-color .15s}
 .cons input:checked{background:var(--grad-135);border-color:transparent}
 .cons input:checked::after{content:'';position:absolute;left:6.5px;top:2.5px;width:5px;height:10px;border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}
@@ -326,6 +333,9 @@ const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat
      stránky se dřív volba ztratila a rezervace tiše spadla zpátky na
      „osobně v Praze“, i když si klient vybral video. */
   form: '',
+  /* Údaje pro laboratoř. Drží se stejně jako forma — konzultace platí 72 hodin
+     a klient se do ní vrací, takže se nesmí ztratit obnovením stránky. */
+  labDob: '', labRc: '', labConsent: false,
   consent: false, consents: {}, variant: null, asked: {} });
 let S = blank();
 let D = null;                       // data z e‑screeningu
@@ -684,9 +694,18 @@ bookForm: [
       ? 'Vy jste z Prahy, takže se nabízí osobně. Jak to chcete?'
       : 'Vzhledem k tomu, odkud jste, bude nejspíš pohodlnější online. Jak to chcete?' },
   { chips: [
-      { label: 'Osobně v Praze', go: 'bookSlots', form: 'osobne' },
-      { label: 'Online přes video', go: 'bookSlots', form: 'online' }
+      { label: 'Osobně v Praze', go: 'bookLab', form: 'osobne' },
+      { label: 'Online přes video', go: 'bookLab', form: 'online' }
     ] }
+],
+
+/* Údaje pro laboratoř ještě před platbou. Dřív je klient vyplňoval až potom,
+   z odkazu v e-mailu — zaplatil, zavřel okno a vracel se na web podruhé.
+   Ptáme se na to, co laboratoř opravdu chce do žádanky, nic víc. */
+bookLab: [
+  { t: 'Ještě než vyberete termín: laboratoř potřebuje pár údajů, jinak žádanku na odběr nevystaví.' },
+  { t: 'Rodné číslo posílám jen jí, v e-mailech ho nikdy neuvádíme. Když nakonec nezaplatíte, smažeme ho.' },
+  { lab: true }
 ],
 
 bookSlots: [
@@ -882,6 +901,27 @@ function renderConsents() {
   setChips([]);
 }
 
+/* Datum narození a rodné číslo. Víc po klientovi nechceme — jméno, adresu
+   i míry máme ze screeningu a zbytek anamnézy probere lékař při vyšetření. */
+function renderLabForm() {
+  const row = bubble('<div class="cons" id="labform">' +
+    '<label class="lf"><span>Datum narození</span><input type="date" id="lf-dob" value="' + esc(S.labDob || '') + '"></label>' +
+    '<label class="lf"><span>Rodné číslo</span><input type="text" inputmode="numeric" id="lf-rc" placeholder="8601079443" value="' + esc(S.labRc || '') + '"></label>' +
+    '<label><input type="checkbox" id="lf-ok"' + (S.labConsent ? ' checked' : '') + '><span>Souhlasím, aby Aeternum Clinic předala tyto údaje smluvní laboratoři za účelem objednání odběru a provedení vyšetření.</span></label>' +
+    '</div>');
+  const box = row.querySelector('#labform');
+  const dob = box.querySelector('#lf-dob'), rc = box.querySelector('#lf-rc'), okb = box.querySelector('#lf-ok');
+  const prepocet = function () {
+    S.labDob = dob.value; S.labRc = rc.value.trim(); S.labConsent = okb.checked; save();
+    const hotovo = /^\d{4}-\d{2}-\d{2}$/.test(S.labDob || '') &&
+      /^\d{6}\s*\/?\s*\d{3,4}$/.test(S.labRc || '') && S.labConsent;
+    setChips(hotovo ? [{ label: 'Pokračovat na výběr termínu', go: 'bookSlots', primary: true }] : []);
+  };
+  box.addEventListener('input', prepocet);
+  box.addEventListener('change', prepocet);
+  prepocet();
+}
+
 function setChips(list) {
   const el = $('#chips');
   // Na co už jsme odpověděli, podruhé nenabízíme — klient by dostal tutéž repliku.
@@ -1014,6 +1054,8 @@ async function pickSlot(isoUtc) {
   try {
     r = await api('hold', { kind: 'exam', slot: local, type: SLOTS.form || 'osobne',
       id: S.id, name: D.fullName || D.name, email: D.email, phone: D.phone,
+      /* Pro žádanku. Adresu a míry si server dotáhne ze screeningu sám. */
+      birthDate: S.labDob || '', birthNumber: (S.labRc || '').trim(), labConsent: S.labConsent === true,
       /* Souhlasy klient odklikl v předchozí kapitole. Posíláme je tak, jak
          jsou — když je neodklikl, rezervaci server odmítne, a to je správně. */
       consent: S.consent === true, src: 'econsult' }, 25000);
@@ -1028,7 +1070,9 @@ async function pickSlot(isoUtc) {
     await renderSlots();
     return;
   }
-  SLOTS.picked = lidsky; SLOTS.vs = r.vs; save();
+  SLOTS.picked = lidsky; SLOTS.vs = r.vs;
+  S.labRc = '';                              // v prohlížeči ho dál nedržíme
+  save();
 
   await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
   await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
@@ -1094,7 +1138,7 @@ function payCard(r, lidsky) {
 const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug',
   form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
   care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
-  book: 'book', bookLater: 'book', bookForm: 'book',
+  book: 'book', bookLater: 'book', bookForm: 'book', bookLab: 'book',
   bookSlots: 'book', blocked: 'intro' };
 
 async function play(key) {
@@ -1117,6 +1161,7 @@ async function play(key) {
     if (beat.vars) { await renderVariants(); busy = false; return; }
     if (beat.slots) { await renderSlots(); busy = false; return; }
     if (beat.cons) { renderConsents(); busy = false; return; }
+    if (beat.lab) { renderLabForm(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
     if (run >= MAX_RUN && i < beats.length - 1) {
