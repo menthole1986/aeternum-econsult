@@ -321,13 +321,21 @@ function countUp(el, to, ms = 900) {
 
 /* ---------- stav ---------- */
 const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat: 0, log: [], answers: {},
+  /* Zvolená forma vyšetření patří do uloženého stavu, ne jen do paměti
+     stránky. Konzultace platí 72 hodin a klient se k ní vrací — po obnovení
+     stránky se dřív volba ztratila a rezervace tiše spadla zpátky na
+     „osobně v Praze“, i když si klient vybral video. */
+  form: '',
   consent: false, consents: {}, variant: null, asked: {} });
 let S = blank();
 let D = null;                       // data z e‑screeningu
 let busy = false;
 
 function save() { try { sessionStorage.setItem(CFG.storageKey, JSON.stringify(S)); } catch (e) {} }
-function load() { try { const r = sessionStorage.getItem(CFG.storageKey); if (r) S = Object.assign(blank(), JSON.parse(r)); } catch (e) {} }
+function load() {
+  try { const r = sessionStorage.getItem(CFG.storageKey); if (r) S = Object.assign(blank(), JSON.parse(r)); } catch (e) {}
+  SLOTS.form = S.form || '';
+}
 
 /* ---------- ukázková data, než je napojený backend ---------- */
 const DEMO = {
@@ -1174,7 +1182,7 @@ document.addEventListener('click', async e => {
   setChips([]);
   if (c.store) { S.answers[c.store[0]] = c.store[1]; save(); }
   if (c.consent) { S.consent = true; save(); }
-  if (c.form) { SLOTS.form = c.form; save(); }
+  if (c.form) { SLOTS.form = c.form; S.form = c.form; save(); }
   /* Klient se chce na něco zeptat. Nikam ho nepřesouváme — zůstane v téhle
      kapitole, odpoví mu model a backToFlow mu pak vrátí tytéž nabídky. */
   if (c.prompt) {
