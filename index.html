@@ -338,10 +338,12 @@ const DEMO = {
   drugWhy: 'máte vyšší BMI a zároveň jste uvedla, že se potřebujete zbavit chutí mezi jídly',
   blocked: false, blockReason: '',
   variants: [
+    { key: 'light', name: 'Telehealth Light', months: 8, price: 4970, drugIncluded: false,
+      desc: 'Lékařský dohled, e-recepty a průběžný screening zdravotního stavu. Bez tréninkového plánu a jídelníčku.' },
     { key: 'standard', name: 'Telehealth Standard', months: 8, price: 6970, drugIncluded: false,
-      desc: 'Celá péče na dálku pod přímým dohledem lékaře. Lék si vyzvednete v lékárně na náš e-recept.', rec: true },
+      desc: 'Všechno z Lightu a k tomu Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
     { key: 'premium', name: 'Telehealth Premium', months: 8, price: 9970, drugIncluded: false,
-      desc: 'Všechno ze Standardu a k tomu prioritní konzultace a vlastní tým — trenér, výživový specialista, psycholog.' }
+      desc: 'Všechno ze Standardu a k tomu prioritní konzultace, vlastní tým a péče o metabolické zdraví a dlouhověkost.' }
   ]
 };
 
@@ -541,11 +543,12 @@ care: [
   /* Jedna osobní návštěva za terapii. Říkáme to tady, ne až u rezervace:
      kdo bydlí daleko, si to musí umět naplánovat, a dozvědět se to ve
      třetím měsíci by bylo nepříjemné překvapení. */
-  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. Vedeme Vás sice na dálku, ale <b>aspoň jednou za celou terapii se chceme vidět osobně</b> — v naší ordinaci v Praze 8. Nemusí to být hned; obvykle se to hodí na první kontrolu po třech měsících.' },
+  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. Vstupní vyšetření můžeme udělat na dálku, ale <b>jednou za celou terapii se potřebujeme vidět osobně</b> — na kontrolním vyšetření po třech měsících od zahájení terapie. To se dělá v ordinaci, zatím v Praze 8.' },
   { t: 'Nedělá se to kvůli papírům. Lékař, který Vás vede, Vás má jednou vidět naživo — a zároveň je to podmínka toho, abychom Vám terapii mohli vést na dálku.' },
-  /* Plán, ne slib — ordinaci máme zatím jednu. Říkáme to proto, aby to
-     člověka z druhého konce republiky neodradilo hned na začátku. */
-  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme ordinace i v dalších městech</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Jak to bude vypadat, dáme Vám včas vědět — a termín si vyberete podle toho, co Vám bude nejblíž.',
+  /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
+     proto, aby to člověka z druhého konce republiky neodradilo hned na
+     začátku; datum ani otevření slibovat nesmíme. */
+  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme ordinace v Brně a v Olomouci</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.',
     dal: 'To mi dává smysl' },
   { t: 'Abychom to uměli, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
   { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
