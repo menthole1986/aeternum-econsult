@@ -398,7 +398,7 @@ const SCRIPT = {
 
 /* 1 · Kde se nacházíme */
 intro: [
-  { t: () => `Dobrý den, ${esc(D.name)}. Jsem Marcel AI — digitální kopie Marcela, koordinátora péče Aeternum Clinic. Natrénoval mě sám na svých skutečných konzultacích, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
+  { t: () => `Dobrý den, ${esc(D.name)}. Jsem Marcel AI — digitální kopie Marcela, koordinátora péče Aeternum Clinic. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
   { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
   { t: 'Počítejte s dvaceti až pětadvaceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
   { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
@@ -561,7 +561,7 @@ care: [
   /* Jedna osobní návštěva za terapii. Říkáme to tady, ne až u rezervace:
      kdo bydlí daleko, si to musí umět naplánovat, a dozvědět se to ve
      třetím měsíci by bylo nepříjemné překvapení. */
-  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. <b>Jednou za celou terapii se potřebujeme vidět osobně</b> — a kdy to bude, je na Vás. Buď přijedete rovnou na vstupní lékařské vyšetření, nebo si ho uděláte online a přijedete až na kontrolní vyšetření tři měsíce po zahájení terapie. Ordinaci máme zatím v Praze 8.' },
+  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. <b>Jednou za celou terapii se potřebujeme vidět osobně</b> — a kdy to bude, je na Vás. Buď přijedete rovnou na vstupní lékařské vyšetření, nebo si ho uděláte online a přijedete až na kontrolní vyšetření na konci třetího měsíce po zahájení terapie. Ordinaci máme zatím jen v Praze, v novém roce přibude Brno, Olomouc a Zlín.' },
   { t: 'Nedělá se to kvůli papírům. Lékař, který Vás vede, Vás má jednou vidět naživo — a zároveň je to podmínka toho, abychom Vám terapii mohli vést na dálku.' },
   /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
      proto, aby to člověka z druhého konce republiky neodradilo hned na
