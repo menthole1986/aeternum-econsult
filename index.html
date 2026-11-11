@@ -448,7 +448,11 @@ vas2: [
       if (r === 'sedavé zaměstnání') return 'Díky. Sedavé zaměstnání je u nás nejčastější a není to Vaše chyba — jen to znamená, že pohyb musíme do programu vědomě dostat, protože se sám od sebe neobjeví.';
       if (r === 'na nohou') return 'Díky. To je dobrý základ — jen pozor, chození celý den není totéž co silový trénink. K tomu se ještě dostanu.';
       if (r === 'směnný provoz') return 'Díky. U směn je nejtěžší pravidelnost jídla a spánku, a to na váhu dopadá víc, než si lidi myslí. Budeme s tím počítat.';
-      return 'Díky. Nepravidelnost je nejčastější důvod, proč diety padají — s tou si poradíme jinak než rozpisem na každý den.';
+      if (r === 'nepravidelný režim') return 'Díky. Nepravidelnost je nejčastější důvod, proč diety padají — s tou si poradíme jinak než rozpisem na každý den.';
+      /* Klient to napsal po svém. Hádat z jeho věty, do které škatulky
+         patří, je horší než neutrální věta — sedavé zaměstnání plus
+         odpolední fitko se do žádné z nich nevejde. */
+      return 'Díky, tohle mi pomůže. Budu s tím počítat, až se dostaneme k režimu a pohybu.';
     } },
   { t: 'A co od terapie čekáte nejvíc?' },
   { chips: [
@@ -470,7 +474,8 @@ vas3: [
       if (e === 'udržet výsledek') return 'To je podle mě ta správná odpověď. Shodit umí leccos — udržet je ta těžší půlka a program je postavený hlavně na ní.';
       if (e === 'zvládnout chutě') return 'Tohle slyším nejčastěji a je to přesně to, s čím tahle léčiva pomáhají nejvíc. Za chvíli si řekneme, jak to dělají.';
       if (e === 'zdraví') return 'Dobře. Čísla z krve uvidíte černé na bílém hned na začátku a pak znovu při kontrolách, takže to nezůstane u pocitu.';
-      return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
+      if (e === 'vedení odborníkem') return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
+      return 'Rozumím, díky. Vrátím se k tomu, až si budeme říkat, co od programu čekat.';
     } },
   { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí a co už máte za sebou? Klidně stručně — lékař si to přečte před vyšetřením.' },
   { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
@@ -1043,7 +1048,7 @@ function setChips(list) {
   const el = $('#chips');
   // Na co už jsme odpověděli, podruhé nenabízíme — klient by dostal tutéž repliku.
   list = (list || []).filter(c => !(c.faq && S.asked[c.faq]));
-  if (!list.length) { el.innerHTML = ''; return; }
+  if (!list.length) { el.innerHTML = ''; el._list = null; return; }
   el.innerHTML = list.map((c, i) =>
     `<button type="button" class="chip${c.primary || c.go && list.length === 1 ? ' go' : ''}${c.faq ? ' faq' : ''}" data-i="${i}">${esc(c.label)}</button>`).join('');
   el._list = list;
@@ -1459,6 +1464,25 @@ async function submitAsk() {
       await wait(240);
     }
     busy = false;
+    return;
+  }
+
+  /* Klient odpověděl vlastními slovy místo kliknutí na nabídku. Je to
+     odpověď na otázku, kterou mu Marcel právě položil, ne dotaz — zapíšeme
+     ji a jedeme tam, kam vedou tlačítka. Jeho věta je navíc přesnější než
+     kterákoli z nich: „přes den sedím, odpoledne fitko" řekne víc než
+     „Většinu dne sedím".
+
+     Platí to jen pro nabídku, která něco zapisuje (`store`). Když visí
+     „Rozumím" nebo nabídka otázek, je napsaný text opravdu dotaz. A text
+     zakončený otazníkem bereme jako dotaz vždycky — klient se může zeptat
+     i uprostřed otázky na sebe. */
+  const nabidka = ($('#chips') || {})._list || [];
+  const volba = nabidka.filter(c => c.store && c.go)[0];
+  if (volba && !/\?\s*$/.test(text)) {
+    setChips([]);
+    S.answers[volba.store[0]] = text; save();
+    play(typeof volba.go === 'function' ? volba.go() : volba.go);
     return;
   }
 
