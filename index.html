@@ -357,6 +357,8 @@ const DEMO = {
   examDoctorPart: 2500,
   sex: 'F', age: 42, height: 168, weight: 88, target: 72, bmi: 31.2,
   lose: 16, months: 6, drug: 'Mounjaro',
+  // ?demo=1&pmos=1 otevre i kapitolu o PMOS, jinak se v demu neukaze.
+  pmos: URLP.get('pmos') === '1',
   drugWhy: 'máte vyšší BMI a zároveň jste uvedla, že se potřebujete zbavit chutí mezi jídly',
   blocked: false, blockReason: '',
   variants: [
@@ -392,6 +394,9 @@ const CHAPTERS = [
    preparátu, který klientovi vychází, ne natvrdo. Dávky ověřila lékařka
    6. 11. 2026. */
 const startDose = () => /wegovy/i.test(String(D && D.drug || '')) ? '0,25 mg' : '2,5 mg';
+/* PMOS je zenska diagnoza; kdyby ji omylem zaskrtl muz, kapitolu
+   neotevirame — cela je psana v zenskem rode.                */
+const maPmos = () => !!(D && D.pmos && D.sex !== 'M');
 const ova = () => D && D.sex === 'M' ? '' : 'a';
 /* „sám/sama" se příponou ohnout nedá, je to jiné slovo. */
 const sam = () => D && D.sex === 'M' ? 'sám' : 'sama';
@@ -486,6 +491,24 @@ drug: [
   { t: 'Rozdíl mezi těmi dvěma léky je jednoduchý. <b>Wegovy</b> působí na jeden hormonální receptor (GLP‑1). <b>Mounjaro</b> působí současně na dva (GLP‑1 a GIP), což u většiny pacientů vedlo v klinických studiích k o něco vyššímu úbytku váhy. Oba jsou vázané na lékařský předpis.' },
   { t: () => `Podle Vašich odpovědí Vám vychází <span class="hl">${esc(D.drug)}</span> — ${esc(D.drugWhy)}.` },
   { t: 'Konečné slovo má ale vždycky lékař. Může doporučení změnit podle krevních testů a podle toho, co u Vás uvidí při vyšetření. Já Vám tady říkám, co vychází z dotazníku, ne co Vám bude předepsáno.' },
+  { chips: [{ label: 'Dobře, jak se to podává?', go: () => maPmos() ? 'pmos' : 'form' }] }
+],
+
+/* 3b · PMOS (PCOS). Ukaze se jen klientce, ktera ho ve screeningu uvedla.
+   Neslibuje uzdraveni cyklu ani hormonalni lecbu — tu vede lekar. Rika,
+   proc u ni diety selhavaly a proc ji vyslo prave tirzepatid.         */
+pmos: [
+  { t: 'Než půjdeme dál, zastavím se u jedné věci, kterou jste v dotazníku uvedla a která mění celý výklad: <b>PMOS</b>, tedy polycystický ovariální syndrom.' },
+  { t: 'Tohle chci, abyste slyšela jako první: pokud u Vás dřív hubnutí nefungovalo, <b>nebyla to slabá vůle.</b> U PMOS stojí za váhou nejčastěji <b>inzulinová rezistence</b> — tělo musí na stejnou práci vyplavit víc inzulinu, a vysoký inzulin brání tělu sahat do zásob. Proto u PMOS běžné diety selhávají výrazně častěji než u ostatních, i když se jich člověk drží do písmene.' },
+  { t: () => `A právě tady má terapie u PMOS smysl navíc: nejde jen o kila, ale o to <b>srovnat práci těla s inzulinem</b>. Proto Vám ze screeningu vyšel <span class="hl">${esc(D.drug)}</span> — ze dvou preparátů působí na inzulinovou rezistenci nejsilněji, protože míří na dva receptory místo jednoho.` },
+  { t: 'Co Vám k tomu můžu a nemůžu říct:',
+    card: () => `<div class="cards">
+      <div class="card"><b>Váha a inzulin</b><span>To je to, na co terapie míří přímo a co u PMOS zabírá obvykle lépe než u kohokoli jiného.</span></div>
+      <div class="card"><b>Cyklus, pleť, ochlupení</b><span>U části klientek se s poklesem inzulinu a váhy upraví i tyhle potíže. Slíbit Vám to ale nemůžu a není to cíl programu — je to možný následek.</span></div>
+      <div class="card"><b>Hormonální léčbu nevedeme já ani program</b><span>Tu má v rukou lékař, náš nebo Váš gynekolog. Já Vám tu říkám, co dělá tohle léčivo s metabolismem.</span></div>
+    </div>` },
+  { t: 'A dvě věci, které s Vámi musí probrat lékař na vstupním vyšetření, takže si je prosím schovejte na něj: <b>jakou užíváte hormonální antikoncepci</b> a jak jste na tom s <b>plánem těhotenství</b>. Tahle terapie se s těhotenstvím nekombinuje — kdyby se Vám ten plán během programu změnil, musíme to vědět hned a lék se vysazuje.' },
+  { t: 'Že u Vás jde o PMOS už lékař ví — máme to z Vašeho dotazníku a uvidí to i s krevními testy ze vstupního screeningu. Nemusíte to znovu vysvětlovat.' },
   { chips: [{ label: 'Dobře, jak se to podává?', go: 'form' }] }
 ],
 
@@ -513,7 +536,7 @@ expect: [
   { t: 'Konkrétně: <b>silový trénink alespoň každý druhý den.</b> Může to být posilovna, může to být cvičení s vlastní váhou doma, na tom nezáleží. Důležité je, že silový trénink drží svalovou hmotu. A zapomeňte na dlouhé kardio a vyběhané hodiny — ve velkém kalorickém deficitu Vám svaly spíš ubírá, než aby pomáhalo.' },
   { t: () => `Co se týče tempa: realistický odhad je <span class="hl">2 až 3 kg za měsíc</span>. První měsíc to obvykle bývá víc, pak se to zpomalí. To je normální a není to známka toho, že by něco přestalo fungovat.`,
     card: () => `<div class="plan">
-      <div class="kv"><span>Očekávané tempo</span><b>2–4 kg / měsíc</b></div>
+      <div class="kv"><span>Očekávané tempo</span><b>2–3 kg / měsíc</b></div>
       <div class="kv"><span>Váš cílový úbytek</span><b>≈ ${D.lose} kg</b></div>
       <div class="kv"><span>Odhadovaná délka</span><b>${D.months} ${mesice(D.months)}</b></div>
     </div>` },
@@ -803,8 +826,9 @@ const FAQ = {
     + 'dostatkem bílkovin a silovým tréninkem alespoň každý druhý den. ' + protokolVeta()
     + ' Složení těla sledujeme, abychom o tom nemuseli jen spekulovat.',
   quit: 'Ano. Program nemá žádnou vázanost, lze ho zkrátit i prodloužit bez pokuty nebo doplácení. Jen bych Vám doporučil to vždycky probrat s lékařem, ať se ukončení udělá rozumně a ne ze dne na den.',
-  insurance: () => 'Ne, tahle terapie není hrazená z veřejného zdravotního pojištění. Program i vstupní screening '
-    + 'si hradíte sám' + ova() + '. ' + (S.variant && S.variant.drugIncluded
+  insurance: () => 'Ne. Aeternum Clinic je privátní klinika a nemá smlouvu s žádnou zdravotní pojišťovnou, '
+    + 'takže se nedá nechat proplatit ani zpětně. Vstupní screening i program '
+    + 'si hradíte sám' + ova() + ', v režimu samoplátce. ' + (S.variant && S.variant.drugIncluded
       ? 'U Vámi vybraného programu je léčivo v ceně, takže v lékárně už nic nedoplácíte.'
       : 'U programů na dálku navíc není v ceně ani léčivo — to si kupujete na náš e‑recept v lékárně, v režimu samoplátce. '
         + 'Říkám to radši dopředu, ať víte, co Vás to celé bude stát.'),
@@ -1212,7 +1236,7 @@ function payCard(r, lidsky) {
 }
 
 /* ---------- běh scénáře ---------- */
-const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug',
+const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug', pmos: 'drug',
   form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
   care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
   book: 'book', bookLater: 'book', bookForm: 'book', bookLab: 'book',
@@ -1321,7 +1345,9 @@ document.addEventListener('click', async e => {
     return;
   }
   if (c.faq) { await answerFaq(c.faq); return; }
-  if (c.go) play(c.go);
+  /* Vetsina prechodu je pevna, par z nich se ohyba podle klienta (PMOS).
+     Proto `go` smi byt i funkce, ktera vrati jmeno kapitole.          */
+  if (c.go) play(typeof c.go === 'function' ? c.go() : c.go);
 });
 
 /* Většina odpovědí je prostý text, dvě se ohýbají podle pohlaví a jsou
