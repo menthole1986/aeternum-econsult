@@ -708,7 +708,7 @@ screening: [
   /* Sami ji děláme jenom v ordinaci, takže kdo jde na vyšetření online, si
      ji musí zařídit sám a dopředu — proto o ní mluvíme tady, ne až na
      vyšetření. */
-  { t: 'A ještě jedno doporučení, které není podmínka. Jestli si k vyšetření stihnete zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
+  { t: 'A ještě jedna věc, kterou Vám <b>vřele doporučuju</b>, i když povinná není. Jestli si k vyšetření stihnete zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
   { t: 'Dělají ji například fitness centra, nebo i některé polikliniky; sami ji zatím provádíme jenom osobně v ordinaci.' },
   { chips: [{ label: 'Rozumím', go: 'faq' }] }
 ],
@@ -739,7 +739,7 @@ included: [
     card: () => `<div class="plan">
       <div class="kv"><span>Žádanka na odběr krve</span><b>e‑mailem hned teď</b></div>
       <div class="kv"><span>Odběr a rozbor v laboratoři Synlab</span><b>v ceně</b></div>
-      <div class="kv"><span>Lékařské vyšetření</span><b>30 minut</b></div>
+      <div class="kv"><span>Lékařské vyšetření</span><b>${D.examMinutes || 45} minut</b></div>
       <div class="kv"><span>Vyhodnocení výsledků lékařem</span><b>v ceně</b></div>
       <div class="kv"><span>Doklad o platbě</span><b>e‑mailem</b></div>
     </div>` },
@@ -1738,6 +1738,21 @@ function dataError(msg) {
    Poslat ho zpátky k pokladně s tím, ať si koupí další konzultaci, je
    nepochopení situace: on chtěl k lékaři. Proto je hlavní tlačítko
    rezervace vyšetření a další konzultace až jako vedlejší nabídka. */
+/* Konzultace je vypnutá (ADVISOR_OFF ve vlastnostech skriptu). Může se to
+   stát i někomu, kdo ji má zaplacenou, takže mu musíme nabídnout cestu dál,
+   ne ho nechat na prázdné stránce. Peníze neřešíme textem — ozve se klinice. */
+function offPanel() {
+  $('#way').style.display = 'none';
+  $('#askbox').style.display = 'none';
+  const id = encodeURIComponent(S.id || '');
+  bubble('Omlouvám se, konzultace se mnou je teď dočasně vypnutá — něco na ní ladíme.');
+  bubble('Nemusíte kvůli tomu čekat. Vstupní konzultaci s Vámi projde i <b>živý koordinátor péče</b>, ' +
+    'a jestli už máte jasno, můžete rovnou na <b>vstupní screening</b>.' +
+    `<a class="pay" href="${esc(CFG.bookingUrl + '/?id=' + id)}">Vybrat termín konzultace</a>` +
+    `<div class="paynote">Jestli jste si konzultaci se mnou zaplatil${ova()}, ozvěte se na ` +
+    `${esc(CFG.email)} nebo na ${esc(CFG.phone)} — domluvíme se.</div>`, { cls: 'stop' });
+}
+
 function lockedPanel(expired) {
   $('#way').style.display = 'none';
   $('#askbox').style.display = 'none';
@@ -1779,6 +1794,7 @@ async function boot() {
     try { D = await api('econsult', { id: S.id }); }
     catch (e) {
       t.remove();
+      if (e.code === 'advisor_off') { offPanel(); return; }
       if (e.code === 'advisor_locked' || e.code === 'advisor_expired') {
         lockedPanel(e.code === 'advisor_expired');
         return;
