@@ -693,10 +693,11 @@ screening: [
     dal: 'Dobře, rozumím, můžeme dál' },
   { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
   { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
-  /* Měření si musí klient zařídit sám a dopředu, takže se o něm musí
-     dozvědět tady, ne až na vyšetření. Sami ho neprovádíme. */
+  /* Sami ji děláme jenom v ordinaci, takže kdo jde na vyšetření online, si
+     ji musí zařídit sám a dopředu — proto o ní mluvíme tady, ne až na
+     vyšetření. */
   { t: 'A ještě jedno doporučení, které není podmínka. Jestli si k vyšetření stihnete zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
-  { t: 'Dělají ji fitness centra, výživové poradny i některé polikliniky; sami ji zatím neprovádíme. Výsledek stačí přinést s sebou nebo nám ho poslat e-mailem.' },
+  { t: 'Dělají ji například fitness centra, nebo i některé polikliniky; sami ji zatím provádíme jenom osobně v ordinaci.' },
   { chips: [{ label: 'Rozumím', go: 'faq' }] }
 ],
 
@@ -1219,7 +1220,8 @@ async function renderSlots(expand) {
       'na <b>odběr krve</b> si musíte osobně zajít na odběrové místo a výsledky ' +
       'bývají obvykle <b>do 48 hodin</b>. Lékař je má mít před sebou už na vyšetření, ' +
       'takže doporučuju jít na odběr <b>alespoň 3–4 dny předem</b>. Žádanku Vám pošlu ' +
-      'e-mailem hned po platbě.');
+      'e-mailem hned po platbě — a kdybyste na odběr nestíhal' + ova() + ', vyberte si radši ' +
+      'pozdější termín vyšetření. Přijít později s výsledky je lepší než včas bez nich.');
   }
 
   const row = expand ? null : bubble('<div class="slots" id="slotbox"></div>');
@@ -1317,7 +1319,7 @@ async function pickSlot(isoUtc) {
   await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
     'Vám pošlu e-mailem hned po platbě. Na odběr si musíte osobně zajít na odběrové místo ' +
     'a výsledky bývají do 48 hodin, takže tam zajděte <b>alespoň 3–4 dny před vyšetřením</b> — ' +
-    'bez výsledků Vám lékař terapii neschválí.');
+    'bez výsledků Vám lékař terapii neschválí. Kdyby to nevycházelo, dejte vědět a termín posuneme.');
   await marcelSays('A až odběr absolvujete, otevřete si svoji rezervaci — odkaz na ni máte ' +
     'v potvrzovacím e-mailu — a klepnete tam na tlačítko <b>„Byl jsem na odběru“</b>. ' +
     'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
