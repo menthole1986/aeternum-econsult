@@ -266,6 +266,7 @@ html,body{background:var(--ground);color:var(--ink)}
   <header class="top">
     <a class="logo" href="https://www.aeternumclinic.cz" aria-label="Aeternum Clinic"><svg aria-hidden="true"><use href="#logoMark"/></svg>
       <div class="wm"><b>AETERNUM</b><span>CLINIC</span></div></a>
+    <button type="button" class="linkbtn" id="znovu" hidden>Začít znovu</button>
     <a class="linkbtn" href="https://www.aeternumclinic.cz">Zpátky na web ›</a>
   </header>
   <div class="way" id="way" aria-hidden="true"></div>
@@ -367,6 +368,15 @@ let D = null;                       // data z e‑screeningu
 let busy = false;
 
 function save() { try { sessionStorage.setItem(CFG.storageKey, JSON.stringify(S)); } catch (e) {} }
+
+/* Karta si rozhovor pamatuje, takže po reloadu naskočí tam, kde skončil —
+   i s replikami ze starší verze stránky. Při zkoušení to mate: vypadá to,
+   že oprava nenaběhla. Tlačítko je proto jen v ukázce; klientovi, který má
+   konzultaci zaplacenou, by smazalo rozhovor, za který zaplatil. */
+function zacitZnovu() {
+  try { sessionStorage.removeItem(CFG.storageKey); } catch (e) {}
+  location.reload();
+}
 function load() {
   try { const r = sessionStorage.getItem(CFG.storageKey); if (r) S = Object.assign(blank(), JSON.parse(r)); } catch (e) {}
   SLOTS.form = S.form || '';
@@ -1752,6 +1762,11 @@ function lockedPanel(expired) {
 async function boot() {
   load();
   if (URLP.get('id')) S.id = URLP.get('id');
+
+  if (DEMO_MODE) {
+    const b = $('#znovu');
+    if (b) { b.hidden = false; b.addEventListener('click', zacitZnovu); }
+  }
 
   if (DEMO_MODE || !S.id) { D = DEMO; }
   else {
