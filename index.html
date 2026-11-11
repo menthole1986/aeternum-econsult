@@ -587,9 +587,11 @@ expect: [
 plan: [
   { t: () => `Teď k penězům. Podle naší kalkulace a predikce nám vychází, že pro dosažení Vašeho cíle bude potřeba <b>délka programu ${D.months} ${mesice(D.months)}</b> — počítejte radši s rezervou dvou měsíců navíc na individuální odezvu a na udržovací fázi.` },
   { t: 'Programy se neliší délkou, ale tím, co je v nich. <b>Cena programu za měsíc je neměnná a platí po celou dobu terapie.</b> Všechny programy jsou plně flexibilní — program lze kdykoli ukončit i prodloužit, bez poplatku.' },
-  { vars: true },
   { t: () => `Pro představu: abyste se dostal${ova()} do pásma normálního BMI, tedy někam k hodnotě ${String(CFG.healthyBmi).replace('.', ',')}, je to <b>${bmiTarget()} kg</b>. Nemusí to být Váš cíl — jen ať víte, kde to pásmo začíná.` },
-  { chips: [{ label: 'Jak se to platí?', go: 'price' }] }
+  /* `vars` musí být poslední beat kapitoly: `play` u něj skončí a další
+     repliky by se nikdy nepřehrály. Kam se jde dál, rozhoduje nabídka,
+     kterou nastaví `renderVariants` — ne beat pod tímhle řádkem. */
+  { vars: true }
 ],
 
 /* 11 · Měsíční fakturace */
@@ -1087,7 +1089,10 @@ async function renderVariants() {
       key: v.key, drugIncluded: !!v.drugIncluded }; save();
     buzz(12);
     logLine('klient', 'Vybral variantu ' + v.name + ' · ' + v.months + ' měsíců · ' + v.price + ' Kč/měs.');
-    setChips([{ label: 'Pokračovat s variantou ' + v.name, go: 'benefits', primary: true }]);
+    /* Na `price` — kapitola o měsíční platbě kartou. Dřív se odsud skákalo
+       rovnou na `benefits` a celý výklad o tom, jak se platí a že jde
+       platbu kdykoli zrušit, klient nikdy neviděl. */
+    setChips([{ label: 'Pokračovat s variantou ' + v.name, go: 'price', primary: true }]);
   });
   setChips([]);
 }
