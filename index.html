@@ -693,6 +693,10 @@ screening: [
     dal: 'Dobře, rozumím, můžeme dál' },
   { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
   { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
+  /* Měření si musí klient zařídit sám a dopředu, takže se o něm musí
+     dozvědět tady, ne až na vyšetření. Sami ho neprovádíme. */
+  { t: 'A ještě jedno doporučení, které není podmínka. Jestli si k vyšetření stihnete zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
+  { t: 'Dělají ji fitness centra, výživové poradny i některé polikliniky; sami ji zatím neprovádíme. Výsledek stačí přinést s sebou nebo nám ho poslat e-mailem.' },
   { chips: [{ label: 'Rozumím', go: 'faq' }] }
 ],
 
@@ -1212,9 +1216,9 @@ async function renderSlots(expand) {
 
   if (!expand) {
     await marcelSays('Tady jsou volné termíny. Záměrně nezačínám hned zítra: ' +
-      'do vyšetření musíte stihnout <b>odběr krve</b> a laboratoři trvá obvykle ' +
-      '<b>48 hodin</b>, než nám pošle výsledky. Lékař je má mít před sebou už ' +
-      'na vyšetření, takže se vyplatí jít na odběr s rezervou. Žádanku Vám pošlu ' +
+      'na <b>odběr krve</b> si musíte osobně zajít na odběrové místo a výsledky ' +
+      'bývají obvykle <b>do 48 hodin</b>. Lékař je má mít před sebou už na vyšetření, ' +
+      'takže doporučuju jít na odběr <b>alespoň 3–4 dny předem</b>. Žádanku Vám pošlu ' +
       'e-mailem hned po platbě.');
   }
 
@@ -1311,8 +1315,9 @@ async function pickSlot(isoUtc) {
 
   await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
   await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
-    'Vám pošlu e-mailem hned po platbě. Na odběr zajděte <b>s rezervou</b> — laboratoři trvá ' +
-    'zhruba <b>48 hodin</b>, než nám pošle výsledky, a bez nich Vám lékař terapii neschválí.');
+    'Vám pošlu e-mailem hned po platbě. Na odběr si musíte osobně zajít na odběrové místo ' +
+    'a výsledky bývají do 48 hodin, takže tam zajděte <b>alespoň 3–4 dny před vyšetřením</b> — ' +
+    'bez výsledků Vám lékař terapii neschválí.');
   await marcelSays('A až odběr absolvujete, otevřete si svoji rezervaci — odkaz na ni máte ' +
     'v potvrzovacím e-mailu — a klepnete tam na tlačítko <b>„Byl jsem na odběru“</b>. ' +
     'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
