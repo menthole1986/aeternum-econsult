@@ -188,10 +188,26 @@ p{margin:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media (max-width:760px){
-  .bub{max-width:86%}
+  .bub{max-width:88%}
   .chips{justify-content:stretch}
   .chip{flex:1 1 100%;text-align:center}
   .cards{grid-template-columns:1fr}
+
+  /* Rozhovor začínal nahoře a pod první bublinou zbývala půlka obrazovky
+     prázdná. `margin-top:auto` na první řádek ho stlačí dolů k poli na
+     dotaz — když je zpráv moc, pravidlo se samo přestane projevovat.    */
+  .inner{min-height:100%}
+  .inner > :first-child{margin-top:auto}
+
+  /* víc vzduchu mezi replikami a uvnitř bubliny */
+  .inner{gap:14px}
+  .bub{line-height:1.66}
+  .talk{padding-top:18px}
+
+  /* karty a čísla v bublině drží střed — je to výpis, ne odstavec */
+  .card b{display:block;text-align:center}
+  .plan{padding:16px}
+  .vars{gap:12px}
 }
 
 /* ---------- Světlý vzhled ----------------------------------------------
