@@ -280,7 +280,11 @@ const CFG = {
   // kdyby odpověď nedorazila. Prázdno = odkaz se nikde neukáže.
   termsUrl: 'https://www.aeternumclinic.cz/_files/ugd/58be90_9f9915d451c54eb09770f75488dd0a31.pdf',
   validHours: 72,                               // jak dlouho po zaplacení se sem dá vracet
-  healthyBmi: 21.7,
+  /* Horní hranice normálního BMI. Stejné číslo, na které počítá délku
+     programu screening (clinicalTarget) i kalkulačka GLP-1 — dřív tu bylo
+     21,7 a Marcel klientovi říkal o šest kilo ambicióznější cíl, než na
+     jaký systém plánoval. */
+  healthyBmi: 24,
   phone: '+420 775 481 700',
   email: 'info@aeternumclinic.cz',
   storageKey: 'aeternum-econsult-v1'
@@ -507,7 +511,7 @@ expect: [
   { t: 'Teď k tomu, co Vám můžu a nemůžu slíbit.' },
   { t: 'Úbytek <b>nelze garantovat</b> a nikdo odpovědný Vám ho garantovat nebude. Musíte tomu jít naproti režimem — a myslím tím hlavně změnu návyků a dostatek pohybu.' },
   { t: 'Konkrétně: <b>silový trénink alespoň každý druhý den.</b> Může to být posilovna, může to být cvičení s vlastní váhou doma, na tom nezáleží. Důležité je, že silový trénink drží svalovou hmotu. A zapomeňte na dlouhé kardio a vyběhané hodiny — ve velkém kalorickém deficitu Vám svaly spíš ubírá, než aby pomáhalo.' },
-  { t: () => `Co se týče tempa: realistický odhad je <span class="hl">2 až 4 kg za měsíc</span>. První měsíc to obvykle bývá víc, pak se to zpomalí. To je normální a není to známka toho, že by něco přestalo fungovat.`,
+  { t: () => `Co se týče tempa: realistický odhad je <span class="hl">2 až 3 kg za měsíc</span>. První měsíc to obvykle bývá víc, pak se to zpomalí. To je normální a není to známka toho, že by něco přestalo fungovat.`,
     card: () => `<div class="plan">
       <div class="kv"><span>Očekávané tempo</span><b>2–4 kg / měsíc</b></div>
       <div class="kv"><span>Váš cílový úbytek</span><b>≈ ${D.lose} kg</b></div>
@@ -541,16 +545,7 @@ price: [
 /* 12 · Benefity programu */
 benefits: [
   { t: 'V ceně programu máte tohle:',
-    card: () => `<div class="cards">
-      <div class="card"><b>Lékařský dohled</b><span>Pravidelné kontroly, úprava protokolu, monitoring parametrů.</span></div>
-      <div class="card"><b>Pravidelné krevní testy</b><span>Sledování metabolických parametrů a reakce organismu po celou dobu programu.</span></div>
-      ${S.variant && S.variant.drugIncluded
-        ? '<div class="card"><b>Léky v ceně programu</b><span>All‑inclusive — vše zahrnuto, bez skrytých poplatků a bez doplácení za lék.</span></div>'
-        : '<div class="card"><b>Léčivo na e‑recept</b><span>Lék si vyzvednete v kterékoli lékárně na náš e‑recept a platíte ho tam sám. Cenu balení znáte dopředu.</span></div>'}
-      <div class="card"><b>Tým po celou dobu</b><span>Program manager, výživový specialista a fitness trenér. Nejste na to sám${ova()} ani mezi kontrolami.</span></div>
-      <div class="card"><b>Flexibilní program</b><span>Bez vázanosti a bez storno poplatku. Program lze zkrátit nebo prodloužit podle toho, jak se váha vyvíjí.</span></div>
-      <div class="card"><b>Aeternum Longevity Protokol</b><span>Individuální nutriční, suplementační, tréninkový a regenerační plán sestavený z Vašeho dotazníku, krevních testů a lékařské konzultace.</span></div>
-    </div>` },
+    card: () => planCards() },
   { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b>. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Stejně tak ho jde zkrátit nebo prodloužit podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
   { chips: [{ label: 'Jak to probíhá dál?', go: 'care' }] }
 ],
@@ -566,7 +561,7 @@ care: [
   /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
      proto, aby to člověka z druhého konce republiky neodradilo hned na
      začátku; datum ani otevření slibovat nesmíme. */
-  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme ordinace v Brně a v Olomouci</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.',
+  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme ordinace v Brně, v Olomouci a ve Zlíně</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.',
     dal: 'To mi dává smysl' },
   { t: 'Abychom to uměli, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
   { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
@@ -577,17 +572,34 @@ care: [
 
 /* 14 · Výdej léčiva */
 pharmacy: [
+  /* Dva různé modely. U telemedicíny jede e-recept: léčivo není v ceně,
+     klient si ho kupuje sám v jakékoli lékárně. Dřív tu měli všichni
+     popsané vyzvednutí v BENU na Bulovce — pro klienta z druhého konce
+     republiky nesmysl a navíc v rozporu s kartou o kus výš. */
   { t: 'Poslední praktická věc — jak se k léku dostanete.' },
-  { t: 'Léčivo se vydává na <b>měsíční bázi</b>, a to přímo v <b>lékárně BENU na Bulovce</b>, v ulici Chlumčanského v Praze 8.' },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'U Vašeho programu je léčivo v ceně. Objednáme ho za Vás a vyzvednete si ho v <b>lékárně BENU na Bulovce</b>, v ulici Chlumčanského v Praze 8. V lékárně už nic neplatíte.'
+      : 'Léčivo si u programů na dálku <b>kupujete sám' + ova() + '</b>, v režimu samoplátce. My Vám na něj vystavíme <b>e-recept</b> — a ten platí v kterékoli lékárně v České republice.' },
   { t: 'Postup je každý měsíc stejný:',
-    card: () => `<div class="plan">
-      <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
-      <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
-      <div class="kv"><span>3. Objednáme léčivo</span><b>my, za Vás</b></div>
-      <div class="kv"><span>4. Vyzvednutí</span><b>lékárna BENU Chlumčanského</b></div>
-    </div>` },
-  { t: 'Lék na Vás v lékárně počká, nemusíte nikam volat ani nic řešit — stačí přijít a říct jméno.' },
-  { t: 'A až se terapie ustálí a budeme vědět, že Vám dávka sedí, dá se to zjednodušit: <b>objednáme víc balení najednou</b> a platba proběhne na několik měsíců dopředu. Odpadne tím chození do lékárny každý měsíc.' },
+    card: () => S.variant && S.variant.drugIncluded
+      ? `<div class="plan">
+          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
+          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>3. Objednáme léčivo</span><b>my, za Vás</b></div>
+          <div class="kv"><span>4. Vyzvednutí</span><b>lékárna BENU Chlumčanského</b></div>
+        </div>`
+      : `<div class="plan">
+          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
+          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>3. Vystavíme e‑recept</span><b>my, za Vás</b></div>
+          <div class="kv"><span>4. Vyzvednutí a úhrada</span><b>kterákoli lékárna</b></div>
+        </div>` },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'Lék na Vás v lékárně počká, nemusíte nikam volat ani nic řešit — stačí přijít a říct jméno.'
+      : 'V lékárně stačí říct, že máte e-recept, a ukázat průkaz pojištěnce nebo občanku. Nic tisknout nemusíte, recept je v centrálním úložišti. Cena balení se liší podle dávky a platíte ji tam.' },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'A až se terapie ustálí a budeme vědět, že Vám dávka sedí, dá se to zjednodušit: <b>objednáme víc balení najednou</b>. Odpadne tím chození do lékárny každý měsíc.'
+      : 'Až se terapie ustálí a dávka Vám bude sedět, můžeme e-recept vystavit na víc balení najednou. Odpadne tím cesta do lékárny každý měsíc.' },
   { chips: [{ label: 'Rozumím, co je třeba udělat teď?', go: 'screening' }] }
 ],
 
@@ -721,6 +733,64 @@ blocked: [
 };
 
 /* ---------- odpovědi na časté dotazy ---------- */
+/* Tréninkový plán a jídelníček jsou od Standardu výš. Light je nemá a slíbit
+   mu je by znamenalo, že si klient zaplatí a pak zjistí, že nic nepřijde.
+   Dokud si program nevybral, mluvíme o tom v podmínce. */
+function protokolVeta() {
+  const k = S.variant && S.variant.key;
+  if (k === 'praha') return 'Konkrétní jídelníček i suplementaci dostanete v <b>Aeternum Longevity Protokolu</b>, který je součástí Vašeho programu.';
+  if (k === 'light') return 'Konkrétní jídelníček a tréninkový plán jsou součástí programů Standard a Premium — v Lightu nejsou. '
+    + 'Doporučení Vám ale dá lékař i koordinátor péče a kdykoli se dá přejít výš.';
+  if (k === 'standard' || k === 'premium') return 'Konkrétní jídelníček, suplementaci i tréninkový plán dostanete v '
+    + '<b>Aeternum Lifestyle Protocolu</b>, který je součástí Vašeho programu.';
+  return 'Konkrétní jídelníček, suplementaci i tréninkový plán dostanete v <b>Aeternum Lifestyle Protocolu</b> — ten je '
+    + 'součástí programů Standard a Premium. Light ho nemá, tam zůstává lékařský dohled a podpora koordinátora.';
+}
+
+/* Co je v ceně — podle vybraného programu, ne paušálně. Dřív karta slibovala
+   všem Longevity Protokol a tým s trenérem a výživovým specialistou; to má
+   ve skutečnosti jen Praha a Premium. Zrcadlí nabídku na www.aeternumclinic.cz. */
+const SPOLECNE = [
+  ['Lékařský dohled a e-recepty', 'Pravidelné kontroly, úprava dávkování a e-recept na každý měsíc.'],
+  ['Průběžný screening zdravotního stavu', 'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'],
+  ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
+  ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
+];
+const PLAN_KARTY = {
+  light: SPOLECNE,
+  standard: SPOLECNE.slice(0, 2).concat([
+    ['Aeternum Lifestyle Protocol', 'Jídelníček, suplementace a tréninkový plán sestavený z Vašeho dotazníku a krevních testů.'],
+    ['Tréninkový plán od fitness trenéra', 'Postavený na tom, co opravdu zvládnete dělat.'],
+    ['Jídelníček a doporučení doplňků stravy', 'Konkrétní, ne obecné rady.']
+  ], SPOLECNE.slice(2)),
+  premium: [
+    ['Všechno ze Standardu', 'Lékařský dohled, screening, Lifestyle Protocol, jídelníček i tréninkový plán.'],
+    ['Prioritní konzultace bez čekání', 'Když něco potřebujete, jdete na řadu první.'],
+    ['Pokročilý Aeternum Lifestyle Protocol', 'Cílený i na metabolické zdraví a dlouhověkost.'],
+    ['Konzultace s fitness trenérem', 'Jednou měsíčně, plus tréninkový plán s detailním rozpisem.'],
+    ['Konzultace s výživovým specialistou', 'Jednou měsíčně, jídelníček na míru a přesný plán suplementace.'],
+    ['Konzultace s psychologem', 'Jednou za tři měsíce.'],
+    ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
+  ],
+  praha: [
+    ['Medikace v ceně programu', 'All-inclusive — v lékárně už nic nedoplácíte.'],
+    ['Lékařský dohled a pravidelné kontroly', 'Osobní i online konzultace na klinice v Praze.'],
+    ['Prioritní konzultace bez čekání', 'Když něco potřebujete, jdete na řadu první.'],
+    ['Pokročilý Aeternum Lifestyle Protocol', 'Individuální nutriční, suplementační a tréninkový plán.'],
+    ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
+  ]
+};
+function planCards() {
+  const k = (S.variant && S.variant.key) || 'standard';
+  const radky = PLAN_KARTY[k] || PLAN_KARTY.standard;
+  const lek = S.variant && S.variant.drugIncluded ? '' :
+    '<div class="card"><b>Léčivo není v ceně</b><span>Kupujete si ho sám' + ova() +
+    ' na náš e-recept, v kterékoli lékárně a v režimu samoplátce. Cenu balení znáte dopředu.</span></div>';
+  return '<div class="cards">' +
+    radky.map(r => '<div class="card"><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') +
+    lek + '</div>';
+}
+
 const FAQ = {
   side: () => `Nejčastěji jde o zažívací potíže v prvních týdnech — pocit plnosti, nevolnost, občas zácpa nebo naopak. U většiny lidí to odezní, jak si tělo zvykne, a dá se tomu předcházet menšími porcemi a tím, že nebudete jíst do přeplnění. Právě proto začínáme na nejnižší dávce a zvyšujeme ji pomalu. Vážnější reakce jsou vzácné a vstupní screening děláme mimo jiné proto, abychom je uměli vyloučit předem. Po celou dobu jste pod dohledem lékaře, takže na to nejste ${sam()}.`,
   yoyo: 'Budu upřímný: když se váha shodí rychle a drasticky, riziko návratu je vysoké — a to platí u jakékoli metody, nejen u GLP‑1. Proto u nás jedeme změnu dlouhodobou místo rychlé. Program počítá s udržovací fází a s tím, že si za tu dobu přenastavíte návyky kolem jídla, pohybu a spánku. Cílem není číslo na váze za tři měsíce, ale to, aby Vám výsledek zůstal.',
@@ -729,10 +799,17 @@ const FAQ = {
   needle: 'Podává se podkožní injekcí jednou týdně, perem s velmi tenkou jehlou — do břicha, stehna nebo paže. Jehla je kratší a tenčí než při odběru krve a většina lidí popisuje, že to prakticky necítí. Pero je navržené tak, aby to zvládl kdokoli: jehlu ani nevidíte, přiložíte a zmáčknete. Aplikaci si uděláte doma a při zahájení programu Vám ji ukážeme a projdeme s Vámi, dokud si nebudete jistí.',
   miss: 'Nic dramatického se neděje. Postupuje se podle pravidel z příbalové informace a záleží na tom, kolik dní uplynulo — v žádném případě se nedávkuje dvojitě. Kdyby to nastalo, napište nám a poradíme Vám.',
   cravings: () => `To je přesně ta situace, kdy chceme vědět. Když se chutě vrátí nebo se váha zastaví na víc než 28 dní, dáte nám vědět a lékař rozhodne o úpravě dávkování na další měsíc. Neřešte to ${sam()} zvyšováním dávky.`,
-  muscle: 'Při hubnutí tělo bere i ze svalů, to platí vždycky. Dá se to z velké části zvrátit dvěma věcmi: dostatkem bílkovin a silovým tréninkem alespoň každý druhý den. Obojí je součástí protokolu, který od nás dostanete, a složení těla sledujeme, abychom o tom nemuseli jen spekulovat.',
+  muscle: () => 'Při hubnutí tělo bere i ze svalů, to platí vždycky. Dá se to z velké části zvrátit dvěma věcmi: '
+    + 'dostatkem bílkovin a silovým tréninkem alespoň každý druhý den. ' + protokolVeta()
+    + ' Složení těla sledujeme, abychom o tom nemuseli jen spekulovat.',
   quit: 'Ano. Program nemá žádnou vázanost, lze ho zkrátit i prodloužit bez pokuty nebo doplácení. Jen bych Vám doporučil to vždycky probrat s lékařem, ať se ukončení udělá rozumně a ne ze dne na den.',
-  insurance: 'Ne, tahle terapie není hrazená z veřejného zdravotního pojištění. Program i vstupní screening si klient hradí sám. Proto je u nás cena programu all‑inclusive, ať víte dopředu, co Vás to celé bude stát.',
-  diet: 'Nemusíte držet žádnou dietu a nebudu Vám dávat jídelníček, který se nedá dodržet. Lék sám sníží chuť k jídlu — to podstatné je využít to a jíst dost bílkovin, aby se neubíralo svalstvo. Doporučení dostanete v Aeternum Longevity protokolu po zahájení programu.',
+  insurance: () => 'Ne, tahle terapie není hrazená z veřejného zdravotního pojištění. Program i vstupní screening '
+    + 'si hradíte sám' + ova() + '. ' + (S.variant && S.variant.drugIncluded
+      ? 'U Vámi vybraného programu je léčivo v ceně, takže v lékárně už nic nedoplácíte.'
+      : 'U programů na dálku navíc není v ceně ani léčivo — to si kupujete na náš e‑recept v lékárně, v režimu samoplátce. '
+        + 'Říkám to radši dopředu, ať víte, co Vás to celé bude stát.'),
+  diet: () => 'Nemusíte držet žádnou dietu a nebudu Vám dávat jídelníček, který se nedá dodržet. Lék sám sníží '
+    + 'chuť k jídlu — to podstatné je využít to a jíst dost bílkovin, aby se neubíralo svalstvo. ' + protokolVeta(),
   nowork: 'Stává se to u menší části lidí. Proto jsou v programu pravidelné kontroly — když se po několika týdnech nic neděje, lékař upraví dávku nebo zváží změnu preparátu. Nikdo Vás nenechá půl roku na něčem, co nefunguje.'
 };
 
