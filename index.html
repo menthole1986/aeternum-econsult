@@ -1228,7 +1228,7 @@ async function renderSlots(expand) {
     el.dataset.iso = d.toISOString();
     el.innerHTML = '<span><span class="sd">' + slotDay(d) + ' ' + slotDate(d) +
       '</span><span class="sw">' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') +
-      ' · ' + (D.examMinutes || 30) + ' minut</span></span>' +
+      ' · ' + (D.examMinutes || 45) + ' minut</span></span>' +
       '<span class="st">' + slotTime(d) + '</span>';
     host.appendChild(el);
     buzz(6); scroll();
