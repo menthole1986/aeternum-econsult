@@ -646,7 +646,7 @@ life: [
     } },
   { ask: 'limits', placeholder: 'Nic / bolesti zad, kolena…' },
   { t: () => `Díky. A co už máte za sebou — co jste na hubnutí zkoušel${ova()} a jak to dopadlo? Diety, cvičení, i léky, pokud nějaké byly.` },
-  { ask: 'pastAttempts', placeholder: 'Co jste zkoušel(a) a jak to dopadlo' },
+  { ask: 'pastAttempts', placeholder: () => `Co jste zkoušel${ova()} a jak to dopadlo` },
   { t: 'Výborně, tohle mi dává obrázek. Teď tři rychlé — stačí klepnout.' },
   { t: 'Jak to máte s alkoholem?' },
   { chips: [
@@ -807,7 +807,7 @@ care: [
      proto, aby to člověka z druhého konce republiky neodradilo hned na
      začátku; datum ani otevření ordinace slibovat nesmíme, proto „možnost
      vyšetření". Města zazní jen tady, o kus výš se o nich mlčí. */
-  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme možnost vyšetření v Brně, v Olomouci a ve Zlíně</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.',
+  { t: () => `A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme možnost vyšetření v Brně, v Olomouci a ve Zlíně</b>, abyste za tou jednou návštěvou nemusel${ova()} přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.`,
     dal: 'To mi dává smysl' },
   { t: 'Abychom to uměli, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
   { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
@@ -1640,7 +1640,10 @@ let pending = null;
 function askMode(beat) {
   pending = beat;
   const ta = $('#ask');
-  ta.placeholder = beat.placeholder || 'Napište mi to…';
+  /* Může být i funkce. Pevný řetězec by se vyhodnotil při načtení skriptu,
+     kdy ještě nevíme, jestli mluvíme s mužem nebo se ženou. */
+  ta.placeholder = (typeof beat.placeholder === 'function'
+    ? beat.placeholder() : beat.placeholder) || 'Napište mi to…';
   ta.focus();
   // Na mobilu vyjede klávesnice a ukrojí půl obrazovky. Totéž co u nabídky.
   requestAnimationFrame(scroll);
