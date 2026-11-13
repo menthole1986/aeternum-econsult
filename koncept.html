@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vstupní konzultace · Marcel AI · Aeternum Clinic</title>
+<meta name="theme-color" content="#19191B">
+<meta name="robots" content="noindex">
+<meta name="description" content="Vstupní e-konzultace Aeternum Clinic. Projdeme spolu, jak terapie GLP-1 funguje, jaký program Vám vychází a co obnáší vstupní screening.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --ground:#19191B; --ink:#F4F4F6; --muted:rgba(244,244,246,.62); --dim:rgba(244,244,246,.40);
+  --line:rgba(255,255,255,.14); --line2:rgba(255,255,255,.24);
+  --grad:linear-gradient(90deg,#7A3E9E,#2F86CC);
+  --grad-135:linear-gradient(135deg,#7A3E9E,#2F86CC);
+  --grad-text:linear-gradient(90deg,#A27AD2,#4FA3E0);
+  --good:#5ED3A0; --ok:#B5D333; --warn:#F2B45A; --crit:#EE7A6D;
+  --gut:clamp(18px,calc(5*var(--u)),calc(96px*var(--k)));
+  --u:min(1vw,1.7778vh); --k:1;
+  --font:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (min-width:2200px) and (min-height:1200px){:root{--k:1.35}}
+@media (min-width:3000px) and (min-height:1650px){:root{--k:2}}
+@media (max-width:760px){:root{--u:1vw}}
+html{-webkit-text-size-adjust:100%}
+body{touch-action:manipulation}
+html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font)}
+body{min-height:100dvh;line-height:1.5}
+
+/* ── KONCEPT: ordinace ──────────────────────────────────────────────────
+   Fotka skutečné ordinace leží pod celým rozhovorem. Je rozostřená a
+   ztmavená, aby nekradla pozornost textu — má jen navodit pocit, že si
+   klient sedl naproti konzultantovi, ne že vyplňuje formulář. */
+.ordinace{position:fixed;inset:0;z-index:0;background:url('ordinace.jpg') center/cover no-repeat;
+  filter:blur(3px) saturate(1.02);transform:scale(1.06)}
+.ordinace:after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 72% 76%,rgba(255,164,64,.28),transparent 50%),
+             linear-gradient(180deg,rgba(236,236,236,.46),rgba(236,236,236,.84) 72%)}
+
+/* Uvítací clona. Drží se přes celou obrazovku, dokud klient nevejde. */
+.vstup{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:radial-gradient(ellipse at 50% 45%,rgba(236,236,236,.88),rgba(236,236,236,.55));
+  opacity:1;transition:opacity .7s ease}
+.vstup.pryc{opacity:0;pointer-events:none}
+.vstupin{width:min(560px,100%);text-align:center}
+.avatar{width:clamp(120px,26vw,180px);height:clamp(120px,26vw,180px);border-radius:50%;
+  margin:0 auto clamp(18px,3vh,30px);overflow:hidden;position:relative;
+  border:1px solid var(--line2);background:var(--karta);
+  box-shadow:0 18px 50px rgba(20,20,20,.18)}
+.avatar video,.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar .cekam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);
+  text-align:center;padding:12px;line-height:1.5}
+.vstup h2{font-size:clamp(22px,4.4vw,32px);font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
+.vstup p{color:var(--muted);margin:0 auto;max-width:34em}
+.pit{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:clamp(20px,3.4vh,30px)}
+.pit button{border:1px solid var(--line2);background:var(--karta);color:var(--ink);
+  border-radius:999px;padding:11px 20px;font-size:14px;cursor:pointer;
+  transition:border-color .15s,background .15s}
+.pit button:hover{border-color:var(--g1);color:var(--g1)}
+.zvuk{position:fixed;right:16px;bottom:16px;z-index:41;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line2);background:var(--karta);color:var(--ink);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.zvuk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+@media (max-width:760px){ .ordinace{filter:blur(6px) saturate(.85)} }
+button,input,select,textarea{font:inherit;color:inherit}
+p{margin:0}
+:focus-visible{outline:2px solid #4FA3E0;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- pozadí ---------- */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--ground)}
+.glow{position:absolute;border-radius:50%;filter:blur(40px)}
+
+/* ---------- kostra ---------- */
+.app{position:relative;z-index:1;height:100dvh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:clamp(14px,calc(2*var(--u)),calc(34px*var(--k))) var(--gut) 0;flex:none}
+.logo{display:flex;align-items:center;gap:clamp(10px,calc(1*var(--u)),calc(18px*var(--k)));text-decoration:none;color:inherit}
+.logo svg{width:clamp(32px,calc(2.3*var(--u)),calc(46px*var(--k)));height:clamp(32px,calc(2.3*var(--u)),calc(46px*var(--k)));fill:none;stroke:#6B3A96;stroke-width:6.5;flex:none}
+.logo .wm{display:flex;flex-direction:column;gap:3px}
+.logo .wm b{font-size:clamp(15px,calc(1.1*var(--u)),calc(22px*var(--k)));font-weight:600;letter-spacing:.035em;line-height:1;background:linear-gradient(90deg,#6E3D9C,#2F7FC4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo .wm span{font-size:clamp(7px,calc(.5*var(--u)),calc(10px*var(--k)));letter-spacing:.44em;color:#6B4A9A;font-weight:500;line-height:1}
+.linkbtn{background:none;border:0;padding:0;cursor:pointer;color:var(--dim);font-size:clamp(10px,calc(.68*var(--u)),calc(13px*var(--k)));font-weight:600;letter-spacing:.2em;text-transform:uppercase;text-decoration:none}
+.linkbtn:hover{color:var(--ink)}
+
+/* ---------- postup ---------- */
+.prog{flex:none;padding:clamp(10px,calc(1.2*var(--u)),calc(22px*var(--k))) var(--gut) 0;display:flex;gap:6px;align-items:center}
+.prog i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.prog i.done{background:var(--grad)}
+.prog i.on::after{content:'';position:absolute;inset:0;background:var(--grad);transform-origin:left;animation:fill .5s ease forwards}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(.55)}}
+.progl{flex:none;padding:8px var(--gut) 0;font-size:clamp(9.5px,calc(.62*var(--u)),calc(12px*var(--k)));letter-spacing:.24em;text-transform:uppercase;color:var(--dim);font-weight:600}
+
+/* ---------- rozhovor ---------- */
+.talk{flex:1;overflow-y:auto;padding:clamp(14px,calc(1.8*var(--u)),calc(30px*var(--k))) var(--gut) 10px;scroll-behavior:smooth}
+.inner{max-width:calc(820px*var(--k));margin:0 auto;display:flex;flex-direction:column;gap:clamp(12px,calc(1.2*var(--u)),calc(20px*var(--k)))}
+.row{display:flex;gap:clamp(10px,calc(.9*var(--u)),calc(16px*var(--k)));align-items:flex-end;animation:pop .32s ease both}
+@keyframes pop{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}
+.row.me{flex-direction:row-reverse}
+.ava{width:clamp(34px,calc(2.5*var(--u)),calc(48px*var(--k)));height:clamp(34px,calc(2.5*var(--u)),calc(48px*var(--k)));border-radius:50%;object-fit:cover;flex:none;border:1.5px solid rgba(255,255,255,.18)}
+.ava.hide{visibility:hidden}
+.bub{max-width:min(78%,calc(600px*var(--k)));padding:clamp(12px,calc(1.05*var(--u)),calc(20px*var(--k))) clamp(15px,calc(1.3*var(--u)),calc(24px*var(--k)));border-radius:20px 20px 20px 6px;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:clamp(14px,calc(1.02*var(--u)),calc(18px*var(--k)));line-height:1.62;letter-spacing:.012em;word-break:keep-all;overflow-wrap:break-word}
+.row.me .bub{border-radius:20px 20px 6px 20px;background:var(--grad-135);border-color:transparent;color:#fff;font-weight:500}
+.bub b{font-weight:700}
+.bub .hl{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.bub ul{margin:8px 0 0;padding-left:18px}
+.bub li{margin-bottom:6px}
+.bub .note{display:block;margin-top:10px;font-size:.84em;color:var(--muted)}
+
+/* psaní */
+.typing{display:flex;gap:5px;padding:16px 20px}
+.typing span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.18s}
+.typing span:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+/* karty uvnitř rozhovoru */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px;margin-top:12px}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(122,62,158,.12),rgba(47,134,204,.08))}
+.card b{display:block;font-size:.95em;margin-bottom:5px}
+.card span{font-size:.84em;color:var(--muted);line-height:1.5}
+.plan{margin-top:12px;border:1px solid var(--line2);border-radius:16px;padding:16px 18px;background:rgba(255,255,255,.04)}
+.plan .pr{font-size:clamp(26px,calc(2.3*var(--u)),calc(44px*var(--k)));font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.plan .pm{font-size:.86em;color:var(--muted);margin-top:4px}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-top:1px solid var(--line);font-size:.9em}
+.kv:first-of-type{border-top:0}
+.kv span{color:var(--muted)}
+.kv b{font-weight:700;text-align:right}
+
+/* ---------- ovládání ---------- */
+.dock{flex:none;padding:0 var(--gut) clamp(14px,calc(1.8*var(--u)),calc(30px*var(--k)));background:linear-gradient(180deg,rgba(25,25,27,0),rgba(25,25,27,.92) 28%)}
+.dockin{max-width:calc(820px*var(--k));margin:0 auto}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-bottom:10px}
+.chip{border:1.5px solid var(--line2);background:rgba(25,25,27,.6);color:var(--ink);border-radius:999px;padding:10px 18px;font-size:clamp(12.5px,calc(.88*var(--u)),calc(15px*var(--k)));font-weight:500;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
+.chip:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.06)}
+.chip.go{background:var(--grad);border-color:transparent;color:#fff;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:clamp(11.5px,calc(.78*var(--u)),calc(14px*var(--k)));padding:12px 24px}
+.chip.go:hover{filter:brightness(1.12);background:var(--grad)}
+.chip.faq{font-size:clamp(12px,calc(.82*var(--u)),calc(14px*var(--k)));color:var(--muted)}
+.ask{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.04);padding:7px 7px 7px 16px}
+.ask textarea{flex:1;background:none;border:0;resize:none;outline:none;font-size:clamp(14px,calc(.98*var(--u)),calc(17px*var(--k)));line-height:1.5;max-height:120px;padding:9px 0}
+.ask textarea::placeholder{color:var(--dim)}
+.send{flex:none;width:clamp(42px,calc(2.9*var(--u)),calc(52px*var(--k)));height:clamp(42px,calc(2.9*var(--u)),calc(52px*var(--k)));border-radius:50%;border:0;background:var(--grad);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.send svg{width:46%;height:46%;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.send[disabled]{opacity:.35;cursor:default}
+.hint{margin-top:8px;font-size:clamp(10.5px,calc(.7*var(--u)),calc(13px*var(--k)));color:var(--dim);text-align:center}
+.hint a{color:var(--muted)}
+
+/* ---------- cesta 1-2-3 ---------- */
+.way{flex:none;padding:clamp(10px,calc(1.1*var(--u)),calc(20px*var(--k))) var(--gut) 0;display:flex;gap:clamp(8px,calc(.8*var(--u)),calc(16px*var(--k)));max-width:calc(820px*var(--k));margin:0 auto;width:100%}
+.way .st{flex:1;display:flex;gap:9px;align-items:flex-start;opacity:.34;transition:opacity .45s ease}
+.way .st.on,.way .st.done{opacity:1}
+.way .st i{flex:none;font-style:normal;font-weight:800;font-size:clamp(17px,calc(1.5*var(--u)),calc(28px*var(--k)));line-height:1;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.way .st .lb{min-width:0}
+.way .st b{display:block;font-size:clamp(11px,calc(.78*var(--u)),calc(14px*var(--k)));font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.way .st b .sm{display:none}
+@media (max-width:760px){.way .st b .lg{display:none}.way .st b .sm{display:inline}.way{gap:7px}}
+.way .st .bar{margin-top:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.way .st .bar u{display:block;height:100%;width:0;background:var(--grad);transition:width .6s cubic-bezier(.4,0,.2,1)}
+.way .st.done .bar u{width:100%}
+
+/* ---------- výběr varianty programu ---------- */
+.vars{display:grid;gap:10px;margin-top:14px}
+.var{text-align:left;width:100%;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;background:rgba(255,255,255,.04);cursor:pointer;transition:border-color .15s,background .15s,transform .15s;display:block;animation:pop .36s ease both}
+.var:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.07)}
+.var.sel{border-color:transparent;background:linear-gradient(135deg,rgba(122,62,158,.3),rgba(47,134,204,.22));box-shadow:0 0 0 1.5px rgba(162,122,210,.75)}
+.var .vh{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.var .vn{font-weight:700;font-size:1.02em}
+.var .vp{font-weight:700;font-size:clamp(17px,calc(1.45*var(--u)),calc(26px*var(--k)));white-space:nowrap;font-variant-numeric:tabular-nums}
+.var .vp em{font-style:normal;font-size:.6em;font-weight:600;color:var(--muted)}
+.var .vm{font-size:.84em;color:var(--muted);margin-top:2px}
+.var .vd{font-size:.83em;color:var(--muted);line-height:1.5;margin-top:8px}
+.var .vf{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.var .vf li{display:flex;align-items:flex-start;gap:8px;font-size:.82em;line-height:1.45;color:var(--muted)}
+.var .vf .fi{flex:none;font-size:1.05em;line-height:1.3}
+.var .vf li.ok .fi{color:#2E9E6B}
+.var .vf li.no .fi{color:#C8372A}
+.var .tag{display:inline-block;margin-left:8px;font-size:.62em;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--grad);color:#fff;vertical-align:middle}
+
+/* ---------- souhlasy ---------- */
+.cons{margin-top:12px;display:grid;gap:2px}
+.cons label{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;transition:background .15s}
+.cons label:hover{background:rgba(255,255,255,.04)}
+/* Řádek s textovým polem uvnitř souhlasů: popisek nad polem, ne vedle
+   zaškrtávátka — datum a rodné číslo se píšou, neodklikávají. */
+.cons label.lf{display:block;cursor:default}
+.cons label.lf:hover{background:none}
+.cons label.lf span{display:block;font-size:.78em;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.cons label.lf input{appearance:auto;width:100%;height:auto;padding:11px 12px;border:1.5px solid var(--line2);border-radius:12px;background:transparent;color:var(--ink);font:inherit;cursor:text}
+.cons label.lf input:focus{outline:none;border-color:var(--purple,#A27AD2)}
+.cons input{appearance:none;flex:none;width:21px;height:21px;margin:1px 0 0;border:1.5px solid var(--line2);border-radius:6px;cursor:pointer;position:relative;transition:background .15s,border-color .15s}
+.cons input:checked{background:var(--grad-135);border-color:transparent}
+.cons input:checked::after{content:'';position:absolute;left:6.5px;top:2.5px;width:5px;height:10px;border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}
+.cons span{font-size:.88em;line-height:1.55;color:var(--muted)}
+
+/* ---------- shrnutí na konec ---------- */
+/* ── Výběr termínu a platba ─────────────────────────────────────────────────
+   Tři čtvrtiny lidí sem chodí z telefonu, takže karta termínu je velký
+   terč přes celou šířku a datum je to první, co je na ní vidět. Žádné
+   dva sloupce — na úzké obrazovce se z nich dělá mlha. */
+.slots{display:grid;gap:10px;margin-top:14px}
+.slot{text-align:left;width:100%;min-height:62px;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;background:rgba(255,255,255,.04);cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:pop .36s ease both;color:inherit;font:inherit}
+.slot:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.07)}
+.slot.sel{border-color:transparent;background:linear-gradient(135deg,rgba(122,62,158,.3),rgba(47,134,204,.22));box-shadow:0 0 0 1.5px rgba(162,122,210,.75)}
+.slot .sd{font-weight:700;font-size:1.02em;line-height:1.25}
+.slot .sw{display:block;font-size:.8em;font-weight:500;color:var(--muted);margin-top:2px}
+.slot .st{font-weight:700;font-size:clamp(17px,calc(1.4*var(--u)),calc(24px*var(--k)));font-variant-numeric:tabular-nums;white-space:nowrap}
+.slot.more{display:block;text-align:center;min-height:52px;border-style:dashed;padding:12px 14px}
+.slot.more .sd{font-weight:600;font-size:.92em;color:var(--muted)}
+
+/* Platba je poslední krok a nesmí se v ní dát ztratit: jedno tlačítko přes
+   celou šířku, pod ním to, co klient potřebuje vědět, a nic jiného. */
+.pay{display:block;width:100%;margin-top:14px;border:0;border-radius:14px;padding:16px 20px;background:var(--grad);color:#fff;font:inherit;font-weight:700;font-size:clamp(15px,calc(1.1*var(--u)),calc(18px*var(--k)));cursor:pointer;text-align:center;text-decoration:none;transition:filter .15s}
+.pay:hover{filter:brightness(1.12)}
+.pay[aria-busy="true"]{opacity:.6;pointer-events:none}
+.paynote{margin-top:10px;font-size:.8em;color:var(--muted);line-height:1.55}
+.paynote b{color:var(--ink);font-weight:600}
+.sum{margin-top:12px;border:1px solid var(--line2);border-radius:18px;overflow:hidden;background:linear-gradient(135deg,rgba(122,62,158,.16),rgba(47,134,204,.1))}
+.sum .sh{padding:16px 18px 13px;border-bottom:1px solid var(--line)}
+.sum .se{font-size:.6em;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+.sum .sn{font-size:clamp(18px,calc(1.6*var(--u)),calc(30px*var(--k)));font-weight:700;margin-top:5px;line-height:1.2}
+.sum .sb{padding:12px 18px 16px}
+
+/* ---------- stop ---------- */
+.stop{border-left:3px solid var(--crit);padding-left:14px}
+.sp{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:760px){
+  .bub{max-width:88%}
+  .chips{justify-content:stretch}
+  .chip{flex:1 1 100%;text-align:center}
+  .cards{grid-template-columns:1fr}
+
+  /* Rozhovor začínal nahoře a pod první bublinou zbývala půlka obrazovky
+     prázdná. `margin-top:auto` na první řádek ho stlačí dolů k poli na
+     dotaz — když je zpráv moc, pravidlo se samo přestane projevovat.    */
+  .inner{min-height:100%}
+  .inner > :first-child{margin-top:auto}
+
+  /* víc vzduchu mezi replikami a uvnitř bubliny */
+  .inner{gap:14px}
+  .bub{line-height:1.66}
+  .talk{padding-top:18px}
+
+  /* karty a čísla v bublině drží střed — je to výpis, ne odstavec */
+  .card b{display:block;text-align:center}
+  .plan{padding:16px}
+  .vars{gap:12px}
+}
+
+/* ---------- Světlý vzhled ----------------------------------------------
+   Pozadí, černý text a limetkové tlačítko podle www.aeternumclinic.cz,
+   stejně jako na screeningu a v rezervaci. Blok je schválně až na konci
+   sešitu: přebíjí tmavé hodnoty výše, takže se dá celý smazat a stránka
+   se vrátí do původní tmavé podoby. */
+:root{
+  --ground:#ECECEC; --ink:#141414;
+  --muted:rgba(20,20,20,.68); --dim:rgba(20,20,20,.46);
+  --line:rgba(20,20,20,.12); --line2:rgba(20,20,20,.22);
+  --karta:rgba(255,255,255,.72);          /* plocha karet na světlém pozadí */
+  --karta-line:rgba(20,20,20,.1);
+}
+html,body{background:var(--ground);color:var(--ink)}
+.bg{background:var(--ground)}
+/* barevné záře byly kreslené na tmavé pozadí, na světlém dělají špínu */
+.glow{opacity:.1;filter:blur(70px)}
+
+/* bubliny: Marcelova bílá, klientova zůstává v gradientu s bílým textem */
+.bub{background:var(--karta);border-color:var(--karta-line)}
+.typing span{background:rgba(20,20,20,.42)}
+
+/* nabídky a karty */
+.chip{background:rgba(255,255,255,.6);border-color:rgba(20,20,20,.2)}
+.chip:hover{border-color:rgba(20,20,20,.5);background:rgba(255,255,255,.85)}
+.var,.slot,.plan{background:rgba(255,255,255,.6);border-color:rgba(20,20,20,.14)}
+.var:hover,.slot:hover{border-color:rgba(20,20,20,.45);background:rgba(255,255,255,.9)}
+.cons label:hover{background:rgba(255,255,255,.6)}
+
+/* ukazatele postupu */
+.prog i{background:rgba(20,20,20,.14)}
+.way .st .bar{background:rgba(20,20,20,.14)}
+
+/* pole na dotaz a lišta pod ním */
+.ask{background:rgba(255,255,255,.75);border-color:rgba(20,20,20,.16)}
+.ask textarea::placeholder{color:rgba(20,20,20,.38)}
+.dock{background:linear-gradient(180deg,rgba(236,236,236,0),rgba(236,236,236,.94) 28%)}
+
+/* čekací kolečko mělo bílý okraj, na světlém by zmizelo */
+.sp{border-color:rgba(20,20,20,.22);border-top-color:#141414}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logoMark" viewBox="0 0 120 120"><circle cx="45" cy="70" r="37"/><circle cx="70" cy="47" r="40"/></symbol>
+</svg>
+<div class="bg"><div class="glow" style="right:-14vw;top:-26vh;width:64vw;height:100vh;background:radial-gradient(closest-side,rgba(36,131,197,.26),rgba(122,62,158,.18) 60%,rgba(25,25,27,0))"></div></div>
+
+<!-- KONCEPT: fotka ordinace pod rozhovorem -->
+<div class="ordinace" aria-hidden="true"></div>
+
+<!-- KONCEPT: uvítací clona. Avatar, pozvání a otázka na pití. -->
+<div class="vstup" id="vstup">
+  <div class="vstupin">
+    <div class="avatar">
+      <video id="avatarVid" muted playsinline preload="metadata" poster="marcel-poster.jpg"></video>
+      <div class="cekam" id="avatarCekam">Zde bude<br>uvítání od Marcela</div>
+    </div>
+    <h2 id="vstupH">Pohodlně se usaďte</h2>
+    <p id="vstupP">Máme na sebe dvacet minut a nikam nespěcháme. Než začneme — dáte si něco k pití?</p>
+    <div class="pit" id="pit">
+      <button type="button" data-pit="kávu">Kávu</button>
+      <button type="button" data-pit="čaj">Čaj</button>
+      <button type="button" data-pit="vodu">Vodu</button>
+      <button type="button" data-pit="">Nic, děkuju</button>
+    </div>
+  </div>
+</div>
+
+<button type="button" class="zvuk" id="zvuk" aria-label="Hudba na pozadí" hidden>
+  <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="zvukVlny" d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+</button>
+<audio id="lounge" loop preload="none" src="lounge.mp3"></audio>
+
+<div class="app">
+  <header class="top">
+    <a class="logo" href="https://www.aeternumclinic.cz" aria-label="Aeternum Clinic"><svg aria-hidden="true"><use href="#logoMark"/></svg>
+      <div class="wm"><b>AETERNUM</b><span>CLINIC</span></div></a>
+    <button type="button" class="linkbtn" id="znovu" hidden>Začít znovu</button>
+    <a class="linkbtn" href="https://www.aeternumclinic.cz">Zpátky na web ›</a>
+  </header>
+  <div class="way" id="way" aria-hidden="true"></div>
+  <div class="talk" id="talk"><div class="inner" id="inner"></div></div>
+  <div class="dock">
+    <div class="dockin">
+      <div class="chips" id="chips"></div>
+      <div class="ask" id="askbox">
+        <textarea id="ask" rows="1" placeholder="Zeptejte se mě na cokoli…" aria-label="Dotaz"></textarea>
+        <button class="send" id="sendBtn" aria-label="Odeslat dotaz"><svg viewBox="0 0 24 24"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
+      </div>
+      <p class="hint" id="hint">Marcel AI je digitální kopie konzultanta Marcela. O vhodnosti terapie vždy rozhoduje lékař.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   Aeternum Clinic — vstupní e-konzultace
+   Scénář jede po kapitolách, mezi nimi se klient může kdykoli zeptat.
+   Parametry URL: ?id=SC260920-ABC123 (navazuje na dokončený e-screening)
+                  ?demo=1 (ukázková data pro ladění textů)
+   ========================================================================== */
+
+const URLP = new URLSearchParams(location.search);
+const CFG = {
+  apiUrl: 'https://script.google.com/macros/s/AKfycby5mSooRjSpT8CUoaQzhJLW60VzvJwva3e7nLnlLqDBG5FsKBdp70ykk9wO9fE5130p/exec',                                   // webová aplikace z aeternum_screening_apps_script.gs
+  bookingUrl: 'https://booking.aeternumclinic.cz',
+  screeningPrice: 4970,                         // stejné číslo jako CONFIG.ENTRY_SCREENING_PRICE na serveru
+  consultPrice: 570,                            // konzultace se živým koordinátorem
+  advisorPrice: 121,                            // 100 Kč + 21 % DPH, odečítá se z první platby za program
+  // Obchodní podmínky. Server posílá platnou adresu; tahle je záloha,
+  // kdyby odpověď nedorazila. Prázdno = odkaz se nikde neukáže.
+  termsUrl: 'https://www.aeternumclinic.cz/_files/ugd/58be90_9f9915d451c54eb09770f75488dd0a31.pdf',
+  validHours: 72,                               // jak dlouho po zaplacení se sem dá vracet
+  /* Horní hranice normálního BMI. Stejné číslo, na které počítá délku
+     programu screening (clinicalTarget) i kalkulačka GLP-1 — dřív tu bylo
+     21,7 a Marcel klientovi říkal o šest kilo ambicióznější cíl, než na
+     jaký systém plánoval. */
+  healthyBmi: 24,
+  phone: '+420 775 481 700',
+  email: 'info@aeternumclinic.cz',
+  storageKey: 'aeternum-econsult-v1'
+};
+
+const MARCEL_AVATAR = "data:image/jpeg;base64,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";
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => Math.round(n).toLocaleString('cs-CZ');
+const newSid = () => (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+
+/* Jemné cuknutí při příchodu zprávy. iOS Safari to neumí, proto to nikdy
+   nesmí být jediný signál — je to příjemnost navíc, ne nosná informace.
+   Prohlížeč vibrace před prvním dotykem blokuje, tak to do té doby neřešíme. */
+let tapped = false;
+document.addEventListener('pointerdown', () => { tapped = true; }, { once: true, capture: true });
+function buzz(ms = 8) { if (!tapped) return; try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
+
+async function api(action, data, timeoutMs = 20000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(CFG.apiUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, sid: S.sid, ...data }), signal: ctrl.signal
+    });
+    const j = await res.json();
+    if (!j.ok) { const e = new Error(j.error || 'api'); e.code = j.error; throw e; }
+    return j;
+  } finally { clearTimeout(t); }
+}
+
+/* Čísla se nenaskakují, ale dopočítají — cena programu je vrchol celé
+   konzultace a zaslouží si to. Kdo nechce čekat, klepnutím to přeskočí. */
+function countUp(el, to, ms = 900) {
+  const from = 0, t0 = performance.now();
+  (function step(now) {
+    const k = Math.min(1, (now - t0) / ms);
+    const e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(from + (to - from) * e);
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ---------- stav ---------- */
+const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat: 0, log: [], answers: {},
+  /* Zvolená forma vyšetření patří do uloženého stavu, ne jen do paměti
+     stránky. Konzultace platí 72 hodin a klient se k ní vrací — po obnovení
+     stránky se dřív volba ztratila a rezervace tiše spadla zpátky na
+     „osobně v Praze“, i když si klient vybral video. */
+  form: '',
+  /* Údaje pro laboratoř. Drží se stejně jako forma — konzultace platí 72 hodin
+     a klient se do ní vrací, takže se nesmí ztratit obnovením stránky. */
+  labDob: '', labRc: '', labConsent: false,
+  consent: false, consents: {}, variant: null, asked: {} });
+let S = blank();
+let D = null;                       // data z e‑screeningu
+let busy = false;
+
+function save() { try { sessionStorage.setItem(CFG.storageKey, JSON.stringify(S)); } catch (e) {} }
+
+/* Karta si rozhovor pamatuje, takže po reloadu naskočí tam, kde skončil —
+   i s replikami ze starší verze stránky. Při zkoušení to mate: vypadá to,
+   že oprava nenaběhla. Tlačítko je proto jen v ukázce; klientovi, který má
+   konzultaci zaplacenou, by smazalo rozhovor, za který zaplatil. */
+function zacitZnovu() {
+  try { sessionStorage.removeItem(CFG.storageKey); } catch (e) {}
+  location.reload();
+}
+function load() {
+  try { const r = sessionStorage.getItem(CFG.storageKey); if (r) S = Object.assign(blank(), JSON.parse(r)); } catch (e) {}
+  SLOTS.form = S.form || '';
+}
+
+/* ---------- ukázková data, než je napojený backend ---------- */
+const DEMO = {
+  scenario: 'EK-demo', name: 'Jana', fullName: 'Jana Nováková', email: 'jana@email.cz',
+  examDoctorPart: 2500,
+  sex: 'F', age: 42, height: 168, weight: 88, target: 72, bmi: 31.2,
+  lose: 16, months: 6, drug: 'Mounjaro',
+  // ?demo=1&pmos=1 otevre i kapitolu o PMOS, jinak se v demu neukaze.
+  pmos: URLP.get('pmos') === '1',
+  examMinutes: 45,
+  drugPacks: [{ dose: '2,5 mg', retail: 5890, plus: 4790 },
+              { dose: '5 mg', retail: 6890, plus: 6090 }],
+  drugWhy: 'máte vyšší BMI a zároveň jste uvedla, že se potřebujete zbavit chutí mezi jídly',
+  blocked: false, blockReason: '',
+  variants: [
+    { key: 'light', name: 'Telehealth Light', months: 8, price: 4970, drugIncluded: false,
+      desc: 'Lékařský dohled, e-recepty a průběžný screening zdravotního stavu. Bez tréninkového plánu a jídelníčku.' },
+    { key: 'standard', name: 'Telehealth Standard', months: 8, price: 6970, drugIncluded: false,
+      desc: 'Všechno z Lightu a k tomu Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
+    { key: 'premium', name: 'Telehealth Premium', months: 8, price: 9970, drugIncluded: false,
+      desc: 'Všechno ze Standardu a k tomu prioritní konzultace, vlastní tým a péče o metabolické zdraví a dlouhověkost.' }
+  ]
+};
+
+/* ---------- scénář ---------- */
+const bmiTarget = () => D ? Math.max(0, Math.round(D.weight - CFG.healthyBmi * Math.pow(D.height / 100, 2))) : 0;
+
+const CHAPTERS = [
+  { key: 'intro', label: 'Úvod' },
+  { key: 'vas', label: 'Vy a Váš cíl' },
+  { key: 'how', label: 'Jak to funguje' },
+  { key: 'drug', label: 'Váš preparát' },
+  { key: 'form', label: 'Jak se lék podává' },
+  { key: 'dose', label: 'Dávkování' },
+  { key: 'expect', label: 'Co čekat' },
+  { key: 'plan', label: 'Váš program' },
+  { key: 'benefits', label: 'Co je v ceně' },
+  { key: 'care', label: 'Vedení programu' },
+  { key: 'screening', label: 'Vstupní screening' },
+  { key: 'faq', label: 'Dotazy' },
+  { key: 'book', label: 'Rezervace' }
+];
+
+/* Mounjaro se titruje od 2,5 mg, Wegovy od 0,25 mg — dávku bereme podle
+   preparátu, který klientovi vychází, ne natvrdo. Dávky ověřila lékařka
+   6. 11. 2026. */
+const startDose = () => /wegovy/i.test(String(D && D.drug || '')) ? '0,25 mg' : '2,5 mg';
+/* PMOS je zenska diagnoza; kdyby ji omylem zaskrtl muz, kapitolu
+   neotevirame — cela je psana v zenskem rode.                */
+const maPmos = () => !!(D && D.pmos && D.sex !== 'M');
+const ova = () => D && D.sex === 'M' ? '' : 'a';
+/* „sám/sama" se příponou ohnout nedá, je to jiné slovo. */
+const sam = () => D && D.sex === 'M' ? 'sám' : 'sama';
+
+/* Každý beat je jedna replika. `t` je text (nebo funkce), `chips` nabídka,
+   `ask` otevřená otázka, `store` kam uložit odpověď. */
+const SCRIPT = {
+
+/* 1 · Kde se nacházíme */
+intro: [
+  { t: () => `Dobrý den, ${esc(D.name)}. Jsem Marcel AI — digitální kopie Marcela, koordinátora péče Aeternum Clinic. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
+  { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
+  { t: 'Počítejte s dvaceti až pětadvaceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
+  { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
+  { chips: [{ label: 'Můžeme začít', go: 'vas' }] }
+],
+
+/* 2 · Zdvořilostní otázka a co klienta přivádí */
+vas: [
+  { t: 'Než se pustíme do terapie, rád bych Vás trochu poznal — ať Vám pak neříkám obecné věci, které se Vás netýkají.' },
+  { t: 'Jak vypadá Váš běžný den? Vyberte, co se blíží nejvíc.' },
+  { chips: [
+      { label: 'Většinu dne sedím', store: ['rezim', 'sedavé zaměstnání'], go: 'vas2' },
+      { label: 'Jsem hodně na nohou', store: ['rezim', 'na nohou'], go: 'vas2' },
+      { label: 'Pracuju na směny', store: ['rezim', 'směnný provoz'], go: 'vas2' },
+      { label: 'Nedá se to říct, je to různé', store: ['rezim', 'nepravidelný režim'], go: 'vas2' }
+    ] }
+],
+
+vas2: [
+  { t: () => {
+      const r = S.answers.rezim || '';
+      if (r === 'sedavé zaměstnání') return 'Díky. Sedavé zaměstnání je u nás nejčastější a není to Vaše chyba — jen to znamená, že pohyb musíme do programu vědomě dostat, protože se sám od sebe neobjeví.';
+      if (r === 'na nohou') return 'Díky. To je dobrý základ — jen pozor, chození celý den není totéž co silový trénink. K tomu se ještě dostanu.';
+      if (r === 'směnný provoz') return 'Díky. U směn je nejtěžší pravidelnost jídla a spánku, a to na váhu dopadá víc, než si lidi myslí. Budeme s tím počítat.';
+      if (r === 'nepravidelný režim') return 'Díky. Nepravidelnost je nejčastější důvod, proč diety padají — s tou si poradíme jinak než rozpisem na každý den.';
+      /* Klient to napsal po svém. Hádat z jeho věty, do které škatulky
+         patří, je horší než neutrální věta — sedavé zaměstnání plus
+         odpolední fitko se do žádné z nich nevejde. */
+      return 'Díky, tohle mi pomůže. Budu s tím počítat, až se dostaneme k režimu a pohybu.';
+    } },
+  { t: 'A co od terapie čekáte nejvíc?' },
+  { chips: [
+      { label: 'Shodit a hlavně si to udržet', store: ['expect', 'udržet výsledek'], go: 'vas3' },
+      { label: 'Zbavit se chutí a myšlenek na jídlo', store: ['expect', 'zvládnout chutě'], go: 'vas3' },
+      { label: 'Zlepšit zdraví, ne jen vzhled', store: ['expect', 'zdraví'], go: 'vas3' },
+      { label: 'Zvládnout to konečně pod dohledem', store: ['expect', 'vedení odborníkem'], go: 'vas3' }
+    ] }
+],
+
+/* Nejdřív nabídka, pak teprve vyprávění. Obráceně to působilo, jako by
+   Marcel klientovu odpověď přeslechl: nechal ho napsat vlastními slovy,
+   co ho přivádí, a hned nato mu nabídl tlačítka na skoro totéž. Takhle
+   si klient nejdřív vybere jedním klepnutím, Marcel na jeho volbu
+   odpoví konkrétně a teprve pak se ptá na to, co se do tlačítek nevejde. */
+vas3: [
+  { t: () => {
+      const e = S.answers.expect || '';
+      if (e === 'udržet výsledek') return 'To je podle mě ta správná odpověď. Shodit umí leccos — udržet je ta těžší půlka a program je postavený hlavně na ní.';
+      if (e === 'zvládnout chutě') return 'Tohle slyším nejčastěji a je to přesně to, s čím tahle léčiva pomáhají nejvíc. Za chvíli si řekneme, jak to dělají.';
+      if (e === 'zdraví') return 'Dobře. Čísla z krve uvidíte černé na bílém hned na začátku a pak znovu při kontrolách, takže to nezůstane u pocitu.';
+      if (e === 'vedení odborníkem') return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
+      return 'Rozumím, díky. Vrátím se k tomu, až si budeme říkat, co od programu čekat.';
+    } },
+  { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí a co už máte za sebou? Klidně stručně — lékař si to přečte před vyšetřením.' },
+  { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
+  { t: 'Děkuju, tohle mi pomůže. Nechám to u Vaší dokumentace, ať to lékař má před sebou.' },
+  { chips: [{ label: 'Pokračujme', go: 'howAsk', primary: true }] }
+],
+
+/* 3 · Jak terapie funguje — dvě tlačítka, výklad je stejný */
+howAsk: [
+  { t: 'Teď k samotné terapii. Víte, jak léky ze skupiny GLP‑1 v těle fungují?' },
+  { chips: [
+      { label: 'Vím to zhruba', store: ['glp', 'zhruba ví'], go: 'how' },
+      { label: 'Nevím, vysvětlete mi to', store: ['glp', 'neví'], go: 'how' }
+    ] }
+],
+
+how: [
+  { t: () => S.answers.glp === 'zhruba ví'
+      ? 'Projdu to tedy celé i tak — ať máme jistotu, že nám nic nechybí, a hlavně ať víte i to, co se obvykle neříká.'
+      : 'Vysvětlím Vám to od začátku a srozumitelně. Není to složité, jen se to většinou vykládá špatně.' },
+  { t: 'Vaše tělo po každém jídle vyplavuje <b>střevní hormony</b>, které mozku oznámí, že je najedeno. U části lidí ten signál funguje slabě — proto mají hlad i chvíli po jídle. Léky jako <b>Mounjaro</b> (účinná látka tirzepatid) nebo <b>Wegovy</b> (semaglutid) tyhle hormony napodobují.' },
+  { t: 'Působí třemi způsoby najednou:',
+    card: () => `<div class="cards">
+      <div class="card"><b>Vypínají pocit hladu v mozku</b><span>Působí na centra, která řídí chuť k jídlu. Výrazně snižují hlad, potlačují chutě na sladké a tučné a odstraňují takzvaný food noise — neustálé přemýšlení o jídle.</span></div>
+      <div class="card"><b>Zpomalují vyprazdňování žaludku</b><span>Jídlo v žaludku zůstává déle. Po menší porci se cítíte plní výrazně delší dobu.</span></div>
+      <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
+    </div>` },
+  { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytvoří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Terapie je vázaná na lékařský předpis a vede ji lékař.</span>` },
+  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má vedlejší účinky?', faq: 'side' }] }
+],
+
+/* Rozdíl mezi preparáty a co vychází klientovi */
+drug: [
+  { t: 'Rozdíl mezi těmi dvěma léky je jednoduchý. <b>Wegovy</b> působí na jeden hormonální receptor (GLP‑1). <b>Mounjaro</b> působí současně na dva (GLP‑1 a GIP), což u většiny pacientů vedlo v klinických studiích k o něco vyššímu úbytku váhy. Oba jsou vázané na lékařský předpis.' },
+  { t: () => `Podle Vašich odpovědí Vám vychází <span class="hl">${esc(D.drug)}</span> — ${esc(D.drugWhy)}.` },
+  { t: 'Konečné slovo má ale vždycky lékař. Může doporučení změnit podle krevních testů a podle toho, co u Vás uvidí při vyšetření. Já Vám tady říkám, co vychází z dotazníku, ne co Vám bude předepsáno.' },
+  { chips: [{ label: 'Dobře, jak se to podává?', go: () => maPmos() ? 'pmos' : 'form' }] }
+],
+
+/* 3b · PMOS (PCOS). Ukaze se jen klientce, ktera ho ve screeningu uvedla.
+   Neslibuje uzdraveni cyklu ani hormonalni lecbu — tu vede lekar. Rika,
+   proc u ni diety selhavaly a proc ji vyslo prave tirzepatid.         */
+pmos: [
+  { t: 'Než půjdeme dál, zastavím se u jedné věci, kterou jste v dotazníku uvedla a která mění celý výklad: <b>PMOS</b>, tedy polycystický ovariální syndrom.' },
+  { t: 'Tohle chci, abyste slyšela jako první: pokud u Vás dřív hubnutí nefungovalo, <b>nebyla to slabá vůle.</b> U PMOS stojí za váhou nejčastěji <b>inzulinová rezistence</b> — tělo musí na stejnou práci vyplavit víc inzulinu, a vysoký inzulin brání tělu sahat do zásob. Proto u PMOS běžné diety selhávají výrazně častěji než u ostatních, i když se jich člověk drží do písmene.' },
+  { t: () => `A právě tady má terapie u PMOS smysl navíc: nejde jen o kila, ale o to <b>srovnat práci těla s inzulinem</b>. Proto Vám ze screeningu vyšel <span class="hl">${esc(D.drug)}</span> — ze dvou preparátů působí na inzulinovou rezistenci nejsilněji, protože míří na dva receptory místo jednoho.` },
+  { t: 'Co Vám k tomu můžu a nemůžu říct:',
+    card: () => `<div class="cards">
+      <div class="card"><b>Váha a inzulin</b><span>To je to, na co terapie míří přímo a co u PMOS zabírá obvykle lépe než u kohokoli jiného.</span></div>
+      <div class="card"><b>Cyklus, pleť, ochlupení</b><span>U části klientek se s poklesem inzulinu a váhy upraví i tyhle potíže. Slíbit Vám to ale nemůžu a není to cíl programu — je to možný následek.</span></div>
+      <div class="card"><b>Hormonální léčbu nevedeme já ani program</b><span>Tu má v rukou lékař, náš nebo Váš gynekolog. Já Vám tu říkám, co dělá tohle léčivo s metabolismem.</span></div>
+    </div>` },
+  { t: 'A dvě věci, které s Vámi musí probrat lékař na vstupním vyšetření, takže si je prosím schovejte na něj: <b>jakou užíváte hormonální antikoncepci</b> a jak jste na tom s <b>plánem těhotenství</b>. Tahle terapie se s těhotenstvím nekombinuje — kdyby se Vám ten plán během programu změnil, musíme to vědět hned a lék se vysazuje.' },
+  { t: 'Že u Vás jde o PMOS už lékař ví — máme to z Vašeho dotazníku a uvidí to i s krevními testy ze vstupního screeningu. Nemusíte to znovu vysvětlovat.' },
+  { chips: [{ label: 'Dobře, jak se to podává?', go: 'form' }] }
+],
+
+/* 4 · Forma a aplikace */
+form: [
+  { t: 'Teď prakticky — jak to vlastně budete užívat.' },
+  { t: 'Lék je v <b>aplikačním peru</b>. Jedno pero vystačí na <b>jeden měsíc</b> a jsou v něm <b>čtyři dávky</b>.' },
+  { t: 'Aplikuje se <b>jednou týdně</b>, podkožně, malou injekční jehlou — podobně jako inzulin — nejčastěji do břicha nebo stehna. Ideálně vždy ve stejný den a přibližně ve stejnou dobu. Většina lidí si nastaví připomínku v telefonu a za měsíc už na to ani nemyslí.' },
+  { chips: [{ label: 'Jasné', go: 'dose' }, { label: 'Bojím se jehel, bolí to?', faq: 'needle' }] }
+],
+
+/* 5 a 6 · Dávkování */
+dose: [
+  { t: () => `Terapii vždycky začínáme na <span class="hl">${startDose()}</span>, tedy na nejnižší dávce. Nikdy se nezačíná nahoře — tělo potřebuje čas si zvyknout a právě tím se dá většině nepříjemností vyhnout.` },
+  { t: 'Pokud se váha zastaví a chutě přetrvávají, přistoupíme ke zvýšení. Cílem je vždycky <b>nejvyšší optimální dávka bez vedlejších účinků</b> — ne nejvyšší možná.' },
+  { t: 'A tohle si prosím zapamatujte: <b>vyšší dávka neznamená víc hubnutí.</b> Jde spíš o to, jak se u ní cítíte Vy. Když na nejnižší dávce stabilně hubnete a nemáte chutě na nesmysly, je všechno v pořádku a vyšší dávka obvykle není potřeba.' },
+  { t: 'Dávku zvyšujeme ve dvou případech: když přijdou velké chutě, nebo když se <b>váha zastaví na víc než 28 dní</b>. V takové chvíli nám dáte vědět a lékař rozhodne o úpravě dávkování na další měsíc.' },
+  { chips: [{ label: 'Rozumím', go: 'expect' }, { label: 'Co když zapomenu dávku?', faq: 'miss' }] }
+],
+
+/* 7, 8 a 9 · Co od toho čekat */
+expect: [
+  { t: 'Teď k tomu, co Vám můžu a nemůžu slíbit.' },
+  { t: 'Úbytek <b>nelze garantovat</b> a nikdo odpovědný Vám ho garantovat nebude. Musíte tomu jít naproti režimem — a myslím tím hlavně změnu návyků a dostatek pohybu.' },
+  { t: 'Konkrétně: <b>silový trénink alespoň každý druhý den.</b> Může to být posilovna, může to být cvičení s vlastní váhou doma, na tom nezáleží. Důležité je, že silový trénink drží svalovou hmotu. A zapomeňte na dlouhé kardio a vyběhané hodiny — ve velkém kalorickém deficitu Vám svaly spíš ubírá, než aby pomáhalo.' },
+  { t: () => `Co se týče tempa: realistický odhad je <span class="hl">2 až 3 kg za měsíc</span>. První měsíc to obvykle bývá víc, pak se to zpomalí. To je normální a není to známka toho, že by něco přestalo fungovat.`,
+    card: () => `<div class="plan">
+      <div class="kv"><span>Očekávané tempo</span><b>2–3 kg / měsíc</b></div>
+      <div class="kv"><span>Váš cílový úbytek</span><b>≈ ${D.lose} kg</b></div>
+      <div class="kv"><span>Odhadovaná délka</span><b>${D.months} ${mesice(D.months)}</b></div>
+    </div>` },
+  { t: 'A ještě jedna věc, která zní nelogicky, ale je zásadní: <b>vždycky doporučujeme pomalejší redukci než drastickou a rychlou.</b> U rychlého hubnutí hrozí povislá kůže a výrazně vyšší riziko jo‑jo efektu. Pomaleji znamená trvaleji.' },
+  { chips: [{ label: 'Dává smysl, kolik to stojí?', go: 'plan' }] }
+],
+
+/* 10 · Kalkulačka a varianty */
+plan: [
+  { t: () => `Teď k penězům. Podle naší kalkulace a predikce nám vychází, že pro dosažení Vašeho cíle bude potřeba <b>délka programu ${D.months} ${mesice(D.months)}</b> — počítejte radši s rezervou dvou měsíců navíc na individuální odezvu a na udržovací fázi.` },
+  { t: 'Programy se neliší délkou, ale tím, co je v nich. <b>Cena programu za měsíc je neměnná a platí po celou dobu terapie.</b> Všechny programy jsou plně flexibilní — program lze kdykoli ukončit i prodloužit, bez poplatku.' },
+  { t: () => `Pro představu: abyste se dostal${ova()} do pásma normálního BMI, tedy někam k hodnotě ${String(CFG.healthyBmi).replace('.', ',')}, je to <b>${bmiTarget()} kg</b>. Nemusí to být Váš cíl — jen ať víte, kde to pásmo začíná.` },
+  /* `vars` musí být poslední beat kapitoly: `play` u něj skončí a další
+     repliky by se nikdy nepřehrály. Kam se jde dál, rozhoduje nabídka,
+     kterou nastaví `renderVariants` — ne beat pod tímhle řádkem. */
+  { vars: true }
+],
+
+/* 11 · Měsíční fakturace */
+price: [
+  { t: () => S.variant
+      ? `Vybral${ova()} jste si variantu <b>${esc(S.variant.name)}</b> na ${S.variant.months} ${mesice(S.variant.months)} za <span class="hl">${fmt(S.variant.price)} Kč</span> měsíčně.`
+      : 'Ještě jste si variantu nevybral' + ova() + ' — můžete se k ní kdykoli vrátit, ale pojďme si říct, jak placení funguje obecně.' },
+  { t: () => `Důležité: ta cena je <b>za měsíc</b>, ne celková částka dopředu. Nic neplatíte na začátku v jednom balíku.` },
+  { t: 'Platí se <b>kartou</b>. Při zahájení programu zadáte kartu jednou do zabezpečené platební brány a odsouhlasíte opakovanou platbu — další měsíce už se částka strhne sama, vždycky ve stejný den. Údaje o kartě vidí jen platební brána, my se k nim nedostaneme.' },
+  { t: 'Ke každé platbě Vám přijde <b>doklad e‑mailem</b>. Opakovanou platbu můžete <b>kdykoli zrušit</b> — jedním klikem v e‑mailu nebo tím, že nám napíšete. Nic tím neporušíte a nic nedoplácíte.' },
+  { t: 'Děláme to takhle proto, že měsíční faktura je nejčastější důvod, proč terapie zbytečně vypadne — někdo zapomene zaplatit, lék se neobjedná a vznikne pauza, kterou tělo pozná. Tomuhle se tím vyhneme.' },
+  { chips: [{ label: 'Co všechno v té ceně je?', go: 'benefits' }] }
+],
+
+/* 12 · Benefity programu */
+benefits: [
+  { t: 'V ceně programu máte tohle:',
+    card: () => planCards() },
+  { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b>. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Stejně tak ho jde zkrátit nebo prodloužit podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
+  { chips: [{ label: 'Jak to probíhá dál?', go: 'care' }] }
+],
+
+/* 13 · Individuální vedení a měsíční zpětná vazba */
+care: [
+  { t: 'Terapie je u každého trochu jiná — někdo zhubne první měsíc pět kilo, někdo dvě a pak to srovná. Proto program vedeme individuálně a neřídíme se tabulkou.' },
+  /* Jedna osobní návštěva za terapii. Říkáme to tady, ne až u rezervace:
+     kdo bydlí daleko, si to musí umět naplánovat, a dozvědět se to ve
+     třetím měsíci by bylo nepříjemné překvapení. */
+  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. <b>Jednou za celou terapii se potřebujeme vidět osobně</b> — a kdy to bude, je na Vás. Buď přijedete rovnou na vstupní lékařské vyšetření, nebo si ho uděláte online a přijedete až na kontrolní vyšetření na konci třetího měsíce po zahájení terapie. Osobní návštěvy zatím děláme jen v Praze.' },
+  { t: 'Nedělá se to kvůli papírům. Lékař, který Vás vede, Vás má jednou vidět naživo — a zároveň je to podmínka toho, abychom Vám terapii mohli vést na dálku.' },
+  /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
+     proto, aby to člověka z druhého konce republiky neodradilo hned na
+     začátku; datum ani otevření ordinace slibovat nesmíme, proto „možnost
+     vyšetření". Města zazní jen tady, o kus výš se o nich mlčí. */
+  { t: 'A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme možnost vyšetření v Brně, v Olomouci a ve Zlíně</b>, abyste za tou jednou návštěvou nemuseli přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.',
+    dal: 'To mi dává smysl' },
+  { t: 'Abychom to uměli, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
+  { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
+    dal: 'To se mi líbí' },
+  { t: () => `Máte na to připravené místo ve <b>své klientské sekci</b> a vždycky Vám přijde e‑mail s připomenutím, abyste na to nemusel${ova()} myslet. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
+  { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy' }] }
+],
+
+/* 14 · Výdej léčiva */
+pharmacy: [
+  /* Dva různé modely. U telemedicíny jede e-recept: léčivo není v ceně,
+     klient si ho kupuje sám v jakékoli lékárně. Dřív tu měli všichni
+     popsané vyzvednutí v BENU na Bulovce — pro klienta z druhého konce
+     republiky nesmysl a navíc v rozporu s kartou o kus výš. */
+  { t: 'Poslední praktická věc — jak se k léku dostanete.' },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'U Vašeho programu je léčivo v ceně. Objednáme ho za Vás a vyzvednete si ho v <b>lékárně BENU na Bulovce</b>, v ulici Chlumčanského v Praze 8. V lékárně už nic neplatíte.'
+      : 'Léčivo si u programů na dálku <b>kupujete ' + sam() + '</b>, v režimu samoplátce. My Vám na něj vystavíme <b>e-recept</b> — a ten platí v kterékoli lékárně v České republice.' },
+  { t: 'Postup je každý měsíc stejný:',
+    card: () => S.variant && S.variant.drugIncluded
+      ? `<div class="plan">
+          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
+          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>3. Objednáme léčivo</span><b>my, za Vás</b></div>
+          <div class="kv"><span>4. Vyzvednutí</span><b>lékárna BENU Chlumčanského</b></div>
+        </div>`
+      : `<div class="plan">
+          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
+          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>3. Vystavíme e‑recept</span><b>my, za Vás</b></div>
+          <div class="kv"><span>4. Vyzvednutí a úhrada</span><b>kterákoli lékárna</b></div>
+        </div>` },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'Lék na Vás v lékárně počká, nemusíte nikam volat ani nic řešit — stačí přijít a říct jméno.'
+      : 'V lékárně stačí říct, že máte e-recept, a ukázat průkaz pojištěnce nebo občanku. Nic tisknout nemusíte, recept je v centrálním úložišti. Platíte tam cenu balení, která se liší podle dávky.' },
+  /* Kolik to v lékárně udělá. Ceny posílá server z CONFIG.DRUGS, takže se
+     neopisují potřetí. Ukazujeme jen první dvě dávky — vyšší určuje lékař
+     podle odezvy a slibovat je dopředu by bylo na vodě. */
+  { t: () => {
+      const b = (D.drugPacks || []).filter(x => x && x.dose);
+      if (!b.length || (S.variant && S.variant.drugIncluded)) return '';
+      return `Ať víte, s čím počítat. Takhle vychází ${esc(D.drug || 'léčivo')} v lékárně na začátku terapie — jedno balení je jeden měsíc:`;
+    },
+    card: () => {
+      const b = (D.drugPacks || []).filter(x => x && x.dose);
+      if (!b.length || (S.variant && S.variant.drugIncluded)) return '';
+      return '<div class="plan">' + b.map(x =>
+        `<div class="kv"><span>${esc(x.dose)}</span><b>${fmt(x.plus)}–${fmt(x.retail)} Kč</b></div>`).join('') +
+        '<div class="kv"><span>Dolní cena</span><b>s kartou BENU PLUS</b></div></div>';
+    } },
+  { t: () => (D.drugPacks || []).length && !(S.variant && S.variant.drugIncluded)
+      ? 'Začíná se vždycky na té nejnižší dávce. Jestli se někdy bude zvyšovat, rozhodne o tom lékař podle toho, jak Vám terapie jde — a cenu vyšší dávky Vám řekneme dřív, než ji předepíšeme.'
+      : '' },
+  { t: () => S.variant && S.variant.drugIncluded
+      ? 'A až se terapie ustálí a budeme vědět, že Vám dávka sedí, dá se to zjednodušit: <b>objednáme víc balení najednou</b>. Odpadne tím chození do lékárny každý měsíc.'
+      : 'Až se terapie ustálí a dávka Vám bude sedět, můžeme e-recept vystavit na víc balení najednou. Odpadne tím cesta do lékárny každý měsíc.' },
+  { chips: [{ label: 'Rozumím, co je třeba udělat teď?', go: 'screening' }] }
+],
+
+/* Vstupní screening */
+screening: [
+  { t: 'Než se k programu vůbec dostaneme, čeká Vás jeden <b>povinný krok</b> — vstupní screening.' },
+  { t: 'Je to posouzení, jestli je pro Vás terapie vhodná. Jeho cílem je vyloučit nebezpečné kontraindikace — věci, které z dotazníku nevyčtu a které by Vám mohly ublížit.' },
+  { t: () => `Stojí <span class="hl">${fmt(CFG.screeningPrice)} Kč</span> jednorázově a jsou v tom dvě věci: <b>laboratorní vyšetření krve</b> a navazující <b>lékařské vyšetření</b>.`,
+    /* Laboratorní část je zbytek po lékařské, ne vlastní číslo. Dřív tu byly
+       obě zapsané natvrdo a po změně ceny přestaly dávat součet: 3 170
+       + 2 000 = 5 170, ale celkem svítilo 4 970. Takhle to sedí vždycky. */
+    card: () => {
+      const lekar = Number(D.examDoctorPart) || 2500;
+      return `<div class="plan">
+      <div class="kv"><span>Laboratorní vyšetření krve</span><b>${fmt(CFG.screeningPrice - lekar)} Kč</b></div>
+      <div class="kv"><span>Lékařské vyšetření</span><b>${fmt(lekar)} Kč</b></div>
+      <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
+    </div>`; } },
+  { t: 'Důležité: <b>screening není součástí léčby</b> a hradí se před zahájením terapie. Je to vstupenka k posouzení, ne první platba za program.',
+    dal: 'Dobře, rozumím, můžeme dál' },
+  { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
+  { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
+  /* Sami ji děláme jenom v ordinaci, takže kdo jde na vyšetření online, si
+     ji musí zařídit sám a dopředu — proto o ní mluvíme tady, ne až na
+     vyšetření. */
+  { t: 'A ještě jedna věc, kterou Vám <b>vřele doporučuju</b>, i když povinná není. Jestli si k vyšetření stihnete zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
+  { t: 'Dělají ji například fitness centra, nebo i některé polikliniky; sami ji zatím provádíme jenom osobně v ordinaci.' },
+  { chips: [{ label: 'Rozumím', go: 'faq' }] }
+],
+
+/* 15 · Prostor na dotazy */
+faq: [
+  { t: 'Tím jsme prošli všechno podstatné. Teď je řada na Vás — chci mít jistotu, že Vám nic nezůstalo nejasné.' },
+  { t: 'Ptejte se na cokoli. Buď si vyberte z toho, na co se lidi ptají nejčastěji, nebo mi napište vlastní dotaz dole.' },
+  { chips: [
+      { label: 'Jaké jsou nejčastější vedlejší účinky?', faq: 'side' },
+      { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' },
+      { label: 'Jak rychle budu hubnout?', faq: 'speed' },
+      { label: 'Jak se lék podává? Bolí to?', faq: 'needle' },
+      { label: 'Jaký je rozdíl mezi Mounjaro a Wegovy?', faq: 'diff' },
+      { label: 'Můžu program kdykoli ukončit?', faq: 'quit' },
+      { label: 'Hradí to pojišťovna?', faq: 'insurance' },
+      { label: 'Musím k tomu držet dietu?', faq: 'diet' },
+      { label: 'Co když mi to nezabere?', faq: 'nowork' },
+      { label: 'Přijdu o svaly?', faq: 'muscle' },
+      { label: 'Co když se mi vrátí chutě?', faq: 'cravings' },
+      { label: 'Všemu rozumím, pojďme k rezervaci', go: 'included', primary: true }
+    ] }
+],
+
+included: [
+  { t: 'Výborně. Ještě než to potvrdíte, shrnu, co za tu částku dostanete.' },
+  { t: () => `Za <b>${fmt(CFG.screeningPrice)} Kč</b>:`,
+    card: () => `<div class="plan">
+      <div class="kv"><span>Žádanka na odběr krve</span><b>e‑mailem hned teď</b></div>
+      <div class="kv"><span>Odběr a rozbor v laboratoři Synlab</span><b>v ceně</b></div>
+      <div class="kv"><span>Lékařské vyšetření</span><b>${D.examMinutes || 45} minut</b></div>
+      <div class="kv"><span>Vyhodnocení výsledků lékařem</span><b>v ceně</b></div>
+      <div class="kv"><span>Doklad o platbě</span><b>e‑mailem</b></div>
+    </div>` },
+  /* Smlouvu pojmenujeme programem, který si klient v konzultaci vybral —
+     ví pak, na co se v ní dívat. Kdo se k výběru nedostal, dostane
+     původní obecnou větu. */
+  { t: () => 'Po úhradě Vám e‑mailem přijde potvrzení termínu, pokyny k odběru s kódem žádanky, <b>informovaný souhlas</b> k přečtení a <b>návrh smlouvy o zdravotní péči</b> ' +
+      (S.variant ? 'na program <b>' + esc(S.variant.name) + '</b>, který jste si vybral' + ova() + '. ' : 'podle programu, který Vám vychází. ') +
+      'Podepisuje se až po vyšetření a schválení terapie — takže si to v klidu přečtete doma.' },
+  { chips: [{ label: 'Co dál potřebuju vědět?', go: 'consent' }] }
+],
+
+consent: [
+  { t: () => `${esc(D.name)}, potřebuju od Vás poslední potvrzení. Přečtěte si to prosím a odklikněte každý bod zvlášť.` },
+  { cons: true }
+],
+
+book: [
+  { t: 'Děkuju. Zbývá poslední krok — domluvit vyšetření. Než se pustíme do termínu, chci mít jistotu, že víte přesně, za co platíte.',
+    card: () => {
+      const lekar = Number(D.examDoctorPart) || 2500;
+      return `<div class="sum">
+      <div class="sh">
+        <div class="se">Vstupní screening</div>
+        <div class="sn">${fmt(CFG.screeningPrice)} Kč jednorázově</div>
+      </div>
+      <div class="sb">
+        <div class="kv"><span>Odběr a rozbor krve v Synlabu</span><b>${fmt(CFG.screeningPrice - lekar)} Kč</b></div>
+        <div class="kv"><span>Vyšetření lékařem</span><b>${fmt(lekar)} Kč</b></div>
+        <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
+      </div></div>`; } },
+  { t: 'Obojí je v té částce — odběr i vyšetření. Platí se jednou a úhradou se Vám zároveň drží termín. Nic dalšího se za screening nedoplácí.' },
+  { t: 'Rozhovor je pořád nezávazný a bez Vašeho souhlasu se nikam neposunu. Dává Vám ta částka smysl?' },
+  { chips: [
+      { label: 'Ano, pojďme vybrat termín', go: 'bookForm', primary: true },
+      { label: 'Mám k tomu otázku', prompt: 'Jasně, ptejte se. Co Vás na tom zarazilo?' },
+      { label: 'Teď ne', go: 'bookLater' }
+    ] }
+],
+
+/* „Teď ne" neznamená konec hovoru. Konzultace je zaplacená na 24 hodin,
+   klient se do ní může vracet a ptát se dál — zavřít mu ji ve chvíli, kdy
+   zaváhal nad cenou, by bylo to nejhloupější, co můžeme udělat. Proto tu
+   není final: pole na dotaz zůstává a cesta zpátky k termínu taky. */
+bookLater: [
+  { t: 'Naprosto v pořádku, nikam Vás netlačím.' },
+  { t: () => `Konzultace Vám běží ještě ${hodin(D.hoursLeft || CFG.advisorHours || 72)} a odkaz na ni máte v e-mailu — můžete se sem kdykoli vrátit a dokončit to v klidu. Ptát se mě můžete dál, jsem tu.` },
+  { chips: [
+      { label: 'Ještě se na něco zeptám', prompt: 'Povídejte, co Vás zajímá.' },
+      { label: 'Tak pojďme k termínu', go: 'bookForm', primary: true }
+    ] }
+],
+
+bookForm: [
+  { t: 'Výborně. Vyšetření můžete mít osobně u nás v Praze, nebo online přes video — lékař má v obou případech stejné podklady a rozhoduje stejně.' },
+  { t: () => D.praha
+      ? 'Vy jste z Prahy, takže se nabízí osobně. Jak to chcete?'
+      : 'Vzhledem k tomu, odkud jste, bude nejspíš pohodlnější online. Jak to chcete?' },
+  { chips: [
+      { label: 'Osobně v Praze', go: 'bookLab', form: 'osobne' },
+      { label: 'Online přes video', go: 'bookLab', form: 'online' }
+    ] }
+],
+
+/* Údaje pro laboratoř ještě před platbou. Dřív je klient vyplňoval až potom,
+   z odkazu v e-mailu — zaplatil, zavřel okno a vracel se na web podruhé.
+   Ptáme se na to, co laboratoř opravdu chce do žádanky, nic víc. */
+bookLab: [
+  { t: 'Ještě než vyberete termín: laboratoř potřebuje pár údajů, jinak žádanku na odběr nevystaví.' },
+  { t: 'Rodné číslo posílám jen jí, v e-mailech ho nikdy neuvádíme. Když nakonec nezaplatíte, smažeme ho.' },
+  { lab: true }
+],
+
+bookSlots: [
+  { slots: true }
+],
+
+blocked: [
+  { t: () => `${esc(D.name)}, tady musím být upřímný a zastavit se.`, cls: 'stop' },
+  { t: () => `Z Vašich odpovědí ve screeningu vyplývá ${esc(D.blockReason || 'okolnost, která může být pro tuto terapii překážkou')}. To není něco, co bych mohl posoudit já ani co by se dalo obejít zaplacením screeningu.`, cls: 'stop' },
+  { t: 'Nejlepší další krok je probrat to s Vaším ošetřujícím lékařem, který Vás zná. Pokud Vám terapii doporučí, ozvěte se nám a vrátíme se k tomu společně.', cls: 'stop' },
+  { t: () => `Kdybyste se chtěl${ova()} na cokoli zeptat, napište na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)}.`, final: true, cls: 'stop' }
+]
+};
+
+/* ---------- odpovědi na časté dotazy ---------- */
+/* Tréninkový plán a jídelníček jsou od Standardu výš. Light je nemá a slíbit
+   mu je by znamenalo, že si klient zaplatí a pak zjistí, že nic nepřijde.
+   Dokud si program nevybral, mluvíme o tom v podmínce. */
+function protokolVeta() {
+  const k = S.variant && S.variant.key;
+  if (k === 'praha') return 'Konkrétní jídelníček i suplementaci dostanete v <b>Aeternum Longevity Protokolu</b>, který je součástí Vašeho programu.';
+  if (k === 'light') return 'Konkrétní jídelníček a tréninkový plán jsou součástí programů Standard a Premium — v Lightu nejsou. '
+    + 'Doporučení Vám ale dá lékař i koordinátor péče a kdykoli se dá přejít výš.';
+  if (k === 'standard' || k === 'premium') return 'Konkrétní jídelníček, suplementaci i tréninkový plán dostanete v '
+    + '<b>Aeternum Lifestyle Protocolu</b>, který je součástí Vašeho programu.';
+  return 'Konkrétní jídelníček, suplementaci i tréninkový plán dostanete v <b>Aeternum Lifestyle Protocolu</b> — ten je '
+    + 'součástí programů Standard a Premium. Light ho nemá, tam zůstává lékařský dohled a podpora koordinátora.';
+}
+
+/* Co je v ceně — podle vybraného programu, ne paušálně. Dřív karta slibovala
+   všem Longevity Protokol a tým s trenérem a výživovým specialistou; to má
+   ve skutečnosti jen Praha a Premium. Zrcadlí nabídku na www.aeternumclinic.cz. */
+const SPOLECNE = [
+  ['Lékařský dohled a e-recepty', 'Pravidelné kontroly, úprava dávkování a e-recept na každý měsíc.'],
+  ['Průběžný screening zdravotního stavu', 'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'],
+  ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
+  ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
+];
+/* Co program obsahuje a co ne, jednou větou na řádek. Totéž zrcadlí
+   `PLANS[].feats` ve výsledcích screeningu — když se mění jedno, mění se
+   obojí, jinak si ta dvě místa začnou odporovat. Křížek u medikace je tam
+   schválně: klient má na první pohled vědět, že lék v ceně není. */
+const PLAN_FEATS = {
+  light: [
+    [1, 'Lékařský dohled a e-recepty'],
+    [1, 'Průběžný screening zdravotního stavu'],
+    [1, 'Podpora odborného koordinátora'],
+    [1, 'Flexibilní program bez vázanosti'],
+    [0, 'Medikace není zahrnuta v ceně programu']
+  ],
+  standard: [
+    [1, 'Lékařský dohled a e-recepty'],
+    [1, 'Průběžný screening zdravotního stavu'],
+    [1, 'Aeternum Lifestyle Protocol'],
+    [1, 'Tréninkový plán od fitness trenéra'],
+    [1, 'Jídelníček a doporučení doplňků stravy'],
+    [1, 'Podpora odborného koordinátora'],
+    [1, 'Flexibilní program bez vázanosti'],
+    [0, 'Medikace není zahrnuta v ceně programu']
+  ],
+  premium: [
+    [1, 'Všechno ze Standardu'],
+    [1, 'Prioritní konzultace bez čekání'],
+    [1, 'Pokročilý Aeternum Lifestyle Protocol'],
+    [1, 'Optimalizace metabolického zdraví a longevity'],
+    [1, 'Konzultace s fitness trenérem (1× měsíčně)'],
+    [1, 'Konzultace s výživovým specialistou (1× měsíčně)'],
+    [1, 'Konzultace s psychologem (1× za tři měsíce)'],
+    [1, 'Flexibilní program bez vázanosti'],
+    [0, 'Medikace není zahrnuta v ceně programu']
+  ],
+  praha: [
+    [1, 'Medikace je v ceně programu'],
+    [1, 'Osobní i online konzultace na klinice v Praze'],
+    [1, 'Pravidelné krevní testy'],
+    [1, 'Aeternum Longevity Protokol'],
+    [1, 'Podpora odborného koordinátora'],
+    [1, 'Flexibilní program bez vázanosti']
+  ]
+};
+
+function featsHTML(v) {
+  const radky = PLAN_FEATS[v.key];
+  if (!radky) return `<div class="vd">${esc(v.desc || '')}</div>`;
+  return '<ul class="vf">' + radky.map(r =>
+    `<li class="${r[0] ? 'ok' : 'no'}"><span class="fi" aria-hidden="true">${r[0] ? '✔' : '✕'}</span><span>${esc(r[1])}</span></li>`
+  ).join('') + '</ul>';
+}
+
+const PLAN_KARTY = {
+  light: SPOLECNE,
+  standard: SPOLECNE.slice(0, 2).concat([
+    ['Aeternum Lifestyle Protocol', 'Jídelníček, suplementace a tréninkový plán sestavený z Vašeho dotazníku a krevních testů.'],
+    ['Tréninkový plán od fitness trenéra', 'Postavený na tom, co opravdu zvládnete dělat.'],
+    ['Jídelníček a doporučení doplňků stravy', 'Konkrétní, ne obecné rady.']
+  ], SPOLECNE.slice(2)),
+  premium: [
+    ['Všechno ze Standardu', 'Lékařský dohled, screening, Lifestyle Protocol, jídelníček i tréninkový plán.'],
+    ['Prioritní konzultace bez čekání', 'Když něco potřebujete, jdete na řadu první.'],
+    ['Pokročilý Aeternum Lifestyle Protocol', 'Cílený i na metabolické zdraví a dlouhověkost.'],
+    ['Konzultace s fitness trenérem', 'Jednou měsíčně, plus tréninkový plán s detailním rozpisem.'],
+    ['Konzultace s výživovým specialistou', 'Jednou měsíčně, jídelníček na míru a přesný plán suplementace.'],
+    ['Konzultace s psychologem', 'Jednou za tři měsíce.'],
+    ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
+  ],
+  praha: [
+    ['Medikace v ceně programu', 'All-inclusive — v lékárně už nic nedoplácíte.'],
+    ['Lékařský dohled a pravidelné kontroly', 'Osobní i online konzultace na klinice v Praze.'],
+    ['Prioritní konzultace bez čekání', 'Když něco potřebujete, jdete na řadu první.'],
+    ['Pokročilý Aeternum Lifestyle Protocol', 'Individuální nutriční, suplementační a tréninkový plán.'],
+    ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
+  ]
+};
+function planCards() {
+  const k = (S.variant && S.variant.key) || 'standard';
+  const radky = PLAN_KARTY[k] || PLAN_KARTY.standard;
+  const lek = S.variant && S.variant.drugIncluded ? '' :
+    '<div class="card"><b>Léčivo není v ceně</b><span>Kupujete si ho ' + sam() +
+    ' na náš e-recept, v kterékoli lékárně a v režimu samoplátce. Cenu balení znáte dopředu.</span></div>';
+  return '<div class="cards">' +
+    radky.map(r => '<div class="card"><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') +
+    lek + '</div>';
+}
+
+const FAQ = {
+  side: () => `Nejčastěji jde o zažívací potíže v prvních týdnech — pocit plnosti, nevolnost, občas zácpa nebo naopak. U většiny lidí to odezní, jak si tělo zvykne, a dá se tomu předcházet menšími porcemi a tím, že nebudete jíst do přeplnění. Právě proto začínáme na nejnižší dávce a zvyšujeme ji pomalu. Vážnější reakce jsou vzácné a vstupní screening děláme mimo jiné proto, abychom je uměli vyloučit předem. Po celou dobu jste pod dohledem lékaře, takže na to nejste ${sam()}.`,
+  yoyo: 'Budu upřímný: když se váha shodí rychle a drasticky, riziko návratu je vysoké — a to platí u jakékoli metody, nejen u GLP‑1. Proto u nás jedeme změnu dlouhodobou místo rychlé. Program počítá s udržovací fází a s tím, že si za tu dobu přenastavíte návyky kolem jídla, pohybu a spánku. Cílem není číslo na váze za tři měsíce, ale to, aby Vám výsledek zůstal.',
+  speed: 'Záleží na vstupní váze, dávce a na tom, jak tělo reaguje — proto Vám neslíbím konkrétní číslo. Obecně platí, že zdravé tempo je pozvolné a první týdny bývají spíš o zvykání než o váze. Přesnější odhad Vám dá lékař, až uvidí krevní testy a složení těla.',
+  diff: 'Oba léky působí na stejném principu, Mounjaro ale cílí ještě na druhý receptor navíc, takže u části lidí bývá účinek silnější. Neznamená to, že je automaticky lepší — co bude vhodné pro Vás, rozhodne lékař podle vyšetření a Vašich výsledků.',
+  needle: 'Podává se podkožní injekcí jednou týdně, perem s velmi tenkou jehlou — do břicha, stehna nebo paže. Jehla je kratší a tenčí než při odběru krve a většina lidí popisuje, že to prakticky necítí. Pero je navržené tak, aby to zvládl kdokoli: jehlu ani nevidíte, přiložíte a zmáčknete. Aplikaci si uděláte doma a při zahájení programu Vám ji ukážeme a projdeme s Vámi, dokud si nebudete jistí.',
+  miss: 'Nic dramatického se neděje. Postupuje se podle pravidel z příbalové informace a záleží na tom, kolik dní uplynulo — v žádném případě se nedávkuje dvojitě. Kdyby to nastalo, napište nám a poradíme Vám.',
+  cravings: () => `To je přesně ta situace, kdy chceme vědět. Když se chutě vrátí nebo se váha zastaví na víc než 28 dní, dáte nám vědět a lékař rozhodne o úpravě dávkování na další měsíc. Neřešte to ${sam()} zvyšováním dávky.`,
+  muscle: () => 'Při hubnutí tělo bere i ze svalů, to platí vždycky. Dá se to z velké části zvrátit dvěma věcmi: '
+    + 'dostatkem bílkovin a silovým tréninkem alespoň každý druhý den. ' + protokolVeta()
+    + ' Složení těla sledujeme, abychom o tom nemuseli jen spekulovat.',
+  quit: 'Ano. Program nemá žádnou vázanost, lze ho zkrátit i prodloužit bez pokuty nebo doplácení. Jen bych Vám doporučil to vždycky probrat s lékařem, ať se ukončení udělá rozumně a ne ze dne na den.',
+  insurance: () => 'Ne. Aeternum Clinic je privátní klinika a nemá smlouvu s žádnou zdravotní pojišťovnou, '
+    + 'takže se nedá nechat proplatit ani zpětně. Vstupní screening i program '
+    + 'si hradíte ' + sam() + ', v režimu samoplátce. ' + (S.variant && S.variant.drugIncluded
+      ? 'U Vámi vybraného programu je léčivo v ceně, takže v lékárně už nic nedoplácíte.'
+      : 'U programů na dálku navíc není v ceně ani léčivo — to si kupujete na náš e‑recept v lékárně, v režimu samoplátce. '
+        + 'Říkám to radši dopředu, ať víte, co Vás to celé bude stát.'),
+  diet: () => 'Nemusíte držet žádnou dietu a nebudu Vám dávat jídelníček, který se nedá dodržet. Lék sám sníží '
+    + 'chuť k jídlu — to podstatné je využít to a jíst dost bílkovin, aby se neubíralo svalstvo. ' + protokolVeta(),
+  nowork: 'Stává se to u menší části lidí. Proto jsou v programu pravidelné kontroly — když se po několika týdnech nic neděje, lékař upraví dávku nebo zváží změnu preparátu. Nikdo Vás nenechá půl roku na něčem, co nefunguje.'
+};
+
+function mesice(n) { return n === 1 ? 'měsíc' : (n >= 2 && n <= 4 ? 'měsíce' : 'měsíců'); }
+
+/* ---------- vykreslení ---------- */
+function bubble(html, opts = {}) {
+  const row = document.createElement('div');
+  row.className = 'row' + (opts.me ? ' me' : '');
+  if (!opts.me) {
+    const img = document.createElement('img');
+    img.className = 'ava' + (opts.stack ? ' hide' : '');
+    img.src = MARCEL_AVATAR; img.alt = 'Marcel';
+    row.appendChild(img);
+  }
+  const b = document.createElement('div');
+  b.className = 'bub' + (opts.cls ? ' ' + opts.cls : '');
+  b.innerHTML = html;
+  row.appendChild(b);
+  $('#inner').appendChild(row);
+  if (!opts.me) buzz();
+  scroll();
+  return row;
+}
+
+function typing() {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<img class="ava" src="${MARCEL_AVATAR}" alt=""><div class="bub typing"><span></span><span></span><span></span></div>`;
+  $('#inner').appendChild(row);
+  scroll();
+  return row;
+}
+
+function scroll() { const t = $('#talk'); t.scrollTop = t.scrollHeight; }
+
+/* Rytmus psaní dělá z formuláře rozhovor, ale nikdo nesmí být jeho rukojmím:
+   klepnutí kamkoli do konverzace čekání přeskočí. */
+let skipNow = null;
+const wait = ms => new Promise(r => {
+  const t = setTimeout(done, ms);
+  function done() { clearTimeout(t); if (skipNow === done) skipNow = null; r(); }
+  skipNow = done;
+});
+document.addEventListener('pointerdown', e => {
+  if (!skipNow || e.target.closest('.dock')) return;
+  skipNow();
+});
+/* Jak dlouho se tváří, že píše. Skutečný člověk u delší věty přemýšlí dýl
+   a neodpovídá na takt metronomu, proto délka plus trocha náhody. Strop je
+   nahoře proto, že čekání nad čtyři vteřiny už není rozmýšlení, ale porucha. */
+const pace = txt => {
+  const n = String(txt).replace(/<[^>]*>/g, '').length;
+  return Math.round(Math.min(4000, 700 + n * 19) * (0.85 + Math.random() * 0.3));
+};
+
+/* Kolik zpráv za sebou smí napsat, než nechá klienta reagovat. Bez tohohle
+   sype celou kapitolu v jednom bloku a je z toho cedule, ne rozhovor. */
+const MAX_RUN = 2;
+
+/* Co klient klepne, aby Marcel psal dál. Je to jeho replika, ne ovládací
+   prvek, takže pořád stejné „Pokračovat" zní jako software. Střídají se
+   po pořadí, ne náhodně — aby dvě stejné nepřišly za sebou a aby druhé
+   projití konzultace vypadalo stejně jako první.
+
+   Když se k nějaké replice hodí něco konkrétnějšího, napíše se té replice
+   do `dal` a tenhle seznam se pro ni přeskočí. */
+const DAL = ['Rozumím', 'Dobře', 'Jasně, pokračujte', 'Chápu', 'Dobře, můžeme dál', 'Rozumím, dál'];
+let dalI = 0;
+let dalTed = '';                       // co zrovna na tlačítku stojí
+function dalLabel(beat) {
+  dalTed = (beat && beat.dal) || DAL[dalI++ % DAL.length];
+  return dalTed;
+}
+
+/* Cesta klienta, stejná trojice jako na webu. Ukazatel prvního kroku se plní
+   podle toho, jak daleko je v konzultaci — druhý a třetí ho teprve čekají. */
+const WAY = [
+  { n: 1, label: 'Úvodní konzultace', short: 'Konzultace' },
+  { n: 2, label: 'Vstupní screening', short: 'Screening' },
+  { n: 3, label: 'Lékařské vyšetření', short: 'Vyšetření' }
+];
+
+function renderProgress(key) {
+  const i = CHAPTERS.findIndex(c => c.key === key);
+  const idx = i < 0 ? 0 : i;
+  const share = CHAPTERS.length > 1 ? idx / (CHAPTERS.length - 1) : 1;
+  const el = $('#way');
+  if (!el.children.length) {
+    el.innerHTML = WAY.map(w =>
+      `<div class="st"><i>${w.n}</i><div class="lb"><b><span class="lg">${esc(w.label)}</span><span class="sm">${esc(w.short)}</span></b><div class="bar"><u></u></div></div></div>`).join('');
+  }
+  const steps = el.querySelectorAll('.st');
+  steps[0].className = 'st on';
+  steps[0].querySelector('u').style.width = Math.round(share * 100) + '%';
+}
+
+/* Tři varianty programu. Vykreslují se postupně a cena se dopočítá —
+   je to okamžik, kdy klient poprvé vidí svoje číslo. */
+async function renderVariants() {
+  const vs = D.variants || [];
+  const row = bubble('<div class="vars" id="vars"></div>');
+  const box = row.querySelector('#vars');
+  for (let i = 0; i < vs.length; i++) {
+    const v = vs[i];
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'var';
+    el.dataset.i = String(i);
+    /* Bez odznaku „doporučeno": klient si vybírá sám a program, který mu
+       doporučíme, nemá být ten, na který ho tlačíme. Místo popisku jsou
+       v kartě fajfky a křížek, stejně jako ve výsledcích screeningu. */
+    el.innerHTML = `<div class="vh"><span class="vn">${esc(v.name)}</span>` +
+      `<span class="vp"><b data-p>0</b> Kč<em> /měs.</em></span></div>` +
+      `<div class="vm">${v.months} ${mesice(v.months)}</div>` +
+      featsHTML(v);
+    box.appendChild(el);
+    countUp(el.querySelector('[data-p]'), v.price);
+    buzz(6);
+    scroll();
+    await wait(380);
+  }
+  box.addEventListener('click', e => {
+    const el = e.target.closest('.var');
+    if (!el) return;
+    const v = vs[Number(el.dataset.i)];
+    box.querySelectorAll('.var').forEach(x => x.classList.remove('sel'));
+    el.classList.add('sel');
+    // drugIncluded si pamatujeme kvůli kartám: u programů na dálku
+    // si léčivo kupuje klient sám a tvrdit mu opak by byla lež.
+    S.variant = { name: v.name, months: v.months, price: v.price,
+      key: v.key, drugIncluded: !!v.drugIncluded }; save();
+    buzz(12);
+    logLine('klient', 'Vybral variantu ' + v.name + ' · ' + v.months + ' měsíců · ' + v.price + ' Kč/měs.');
+    /* Na `price` — kapitola o měsíční platbě kartou. Dřív se odsud skákalo
+       rovnou na `benefits` a celý výklad o tom, jak se platí a že jde
+       platbu kdykoli zrušit, klient nikdy neviděl. */
+    setChips([{ label: 'Pokračovat s variantou ' + v.name, go: 'price', primary: true }]);
+  });
+  setChips([]);
+}
+
+/* Souhlasy. Každý zvlášť, žádné „souhlasím se vším“ — a ukládá se přesné
+   znění, protože to je to, co klient opravdu viděl. */
+/* Znění souhlasu se ukládá do přepisu, takže se nesmí lišit od toho, co
+   klient viděl. Cena se proto bere z ceníku, ne opisuje do textu. */
+const consentText = c => typeof c.t === 'function' ? c.t() : c.t;
+
+const CONSENTS = [
+  { k: 'ai', t: 'Beru na vědomí, že jsem úvodní konzultaci absolvoval(a) s digitálním asistentem, nikoli s lékařem, a že poskytnuté informace nejsou lékařskou radou ani diagnózou.' },
+  { k: 'lekar', t: 'Rozumím tomu, že o vhodnosti terapie, volbě léku i dávkování rozhoduje výhradně lékař na základě výsledků vstupního screeningu.' },
+  { k: 'platba', t: () => `Rozumím tomu, že vstupní screening (${fmt(CFG.screeningPrice)} Kč) není součástí léčby a hradí se předem.` },
+  { k: 'gdpr', t: 'Souhlasím se zpracováním osobních údajů v rozsahu nezbytném pro poskytnutí péče.' },
+  { k: 'podminky', t: 'Seznámil(a) jsem se s obchodními podmínkami a souhlasím s nimi.', odkaz: true }
+];
+
+function renderConsents() {
+  const row = bubble('<div class="cons" id="cons">' + CONSENTS.map((c, i) =>
+    `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(consentText(c))}${c.odkaz && podminky() ? ' ' + odkazPodminky('Otevřít') : ''}</span></label>`).join('') + '</div>');
+  const box = row.querySelector('#cons');
+  box.addEventListener('change', () => {
+    const all = Array.from(box.querySelectorAll('input'));
+    /* Ukládá se vyhodnocený text, ne předpis — do důkazní stopy patří přesně
+       ta věta, kterou klient viděl na obrazovce, i s cenou v ní. */
+    all.forEach(i => { S.consents[i.dataset.k] = i.checked
+      ? { at: Date.now(), text: consentText(CONSENTS[Number(i.dataset.i)]) } : null; });
+    save();
+    buzz(10);
+    const done = all.every(i => i.checked);
+    setChips(done ? [{ label: 'Potvrdit a pokračovat k platbě', go: 'book', consent: true, primary: true }] : []);
+  });
+  setChips([]);
+}
+
+/* Datum narození a rodné číslo. Víc po klientovi nechceme — jméno, adresu
+   i míry máme ze screeningu a zbytek anamnézy probere lékař při vyšetření. */
+function renderLabForm() {
+  const row = bubble('<div class="cons" id="labform">' +
+    '<label class="lf"><span>Datum narození</span><input type="date" id="lf-dob" value="' + esc(S.labDob || '') + '"></label>' +
+    /* Realisticky vypadající číslo v nápovědě čtou lidé jako vyplněné pole a
+       pak nechápou, proč to nejde dál. */
+    '<label class="lf"><span>Rodné číslo</span><input type="text" inputmode="numeric" id="lf-rc" placeholder="devět nebo deset číslic, bez lomítka" value="' + esc(S.labRc || '') + '"></label>' +
+    '<label><input type="checkbox" id="lf-ok"' + (S.labConsent ? ' checked' : '') + '><span>Souhlasím, aby Aeternum Clinic předala tyto údaje smluvní laboratoři za účelem objednání odběru a provedení vyšetření.</span></label>' +
+    '</div>');
+  const box = row.querySelector('#labform');
+  const dob = box.querySelector('#lf-dob'), rc = box.querySelector('#lf-rc'), okb = box.querySelector('#lf-ok');
+  const prepocet = function () {
+    S.labDob = dob.value; S.labRc = rc.value.trim(); S.labConsent = okb.checked; save();
+    const hotovo = /^\d{4}-\d{2}-\d{2}$/.test(S.labDob || '') &&
+      /^\d{6}\s*\/?\s*\d{3,4}$/.test(S.labRc || '') && S.labConsent;
+    setChips(hotovo ? [{ label: 'Pokračovat na výběr termínu', go: 'bookSlots', primary: true }] : []);
+  };
+  box.addEventListener('input', prepocet);
+  box.addEventListener('change', prepocet);
+  prepocet();
+}
+
+function setChips(list) {
+  const el = $('#chips');
+  // Na co už jsme odpověděli, podruhé nenabízíme — klient by dostal tutéž repliku.
+  list = (list || []).filter(c => !(c.faq && S.asked[c.faq]));
+  if (!list.length) { el.innerHTML = ''; el._list = null; return; }
+  el.innerHTML = list.map((c, i) =>
+    `<button type="button" class="chip${c.primary || c.go && list.length === 1 ? ' go' : ''}${c.faq ? ' faq' : ''}" data-i="${i}">${esc(c.label)}</button>`).join('');
+  el._list = list;
+  /* Nabídka ukrojí z výšky konverzace, takže poslední replika skončí schovaná
+     za ní. Dorolujeme až po přepočtu rozvržení — hned po innerHTML prohlížeč
+     novou výšku ještě nezná. */
+  requestAnimationFrame(scroll);
+}
+
+/* ---------- výběr termínu a platba ---------- */
+
+const DNY = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+const MESICE_2P = ['ledna','února','března','dubna','května','června',
+                   'července','srpna','září','října','listopadu','prosince'];
+
+/* Server posílá termín jako místní čas bez zóny („2026-11-12T09:00"). Kdyby
+   se to prohnalo new Date() rovnou, prohlížeč v jiné zóně by ho posunul. */
+function parseSlot(iso) {
+  const m = String(iso).match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : new Date(iso);
+}
+function slotDay(d) {
+  const dnes = new Date(); dnes.setHours(0, 0, 0, 0);
+  const den = new Date(d); den.setHours(0, 0, 0, 0);
+  const za = Math.round((den - dnes) / 86400000);
+  if (za === 0) return 'dnes';
+  if (za === 1) return 'zítra';
+  return DNY[d.getDay()];
+}
+const slotDate = d => d.getDate() + '. ' + MESICE_2P[d.getMonth()];
+const slotTime = d => d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+
+/* Nejbližší termíny, přednostně do sedmi dnů: do té doby klient stihne odběr
+   a delší odstup znamená, že si to rozmyslí. Když do týdne nic volného není,
+   nabídneme nejbližší pozdější — poslat rozhodnutého člověka telefonovat je
+   to nejhorší, co se v tuhle chvíli dá udělat. */
+/* Mezi konzultací a vyšetřením musí klient stihnout odběr krve a laboratoř
+   potřebuje zhruba 48 hodin na výsledky. Nabízíme proto termíny nejdřív za
+   týden; dřívější existují, ale lékař by u nich seděl bez výsledků.
+
+   Dřív tohle filtrovalo obráceně — jen termíny DO týdne — takže „Chci jiný
+   termín" ukázalo přesně tytéž tři a vypadalo to jako zaseknuté tlačítko. */
+const ODSTUP_DNI = 7;
+function nextSlots(all, limit) {
+  const dny = all.map(parseSlot).sort((a, b) => a - b);
+  const sOdstupem = dny.filter(d => d.getTime() >= Date.now() + ODSTUP_DNI * 86400000);
+  return (sOdstupem.length ? sOdstupem : dny).slice(0, limit);
+}
+
+
+let SLOTS = { all: [], form: '', picked: null, vs: null };
+
+async function renderSlots(expand) {
+  /* Nejdřív data, teprve pak mluvíme. Uvedení záleží na tom, co vyšlo —
+     kdyby se skládalo dřív, tvrdilo by něco o termínech, které ještě nejsou
+     načtené. Tečky zatím drží pozornost, načítání trvá vteřiny. */
+  if (!SLOTS.all.length) {
+    const t = expand ? null : typing();
+    try {
+      const r = await api('slots', { kind: 'exam' });
+      SLOTS.all = (r && r.slots) || [];
+    } catch (e) { SLOTS.all = []; }
+    if (t) t.remove();
+  }
+
+  const blizke = nextSlots(SLOTS.all, expand ? 20 : 4);
+
+  if (!blizke.length) {
+    await marcelSays('Volné termíny se mi teď nepodařilo načíst. Zkuste to prosím ' +
+      'za chvíli znovu — nebo mi napište a ozvu se Vám s termínem e-mailem.');
+    return;
+  }
+
+  if (!expand) {
+    await marcelSays('Tady jsou volné termíny. Záměrně nezačínám hned zítra: ' +
+      'na <b>odběr krve</b> si musíte osobně zajít na odběrové místo a výsledky ' +
+      'bývají obvykle <b>do 48 hodin</b>. Lékař je má mít před sebou už na vyšetření, ' +
+      'takže doporučuju jít na odběr <b>alespoň 3–4 dny předem</b>. Žádanku Vám pošlu ' +
+      'e-mailem hned po platbě — a kdybyste na odběr nestíhal' + ova() + ', vyberte si radši ' +
+      'pozdější termín vyšetření. Přijít později s výsledky je lepší než včas bez nich.');
+  }
+
+  const row = expand ? null : bubble('<div class="slots" id="slotbox"></div>');
+  const host = expand || (row && row.querySelector('#slotbox'));
+  host.innerHTML = '';
+  for (const d of blizke) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'slot';
+    el.dataset.iso = d.toISOString();
+    el.innerHTML = '<span><span class="sd">' + slotDay(d) + ' ' + slotDate(d) +
+      '</span><span class="sw">' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') +
+      ' · ' + (D.examMinutes || 45) + ' minut</span></span>' +
+      '<span class="st">' + slotTime(d) + '</span>';
+    host.appendChild(el);
+    buzz(6); scroll();
+    await wait(260);
+  }
+  /* Tlačítko slibuje POZDĚJŠÍ termíny, takže se smí ukázat jen když nějaké
+     opravdu jsou. Dřív se porovnávalo proti všem termínům včetně těch,
+     které kvůli odstupu na odběr schválně nenabízíme — klient pak klikl
+     a nic nepřibylo. */
+  const vsechnyPozdeji = nextSlots(SLOTS.all, 1000);
+  if (!expand && vsechnyPozdeji.length > blizke.length) {
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'slot more';
+    more.dataset.more = '1';
+    more.innerHTML = '<span class="sd">Chci pozdější termín</span>' +
+      '<span class="sw">když na odběr nestíháte, vyberte si dál</span>';
+    host.appendChild(more);
+    scroll();
+  }
+
+  host.addEventListener('click', async e => {
+    const el = e.target.closest('.slot');
+    if (!el || host._done) return;
+    if (el.dataset.more) { host._done = true; await renderSlots(host); return; }
+    host._done = true;
+    host.querySelectorAll('.slot').forEach(x => x.classList.remove('sel'));
+    el.classList.add('sel');
+    host.querySelectorAll('.slot.more').forEach(x => x.remove());
+    buzz(12);
+    await pickSlot(el.dataset.iso);
+  }, { once: false });
+}
+
+/* Zabere termín a ukáže platbu. Rezervace drží, dokud nedorazí platba —
+   proto se tu nic neslibuje dřív, než server termín opravdu zapíše. */
+async function pickSlot(isoUtc) {
+  const d = new Date(isoUtc);
+  const lidsky = slotDay(d) + ' ' + slotDate(d) + ' v ' + slotTime(d);
+  logLine('klient', 'Vybral termín ' + lidsky);
+  const local = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') +
+    ':' + String(d.getMinutes()).padStart(2, '0');
+
+  /* Ukázka nemá screening, takže `hold` na serveru spadne na `bad_id` a
+     klientovi by se tvrdilo, že se termín nepodařilo zabrat. Radši řekneme
+     narovinu, kde jsme — spočítat se to nedá a platba v ukázce nejede. */
+  if (DEMO_MODE || !S.id) {
+    await marcelSays('Tady ukázka končí. Termín <b>' + lidsky + '</b> doopravdy nedržím ' +
+      'a platba se nespustí — na to je potřeba dokončený e-screening. ' +
+      'V ostré konzultaci by na tomhle místě přišel QR kód a platba kartou.');
+    setChips([]);
+    return;
+  }
+
+  const t = typing();
+  let r = null, chyba = '';
+  try {
+    r = await api('hold', { kind: 'exam', slot: local, type: SLOTS.form || 'osobne',
+      id: S.id, name: D.fullName || D.name, email: D.email, phone: D.phone,
+      /* Pro žádanku. Adresu a míry si server dotáhne ze screeningu sám. */
+      birthDate: S.labDob || '', birthNumber: (S.labRc || '').trim(), labConsent: S.labConsent === true,
+      /* Souhlasy klient odklikl v předchozí kapitole. Posíláme je tak, jak
+         jsou — když je neodklikl, rezervaci server odmítne, a to je správně. */
+      consent: S.consent === true, src: 'econsult' }, 25000);
+  } catch (e) { chyba = (e && e.message) || 'nepodarilo'; }
+  t.remove();
+
+  if (!r || !r.ok) {
+    bubble(chyba === 'slot_taken'
+      ? 'Ten termín mi právě vzali před nosem. Vyberte si prosím jiný.'
+      : 'Termín se mi nepodařilo zabrat. Zkuste to prosím ještě jednou, nebo nám zavolejte na ' + esc(CFG.phone) + '.');
+    SLOTS.all = [];
+    await renderSlots();
+    return;
+  }
+  SLOTS.picked = lidsky; SLOTS.vs = r.vs;
+  S.labRc = '';                              // v prohlížeči ho dál nedržíme
+  save();
+
+  await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
+  await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
+    'Vám pošlu e-mailem hned po platbě. Na odběr si musíte osobně zajít na odběrové místo ' +
+    'a výsledky bývají do 48 hodin, takže tam zajděte <b>alespoň 3–4 dny před vyšetřením</b> — ' +
+    'bez výsledků Vám lékař terapii neschválí. Kdyby to nevycházelo, dejte vědět a termín posuneme.');
+  await marcelSays('A až odběr absolvujete, otevřete si svoji rezervaci — odkaz na ni máte ' +
+    'v potvrzovacím e-mailu — a klepnete tam na tlačítko <b>„Byl jsem na odběru“</b>. ' +
+    'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
+  await marcelSays(payCard(r, lidsky));
+  persist('book-hold');
+}
+
+/* Jedna bublina od Marcela, i mimo scénář: tečky, pauza, text. */
+async function marcelSays(html) {
+  const t = typing();
+  await wait(pace(html));
+  t.remove();
+  bubble(html);
+  logLine('marcel', html);
+  await wait(300);
+}
+
+/* Odkaz na obchodní podmínky. Server posílá platnou adresu, CFG má zálohu;
+   když ani jedno není, odkaz se prostě neukáže — vést klienta na stránku,
+   která neexistuje, je horší než neodkazovat nikam. */
+const podminky = () => String((D && D.termsUrl) || CFG.termsUrl || '').trim();
+const odkazPodminky = (text) => podminky()
+  ? '<a href="' + esc(podminky()) + '" target="_blank" rel="noopener" style="color:inherit">' + text + ' \u203a</a>'
+  : '';
+
+// Lékařská část screeningu; laboratorní je zbytek do celkové ceny.
+const lekarskaCast = () => Number(D && D.examDoctorPart) || 2500;
+
+function payCard(r, lidsky) {
+  /* Co klient podepisuje svou platbou, se říká před ní, ne pod tlačítkem.
+     Pod tlačítkem to přečte až ten, kdo váhá — a to je pozdě. */
+  const presun = 'Termín <b>přesunete nebo zrušíte sám</b> ve své rezervaci, odkaz máte ' +
+    'v potvrzovacím e-mailu, nebo rovnou v pozvánce v kalendáři. Zdarma, nejpozději ' +
+    (D.rescheduleHours || 12) + ' hodin předem.' +
+    /* Vlastní odstavec: je to jediný pokyn v celé kartě a v jednom bloku
+       se čtyřmi řádky kolem něj se ztratí. */
+    '<br><br><b>Nevolejte nám</b> — udělejte to elektronicky, ať se to u nás ' +
+    'propíše hned a termín může dostat někdo jiný.';
+  const btn = r.checkoutUrl
+    ? '<a class="pay" href="' + esc(r.checkoutUrl) + '">Zaplatit kartou · ' + fmt(CFG.screeningPrice) + ' Kč</a>'
+    : '<div class="paynote">Platební bránu se mi teď nepodařilo otevřít. Napište mi a pošlu Vám odkaz na platbu e-mailem.</div>';
+  return '<div class="sum"><div class="sh">' +
+      '<div class="se">Vstupní screening</div>' +
+      '<div class="sn">' + esc(lidsky) + '</div>' +
+    '</div><div class="sb">' +
+      '<div class="kv"><span>Odběr a rozbor krve v Synlabu</span><b>' + fmt(CFG.screeningPrice - lekarskaCast()) + ' Kč</b></div>' +
+      '<div class="kv"><span>Vyšetření lékařem</span><b>' + fmt(lekarskaCast()) + ' Kč</b></div>' +
+      '<div class="kv"><span>Forma</span><b>' + (SLOTS.form === 'online' ? 'online' : 'osobně v Praze') + '</b></div>' +
+      '<div class="kv"><span>Celkem</span><b>' + fmt(CFG.screeningPrice) + ' Kč jednorázově</b></div>' +
+    '</div></div>' + btn +
+    '<div class="paynote">Platba běží přes zabezpečenou bránu Stripe. ' +
+      'Údaje o kartě vidí jen ona, my se k nim nedostaneme.<br><br>' + presun +
+      (podminky() ? '<br><br>Úhradou potvrzujete, že jste se seznámil s obchodními podmínkami. ' +
+        odkazPodminky('Přečíst obchodní podmínky') : '') + '</div>';
+}
+
+/* ---------- běh scénáře ---------- */
+const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug', pmos: 'drug',
+  form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
+  care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
+  book: 'book', bookLater: 'book', bookForm: 'book', bookLab: 'book',
+  bookSlots: 'book', blocked: 'intro' };
+
+async function play(key) {
+  if (busy) return;
+  busy = true;
+  S.chapter = key; save();
+  persist(key);
+  renderProgress(CHAPTER_OF[key] || key);
+  setChips([]);
+  const beats = SCRIPT[key] || [];
+  /* Od kolikáté repliky kapitoly se pokračuje. Když klient čekání přerušil
+     tlačítkem, vrátíme se sem a dopíšeme zbytek. */
+  let i = S.beat || 0;
+  S.beat = 0;
+  let run = 0;
+  for (; i < beats.length; i++) {
+    const beat = beats[i];
+    if (beat.chips) { setChips(beat.chips); break; }
+    if (beat.ask) { askMode(beat); busy = false; return; }
+    if (beat.vars) { await renderVariants(); busy = false; return; }
+    if (beat.slots) { await renderSlots(); busy = false; return; }
+    if (beat.cons) { renderConsents(); busy = false; return; }
+    if (beat.lab) { renderLabForm(); busy = false; return; }
+    /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
+       repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
+    if (run >= MAX_RUN && i < beats.length - 1) {
+      S.beat = i; save();
+      setChips([{ label: dalLabel(beats[i - 1]), go: key, resume: true }]);
+      busy = false;
+      return;
+    }
+    const txt = typeof beat.t === 'function' ? beat.t() : beat.t;
+    const karta = beat.card ? (typeof beat.card === 'function' ? beat.card() : beat.card) : '';
+    /* Replika, která se týká jen někoho (ceny léčiva u programů na dálku),
+       vrátí pro ostatní prázdno. Prázdná bublina by byla vidět. */
+    if (!txt && !karta) continue;
+    const t = typing();
+    await wait(pace(txt));
+    t.remove();
+    bubble(txt + karta, { cls: beat.cls });
+    logLine('marcel', txt);
+    if (beat.final) { finalScreen(key); }
+    run++;
+    await wait(420);
+  }
+  busy = false;
+}
+
+function finalScreen(key) {
+  if (key === 'book') {
+    const url = CFG.bookingUrl + '/?kind=exam' + (S.id ? '&id=' + encodeURIComponent(S.id) : '');
+    setChips([{ label: 'Vybrat termín a zaplatit', href: url, primary: true }]);
+    $('#askbox').style.display = 'none';
+  } else {
+    setChips([]);
+    $('#askbox').style.display = 'none';
+  }
+}
+
+let pending = null;
+function askMode(beat) {
+  pending = beat;
+  const ta = $('#ask');
+  ta.placeholder = beat.placeholder || 'Napište mi to…';
+  ta.focus();
+  // Na mobilu vyjede klávesnice a ukrojí půl obrazovky. Totéž co u nabídky.
+  requestAnimationFrame(scroll);
+}
+
+function logLine(who, text) {
+  S.log.push({ who, text: String(text).replace(/<[^>]*>/g, ''), at: Date.now() });
+  if (S.log.length > 400) S.log.shift();
+  save();
+}
+
+/* ---------- interakce ---------- */
+document.addEventListener('click', async e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const list = $('#chips')._list || [];
+  const c = list[Number(b.dataset.i)];
+  if (!c) return;
+  if (c.href) { location.href = c.href; return; }
+  /* „Pokračovat" není odpověď, jen pokyn psát dál. Do bubliny ani do přepisu
+     nepatří — přepis je důkaz o tom, co klientovi řekl a co odsouhlasil. */
+  if (!c.resume) {
+    bubble(esc(c.label), { me: true });
+    logLine('klient', c.label);
+  }
+  setChips([]);
+  if (c.store) { S.answers[c.store[0]] = c.store[1]; save(); }
+  if (c.consent) { S.consent = true; save(); }
+  if (c.form) { SLOTS.form = c.form; S.form = c.form; save(); }
+  /* Klient se chce na něco zeptat. Nikam ho nepřesouváme — zůstane v téhle
+     kapitole, odpoví mu model a backToFlow mu pak vrátí tytéž nabídky. */
+  if (c.prompt) {
+    busy = true;
+    const t = typing();
+    await wait(pace(c.prompt));
+    t.remove();
+    bubble(c.prompt);
+    logLine('marcel', c.prompt);
+    busy = false;
+    const ta = $('#ask');
+    ta.placeholder = 'Napište mi, co Vám na tom nesedí…';
+    ta.focus();
+    return;
+  }
+  if (c.faq) { await answerFaq(c.faq); return; }
+  /* Vetsina prechodu je pevna, par z nich se ohyba podle klienta (PMOS).
+     Proto `go` smi byt i funkce, ktera vrati jmeno kapitole.          */
+  if (c.go) play(typeof c.go === 'function' ? c.go() : c.go);
+});
+
+/* Většina odpovědí je prostý text, dvě se ohýbají podle pohlaví a jsou
+   proto funkce. Tohle je srovná, ať se volající nemusí ptát která je která. */
+function faqText(key) {
+  const a = FAQ[key];
+  return typeof a === 'function' ? a() : (a || '');
+}
+
+async function answerFaq(key) {
+  S.asked[key] = Date.now(); save();
+  const answer = faqText(key);
+  /* Když scénář zrovna běží, počkáme. Dvě odpovědi psané přes sebe si
+     navzájem přepisují tečky a jedna z nich se ztratí — klient pak klepne
+     na otázku a nedostane nic. */
+  for (let i = 0; i < 100 && busy; i++) await new Promise(r => setTimeout(r, 150));
+  busy = true;
+  const t = typing();
+  await wait(pace(answer));
+  t.remove();
+  bubble(answer || 'Na tohle Vám radši odpoví lékař — poznamenám si to.');
+  logLine('marcel', answer);
+  busy = false;
+  await wait(200);
+  backToFlow();
+}
+
+function backToFlow() {
+  const k = S.chapter;
+  const beats = SCRIPT[k] || [];
+  /* Klient se zeptal ve chvíli, kdy Marcel čekal na pokyn psát dál. Vrátit
+     ho na konec kapitoly by mu sebralo zbytek výkladu, za který zaplatil —
+     nabídneme mu tutéž repliku, u které jsme stáli. */
+  if (S.beat > 0 && S.beat < beats.length) {
+    setChips([{ label: dalTed || 'Pokračovat', go: k, resume: true }]);
+    return;
+  }
+  const last = beats.filter(b => b.chips).pop();
+  if (last) { setChips(last.chips); return; }
+  /* Kapitola, která končí interakcí — výběr termínu, souhlasy, formulář pro
+     laboratoř, výběr programu — žádnou nabídku nemá. Po dotazu by klient
+     zůstal úplně bez tlačítek a vypadalo by to jako zaseknuté. */
+  if (beats.some(b => b.slots || b.cons || b.lab || b.vars)) {
+    setChips([{ label: zpatkyLabel(beats), go: k, resume: true }]);
+  }
+}
+
+function zpatkyLabel(beats) {
+  if (beats.some(b => b.slots)) return 'Zpátky k termínům';
+  if (beats.some(b => b.vars)) return 'Zpátky k programům';
+  if (beats.some(b => b.lab)) return 'Zpátky k formuláři';
+  return 'Zpátky k souhlasům';
+}
+
+$('#ask').addEventListener('input', e => {
+  e.target.style.height = 'auto';
+  e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px';
+});
+$('#ask').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitAsk(); }
+});
+$('#sendBtn').addEventListener('click', submitAsk);
+
+/* Dotaz, který čeká, až Marcel dopíše rozepsanou repliku. */
+let fronta = null;
+
+async function submitAsk() {
+  const ta = $('#ask');
+  const text = ta.value.trim();
+  if (!text) return;
+  ta.value = ''; ta.style.height = 'auto';
+  bubble(esc(text), { me: true });
+  logLine('klient', text);
+
+  /* Klient napsal uprostřed toho, co Marcel zrovna píše. Jeho bublina
+     naskočila hned — vidí, že zpráva dorazila — a my počkáme, až Marcel
+     dopíše, a teprve pak odpovíme. Dřív se v takové chvíli nestalo vůbec
+     nic a na telefonu to vypadalo, že appka zamrzla.
+
+     Když mezitím pošle další dotaz, ten novější vyhrává a tenhle se tiše
+     vzdá: odpovídat na dvě otázky najednou nedává smysl. */
+  if (busy) {
+    fronta = text;
+    for (let i = 0; i < 150 && busy; i++) await new Promise(r => setTimeout(r, 200));
+    if (fronta !== text) return;
+    fronta = null;
+  }
+
+  if (pending) {                       // odpověď na otázku ze scénáře
+    const beat = pending; pending = null;
+    ta.placeholder = 'Zeptejte se mě na cokoli…';
+    S.answers[beat.ask] = text; save();
+    const beats = SCRIPT[S.chapter];
+    const from = beats.indexOf(beat) + 1;
+    busy = true;
+    for (let i = from; i < beats.length; i++) {
+      const b = beats[i];
+      if (b.chips) { setChips(b.chips); break; }
+      if (b.ask) { askMode(b); break; }
+      const txt = typeof b.t === 'function' ? b.t() : b.t;
+      const karta = b.card ? (typeof b.card === 'function' ? b.card() : b.card) : '';
+      if (!txt && !karta) continue;
+      const t = typing();
+      await wait(pace(txt));
+      t.remove();
+      bubble(txt + karta, { cls: b.cls });
+      logLine('marcel', txt);
+      await wait(240);
+    }
+    busy = false;
+    return;
+  }
+
+  /* Klient odpověděl vlastními slovy místo kliknutí na nabídku. Je to
+     odpověď na otázku, kterou mu Marcel právě položil, ne dotaz — zapíšeme
+     ji a jedeme tam, kam vedou tlačítka. Jeho věta je navíc přesnější než
+     kterákoli z nich: „přes den sedím, odpoledne fitko" řekne víc než
+     „Většinu dne sedím".
+
+     Platí to jen pro nabídku, která něco zapisuje (`store`). Když visí
+     „Rozumím" nebo nabídka otázek, je napsaný text opravdu dotaz. A text
+     zakončený otazníkem bereme jako dotaz vždycky — klient se může zeptat
+     i uprostřed otázky na sebe. */
+  const nabidka = ($('#chips') || {})._list || [];
+  const volba = nabidka.filter(c => c.store && c.go)[0];
+  if (volba && !/\?\s*$/.test(text)) {
+    setChips([]);
+    S.answers[volba.store[0]] = text; save();
+    play(typeof volba.go === 'function' ? volba.go() : volba.go);
+    return;
+  }
+
+  /* Volný dotaz. Odpovídá model na serveru — podklady i instrukce jsou tam,
+     ne tady, takže si je nikdo nemůže přepsat v prohlížeči.
+
+     Když model z jakéhokoli důvodu odpoví chybou, dotaz nesmí spadnout do
+     prázdna: pošle se na kliniku a odpoví člověk. Klient si konzultaci
+     zaplatil mimo jiné proto, aby se mohl ptát. */
+  busy = true;
+  const t = typing();
+  let answer = '';
+  let failed = '';
+  try {
+    if (DEMO_MODE || !CFG.apiUrl || !S.id) {
+      failed = 'demo';
+    } else {
+      const hist = S.log.slice(-6).map(l => ({ role: l.who === 'klient' ? 'user' : 'assistant', text: l.text }));
+      const r = await api('advisorAsk', { id: S.id, text, history: hist }, 60000);
+      answer = String(r.text || '');
+    }
+  } catch (e) { failed = e.code || 'api'; }
+
+  if (answer) {
+    t.remove();
+    // Model píše odstavce, ne HTML. Prázdný řádek dělá nový odstavec.
+    bubble(answer.split(/\n{2,}/).map(x => esc(x.trim()).replace(/\n/g, '<br>')).filter(Boolean).join('<br><br>'));
+    logLine('marcel', answer);
+    busy = false;
+    backToFlow();
+    persist('dotaz');
+    return;
+  }
+
+  // Odpověď nepřišla. Předáme dotaz lidem a řekneme to rovnou.
+  let sent = false;
+  try {
+    if (CFG.apiUrl && S.id && !DEMO_MODE) { await api('question', { id: S.id, text }, 15000); sent = true; }
+  } catch (e) { /* hláška níž to řekne i tak, dotaz zůstává v přepisu */ }
+  await wait(400);
+  t.remove();
+  bubble(failed === 'advisor_limit'
+    ? `Tolik otázek už jsem dneska zodpověděl — radši Vás teď předám kolegům. Napište na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)}.`
+    : sent
+    ? 'Na tuhle otázku Vám radši odpoví člověk — poslal jsem ji kolegům na kliniku a ozveme se e-mailem, obvykle do druhého dne. Zatím můžeme pokračovat dál.'
+    : `Tuhle otázku si poznamenávám, ale radši ji pošlete i na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)} — ať nezapadne.`);
+  busy = false;
+  backToFlow();
+}
+
+/* ---------- ukládání důkazní stopy ----------------------------------------
+   Přepis, verze scénáře, souhlasy a vybraná varianta. Posílá se v milnících,
+   ne po každé replice — ať to nebombarduje backend. Když se nepovede, jede se
+   dál: klient o konzultaci nepřijde kvůli tomu, že se nezapsal log. */
+let lastSaved = 0;
+async function persist(stage) {
+  if (!CFG.apiUrl || !S.id || DEMO_MODE) return;
+  if (Date.now() - lastSaved < 1500) return;
+  lastSaved = Date.now();
+  try {
+    await api('econsultLog', {
+      id: S.id, stage, scenario: D && D.scenario || '', hash: SCENARIO_HASH,
+      variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
+      consents: S.consents, log: S.log
+    }, 15000);
+  } catch (e) { /* důkazní stopa se doplní při dalším milníku */ }
+}
+
+/* Otisk textů scénáře. Když se texty změní, změní se i otisk — u starého
+   klienta pak jde dokázat, co přesně viděl. */
+const SCENARIO_HASH = (() => {
+  const src = JSON.stringify(Object.keys(SCRIPT).map(k => SCRIPT[k].map(b => typeof b.t === 'string' ? b.t : (b.ask || b.vars || b.cons || '')))) +
+    JSON.stringify(CONSENTS.map(c => c.t));
+  let h = 0;
+  for (let i = 0; i < src.length; i++) { h = ((h << 5) - h + src.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+})();
+
+/* ---------- start ---------- */
+const DEMO_MODE = URLP.get('demo') === '1';
+
+// 1 hodinu, 2–4 hodiny, 5 a víc hodin — česky se to prostě musí rozlišit.
+const hodin = n => n === 1 ? '1 hodinu' : (n >= 2 && n <= 4 ? n + ' hodiny' : n + ' hodin');
+
+function dataError(msg) {
+  $('#way').style.display = 'none';
+  bubble('Nepodařilo se načíst Vaše údaje ze screeningu. ' + esc(msg) +
+    `<span class="note">Zkuste prosím otevřít odkaz z e‑mailu znovu, nebo nám zavolejte na ${esc(CFG.phone)}.</span>`, { cls: 'stop' });
+  $('#askbox').style.display = 'none';
+}
+
+/* Zamčeno: konzultace není zaplacená, nebo jí vypršela platnost. Není to
+   chyba, je to stav — proto se nechová jako chybová hláška, ale jako nabídka
+   s tlačítkem. Klient se sem vrací přes rezervaci, kde se platí. */
+/* Zavřená konzultace. Rozlišujeme dva úplně jiné lidi:
+
+   Kdo nezaplatil, konzultaci teprve zvažuje — tomu ji nabídneme.
+
+   Komu vypršela, ten už jednou zaplatil a byl na půl cesty k termínu.
+   Poslat ho zpátky k pokladně s tím, ať si koupí další konzultaci, je
+   nepochopení situace: on chtěl k lékaři. Proto je hlavní tlačítko
+   rezervace vyšetření a další konzultace až jako vedlejší nabídka. */
+/* Konzultace je vypnutá (ADVISOR_OFF ve vlastnostech skriptu). Může se to
+   stát i někomu, kdo ji má zaplacenou, takže mu musíme nabídnout cestu dál,
+   ne ho nechat na prázdné stránce. Peníze neřešíme textem — ozve se klinice. */
+function offPanel() {
+  $('#way').style.display = 'none';
+  $('#askbox').style.display = 'none';
+  const id = encodeURIComponent(S.id || '');
+  bubble('Omlouvám se, konzultace se mnou je teď dočasně vypnutá — něco na ní ladíme.');
+  bubble('Nemusíte kvůli tomu čekat. Vstupní konzultaci s Vámi projde i <b>živý koordinátor péče</b>, ' +
+    'a jestli už máte jasno, můžete rovnou na <b>vstupní screening</b>.' +
+    `<a class="pay" href="${esc(CFG.bookingUrl + '/?id=' + id)}">Vybrat termín konzultace</a>` +
+    `<div class="paynote">Jestli jste si konzultaci se mnou zaplatil${ova()}, ozvěte se na ` +
+    `${esc(CFG.email)} nebo na ${esc(CFG.phone)} — domluvíme se.</div>`, { cls: 'stop' });
+}
+
+function lockedPanel(expired) {
+  $('#way').style.display = 'none';
+  $('#askbox').style.display = 'none';
+  const id = encodeURIComponent(S.id || '');
+  const konzultace = CFG.bookingUrl + '/?id=' + id;
+  const vysetreni = CFG.bookingUrl + '/?kind=exam&id=' + id;
+
+  if (!expired) {
+    bubble('Tahle konzultace ještě není zaplacená.');
+    bubble(`Vstupní konzultace se mnou stojí <b>${fmt(CFG.advisorPrice)} Kč</b> a tu částku Vám odečteme ` +
+      `z první platby za program. Po zaplacení se mnou můžete začít hned a ${CFG.validHours} hodin se sem vracet.` +
+      `<span class="note"><a href="${esc(konzultace)}" style="color:inherit">Objednat konzultaci ›</a></span>`,
+      { cls: 'stop' });
+    return;
+  }
+
+  bubble(`Platnost téhle konzultace vypršela — odkaz žije ${CFG.validHours} hodin od zaplacení.`);
+  bubble('Pokud jste si z ní odnesl to podstatné, dalším krokem je <b>vstupní screening</b>: ' +
+    `odběr krve v Synlabu a vyšetření lékařem, <b>${fmt(CFG.screeningPrice)} Kč</b> jednorázově. ` +
+    'Termín si vyberete rovnou tady.' +
+    `<a class="pay" href="${esc(vysetreni)}">Vybrat termín vyšetření</a>` +
+    `<div class="paynote">Chcete si ještě popovídat? Další konzultace stojí ${fmt(CFG.advisorPrice)} Kč ` +
+    `a taky se odečítá z první platby za program. <a href="${esc(konzultace)}" style="color:inherit">` +
+    'Objednat konzultaci ›</a></div>');
+}
+
+async function boot() {
+  load();
+  if (URLP.get('id')) S.id = URLP.get('id');
+
+  if (DEMO_MODE) {
+    const b = $('#znovu');
+    if (b) { b.hidden = false; b.addEventListener('click', zacitZnovu); }
+  }
+
+  if (DEMO_MODE || !S.id) { D = DEMO; }
+  else {
+    const t = typing();
+    try { D = await api('econsult', { id: S.id }); }
+    catch (e) {
+      t.remove();
+      if (e.code === 'advisor_off') { offPanel(); return; }
+      if (e.code === 'advisor_locked' || e.code === 'advisor_expired') {
+        lockedPanel(e.code === 'advisor_expired');
+        return;
+      }
+      dataError(e.code === 'not_found' ? 'Screening s tímto odkazem jsme nenašli.' : '');
+      return;
+    }
+    t.remove();
+    /* Kolik času zbývá, musí klient vidět, ne hádat. Je to zároveň jediné
+       místo, kde se to dá říct nevtíravě — spodní řádek stránky. */
+    if (D.hoursLeft) {
+      const hint = $('#hint');
+      if (hint) hint.textContent = 'Marcel AI je digitální kopie konzultanta Marcela. ' +
+        'Konzultace je zaplacená a vrátit se k ní můžete ještě ' + hodin(D.hoursLeft) + '. ' +
+        'O vhodnosti terapie vždy rozhoduje lékař.';
+    }
+  }
+
+  if (D.blocked) { play('blocked'); persist('kontraindikace'); return; }
+  play(S.chapter && SCRIPT[S.chapter] ? S.chapter : 'intro');
+}
+/* ── KONCEPT: vstup do ordinace ────────────────────────────────────────────
+   Rozhovor se nespustí hned. Nejdřív se klient usadí, vybere si pití a tím
+   dá najevo, že je připravený — a teprve pak se rozjede scénář. Je to jediné
+   místo, kde se čeká schválně: dvě vteřiny ticha na začátku dělají z formuláře
+   návštěvu. Produkční index.html se tím nemění, tohle je samostatný soubor. */
+const PITI = { 'kávu': 'Kávu Vám podám', 'čaj': 'Čaj Vám podám', 'vodu': 'Vodu Vám podám' };
+let hudbaHraje = false;
+
+function hudbaPrepni() {
+  const a = document.getElementById('lounge');
+  const vlny = document.getElementById('zvukVlny');
+  if (!a) return;
+  if (hudbaHraje) { a.pause(); hudbaHraje = false; }
+  else {
+    /* Když soubor s hudbou ještě není nahraný, přehrání selže. Nevadí —
+       tlačítko se jen vrátí do ztlumené podoby a konzultace běží dál. */
+    a.volume = 0.18;
+    a.play().then(function () { hudbaHraje = true; if (vlny) vlny.style.opacity = '1'; })
+            .catch(function () { hudbaHraje = false; });
+  }
+  if (vlny) vlny.style.opacity = hudbaHraje ? '1' : '.25';
+}
+
+function vstoupit(piti) {
+  const clona = document.getElementById('vstup');
+  const zvuk = document.getElementById('zvuk');
+  if (clona) {
+    clona.classList.add('pryc');
+    setTimeout(function () { clona.remove(); }, 800);
+  }
+  if (zvuk) zvuk.hidden = false;
+  hudbaPrepni();
+  /* Volba pití se promítne do první repliky, ať je vidět, že poslouchal. */
+  if (piti && PITI[piti]) {
+    SCRIPT.intro = [{ t: PITI[piti] + ' hned, jak začneme.' }].concat(SCRIPT.intro);
+  }
+  boot();
+}
+
+(function () {
+  const pit = document.getElementById('pit');
+  const zvuk = document.getElementById('zvuk');
+  const vid = document.getElementById('avatarVid');
+  if (zvuk) zvuk.addEventListener('click', hudbaPrepni);
+  /* Avatar se přehraje, jen když video opravdu existuje. Dokud ho nemáme,
+     zůstane v kolečku popisek a nic se nerozbije. */
+  if (vid) {
+    vid.addEventListener('loadeddata', function () {
+      const c = document.getElementById('avatarCekam');
+      if (c) c.remove();
+      vid.play().catch(function () {});
+    });
+    vid.src = 'marcel-uvitani.mp4';
+  }
+  if (pit) {
+    pit.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-pit]');
+      if (b) vstoupit(b.getAttribute('data-pit'));
+    });
+  }
+})();
+
+/* ---------- české sirotky ----------------------------------------------
+   Jednopísmenné předložky a spojky (k, s, v, z, o, u, a, i) ani krátké
+   předložky typu „na“ nebo „do“ nesmí zůstat viset na konci řádku. Stejně
+   tak se nemá rozpadnout číslo od jednotky („30 minut“, „5 170 Kč“).
+   Běží i nad obsahem, který se dokresluje později. */
+const ORPHAN_RE = /(^|[\s(„"'»–—])((?:[aiksuvozAIKSUVOZ]|[Dd]o|[Nn]a|[Pp]o|[Zz]a|[Oo]d|[Vv]e|[Zz]e|[Ss]e|[Kk]e|[Pp]ro|[Pp]ři|[Bb]ez|[Nn]ad|[Pp]od|[Žž]e)) /g;
+function fixTextNode(n) {
+  const t = n.data.replace(ORPHAN_RE, '$1$2 ').replace(/(\d) (?=\S)/g, '$1 ');
+  if (t !== n.data) n.data = t;
+}
+function fixOrphans(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { fixTextNode(root); return; }
+  if (root.nodeType !== 1 && root.nodeType !== 9 && root.nodeType !== 11) return;
+  const skip = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, SVG: 1, CODE: 1 };
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => {
+      const p = n.parentNode;
+      if (!p || skip[p.nodeName]) return NodeFilter.FILTER_REJECT;
+      if (p.closest && p.closest('[data-nonbsp]')) return NodeFilter.FILTER_REJECT;
+      return n.data.indexOf(' ') < 0 ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const out = [];
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) out.push(n);
+  out.forEach(fixTextNode);
+}
+try {
+  fixOrphans(document.body);
+  new MutationObserver(ms => {
+    ms.forEach(m => m.addedNodes.forEach(fixOrphans));
+  }).observe(document.body, { childList: true, subtree: true });
+} catch (e) { /* bez tohohle stránka funguje dál, jen se hůř láme */ }
+</script>
+</body>
+</html>
