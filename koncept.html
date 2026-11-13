@@ -68,16 +68,9 @@ body{min-height:100dvh;line-height:1.5}
 .pit button:hover{border-color:var(--g1);color:var(--g1);background:#fff}
 
 /* Marcel čeká u textu, ne uprostřed obrazovky — jako když Vás někdo vítá. */
-.hostitel{display:flex;align-items:center;gap:12px;margin-top:clamp(22px,3.4vh,36px)}
-.avatar{width:62px;height:62px;border-radius:50%;overflow:hidden;position:relative;flex:none;
-  border:1.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.7);
-  box-shadow:0 10px 30px rgba(20,20,20,.18)}
-.avatar video,.avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar .cekam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(20,20,20,.4);
-  text-align:center;padding:6px;line-height:1.3}
-.hostitel b{display:block;font-size:15px;font-weight:600;color:#141414}
-.hostitel span{font-size:13px;color:rgba(20,20,20,.6)}
+.podpis{margin-top:clamp(20px,3vh,32px)!important;font-size:13px!important;
+  color:rgba(20,20,20,.6)!important}
+.podpis b{color:#141414;font-weight:600}
 
 /* Marcel v životní velikosti vpravo. Výřez má průhledné pozadí, takže
    stojí přímo v chodbě. Když soubor chybí, obrázek se nevykreslí a hero
@@ -339,7 +332,8 @@ html,body{background:var(--ground);color:var(--ink)}
 
 <!-- KONCEPT: uvítací clona. Avatar, pozvání a otázka na pití. -->
 <div class="vstup" id="vstup">
-  <img class="marcel" id="marcelFoto" src="marcel.png" alt="" onerror="this.remove()">
+  <img class="marcel" id="marcelFoto" src="marcel.webp" alt="" onerror="this.remove()">
+  <video class="marcel" id="avatarVid" muted playsinline preload="metadata" hidden></video>
   <div class="vstupin">
     <span class="eyebrow">Vstupní konzultace</span>
     <h2>Vítejte u nás<span class="light">Posaďte se, prosím</span></h2>
@@ -351,13 +345,7 @@ html,body{background:var(--ground);color:var(--ink)}
       <button type="button" data-pit="vodu">Vodu</button>
       <button type="button" data-pit="">Nic, děkuju</button>
     </div>
-    <div class="hostitel">
-      <div class="avatar">
-        <video id="avatarVid" muted playsinline preload="metadata" poster="marcel-poster.jpg"></video>
-        <div class="cekam" id="avatarCekam">Marcel</div>
-      </div>
-      <div><b>Marcel AI</b><span>koordinátor péče</span></div>
-    </div>
+    <p class="podpis"><b>Marcel AI</b> · koordinátor péče Aeternum Clinic</p>
   </div>
 </div>
 
@@ -1967,9 +1955,13 @@ function vstoupit(piti) {
   /* Avatar se přehraje, jen když video opravdu existuje. Dokud ho nemáme,
      zůstane v kolečku popisek a nic se nerozbije. */
   if (vid) {
+    /* Video Marcela stojí na stejném místě jako výřez a překryje ho, jakmile
+       se opravdu načte. Dokud soubor nemáme, zůstane fotka a nic nebliká. */
     vid.addEventListener('loadeddata', function () {
-      const c = document.getElementById('avatarCekam');
-      if (c) c.remove();
+      const foto = document.getElementById('marcelFoto');
+      if (foto) foto.remove();
+      vid.hidden = false;
+      vid.loop = true;
       vid.play().catch(function () {});
     });
     vid.src = 'marcel-uvitani.mp4';
