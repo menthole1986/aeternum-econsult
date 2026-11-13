@@ -396,7 +396,7 @@ html,body{background:var(--ground);color:var(--ink)}
         <textarea id="ask" rows="1" placeholder="Zeptejte se mě na cokoli…" aria-label="Dotaz"></textarea>
         <button class="send" id="sendBtn" aria-label="Odeslat dotaz"><svg viewBox="0 0 24 24"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
       </div>
-      <p class="hint" id="hint">Marcel AI je digitální kopie konzultanta Marcela. O vhodnosti terapie vždy rozhoduje lékař.</p>
+      <p class="hint" id="hint">Marcel AI je digitální dvojče konzultanta Marcela. O vhodnosti terapie vždy rozhoduje lékař.</p>
     </div>
   </div>
 </div>
@@ -559,7 +559,7 @@ const SCRIPT = {
 
 /* 1 · Kde se nacházíme */
 intro: [
-  { t: () => `Dobrý den, ${esc(D.name)}. Vítám Vás na vstupní konzultaci v Aeternum Clinic. Jsem Marcel AI — digitální kopie Marcela, koordinátora péče. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
+  { t: () => `Dobrý den, ${esc(D.name)}. Vítám Vás na vstupní konzultaci v Aeternum Clinic. Jsem Marcel AI — digitální dvojče konzultanta Marcela. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
   { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
   { t: 'Počítejte s třiceti až pětatřiceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
   { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
@@ -1925,7 +1925,7 @@ async function boot() {
        místo, kde se to dá říct nevtíravě — spodní řádek stránky. */
     if (D.hoursLeft) {
       const hint = $('#hint');
-      if (hint) hint.textContent = 'Marcel AI je digitální kopie konzultanta Marcela. ' +
+      if (hint) hint.textContent = 'Marcel AI je digitální dvojče konzultanta Marcela. ' +
         'Konzultace je zaplacená a vrátit se k ní můžete ještě ' + hodin(D.hoursLeft) + '. ' +
         'O vhodnosti terapie vždy rozhoduje lékař.';
     }
