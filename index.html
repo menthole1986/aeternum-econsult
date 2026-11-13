@@ -357,7 +357,7 @@ html,body{background:var(--ground);color:var(--ink)}
 <button type="button" class="zvuk" id="zvuk" aria-label="Hudba na pozadí" hidden>
   <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="zvukVlny" d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
 </button>
-<audio id="lounge" loop preload="none" src="lounge.mp3"></audio>
+<audio id="lounge" preload="none"></audio>
 
 <div class="app">
   <header class="top">
@@ -1919,6 +1919,14 @@ async function boot() {
    místo, kde se čeká schválně: dvě vteřiny ticha na začátku dělají z formuláře
    návštěvu. Produkční index.html se tím nemění, tohle je samostatný soubor. */
 const PITI = { 'kávu': 'Kávu Vám podám', 'čaj': 'Čaj Vám podám', 'vodu': 'Vodu Vám podám' };
+
+/* Tři skladby za sebou v náhodném pořadí. Jedna by se za dvacet minut
+   zopakovala desetkrát a to už člověk slyší; takhle se vrátí nejdřív
+   po šesti minutách a nikdy nezačíná stejně. Mono a 80 kbps schválně —
+   je to kulisa pod hovorem, ne poslech, a na mobilních datech to není cítit. */
+const SKLADBY = ['lounge1.m4a', 'lounge2.m4a', 'lounge3.m4a'];
+let poradi = SKLADBY.slice().sort(function () { return Math.random() - 0.5; });
+let naRade = 0;
 let hudbaHraje = false;
 
 function hudbaPrepni() {
@@ -1927,8 +1935,16 @@ function hudbaPrepni() {
   if (!a) return;
   if (hudbaHraje) { a.pause(); hudbaHraje = false; }
   else {
-    /* Když soubor s hudbou ještě není nahraný, přehrání selže. Nevadí —
-       tlačítko se jen vrátí do ztlumené podoby a konzultace běží dál. */
+    /* Když soubory s hudbou chybí, přehrání selže. Nevadí — tlačítko
+       zůstane schované a konzultace běží dál. */
+    if (!a.src) {
+      a.src = poradi[naRade];
+      a.addEventListener('ended', function () {
+        naRade = (naRade + 1) % poradi.length;
+        a.src = poradi[naRade];
+        a.play().catch(function () {});
+      });
+    }
     a.volume = 0.18;
     a.play().then(function () {
       hudbaHraje = true;
