@@ -31,42 +31,77 @@ body{touch-action:manipulation}
 html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font)}
 body{min-height:100dvh;line-height:1.5}
 
-/* ── KONCEPT: ordinace ──────────────────────────────────────────────────
-   Fotka skutečné ordinace leží pod celým rozhovorem. Je rozostřená a
-   ztmavená, aby nekradla pozornost textu — má jen navodit pocit, že si
-   klient sedl naproti konzultantovi, ne že vyplňuje formulář. */
+/* ── KONCEPT: ordinace a chodba ─────────────────────────────────────────
+   Úvodní obrazovka je fotka chodby s logem — příchod do kliniky. Je přes
+   celou plochu a bez clony: text si musí poradit sám, proto sedí vlevo na
+   bílé stěně, je tmavý a má pod sebou sotva znatelný stín. Jakmile klient
+   vejde, zůstane za rozhovorem ordinace, tam už clona smysl dává — pod
+   bublinami musí být text čitelný. Mobil dostane fotky na výšku. */
 .ordinace{position:fixed;inset:0;z-index:0;background:url('ordinace.jpg') center/cover no-repeat;
   filter:blur(3px) saturate(1.02);transform:scale(1.06)}
 .ordinace:after{content:'';position:absolute;inset:0;
   background:radial-gradient(ellipse at 72% 76%,rgba(255,164,64,.28),transparent 50%),
              linear-gradient(180deg,rgba(236,236,236,.46),rgba(236,236,236,.84) 72%)}
 
-/* Uvítací clona. Drží se přes celou obrazovku, dokud klient nevejde. */
-.vstup{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
-  padding:24px;background:radial-gradient(ellipse at 50% 45%,rgba(236,236,236,.88),rgba(236,236,236,.55));
-  opacity:1;transition:opacity .7s ease}
+.vstup{position:fixed;inset:0;z-index:40;display:flex;align-items:center;overflow:hidden;
+  background:url('chodba.jpg') 76% center/cover no-repeat;
+  opacity:1;transition:opacity .8s ease}
+/* Bílý závoj jen pod textem, ne přes celou fotku. Vlevo drží písmo, vpravo
+   se rozplyne, takže chodba i Marcel zůstanou vidět. */
+.vstup:before{content:'';position:absolute;inset:0;z-index:1;
+  background:linear-gradient(100deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.92) 38%,
+             rgba(255,255,255,.60) 55%,rgba(255,255,255,0) 78%)}
 .vstup.pryc{opacity:0;pointer-events:none}
-.vstupin{width:min(560px,100%);text-align:center}
-.avatar{width:clamp(120px,26vw,180px);height:clamp(120px,26vw,180px);border-radius:50%;
-  margin:0 auto clamp(18px,3vh,30px);overflow:hidden;position:relative;
-  border:1px solid var(--line2);background:var(--karta);
-  box-shadow:0 18px 50px rgba(20,20,20,.18)}
+.vstupin{width:min(660px,100%);padding:0 clamp(24px,6vw,86px);position:relative;z-index:2}
+.vstup .eyebrow{color:var(--g1)}
+.vstup h2{font-size:clamp(30px,5.2vw,54px);line-height:1.06;font-weight:700;
+  letter-spacing:-.02em;margin:clamp(8px,1.4vh,16px) 0 0;color:#141414;text-wrap:balance}
+.vstup h2 .light{display:block;font-weight:400;color:var(--g1)}
+.vstup p{color:rgba(20,20,20,.72);margin:clamp(14px,2.2vh,24px) 0 0;max-width:30em;
+  font-size:clamp(14px,1.6vw,18px)}
+.vstup .bar{display:block;width:62px;height:3px;border-radius:2px;background:var(--grad);
+  margin:clamp(18px,2.6vh,30px) 0 0}
+.pit{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(20px,3vh,34px)}
+.pit button{border:1.5px solid rgba(20,20,20,.3);background:rgba(255,255,255,.72);
+  color:#141414;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:500;
+  cursor:pointer;backdrop-filter:blur(4px);transition:border-color .15s,background .15s,color .15s}
+.pit button:hover{border-color:var(--g1);color:var(--g1);background:#fff}
+
+/* Marcel čeká u textu, ne uprostřed obrazovky — jako když Vás někdo vítá. */
+.hostitel{display:flex;align-items:center;gap:12px;margin-top:clamp(22px,3.4vh,36px)}
+.avatar{width:62px;height:62px;border-radius:50%;overflow:hidden;position:relative;flex:none;
+  border:1.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.7);
+  box-shadow:0 10px 30px rgba(20,20,20,.18)}
 .avatar video,.avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar .cekam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);
-  text-align:center;padding:12px;line-height:1.5}
-.vstup h2{font-size:clamp(22px,4.4vw,32px);font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
-.vstup p{color:var(--muted);margin:0 auto;max-width:34em}
-.pit{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:clamp(20px,3.4vh,30px)}
-.pit button{border:1px solid var(--line2);background:var(--karta);color:var(--ink);
-  border-radius:999px;padding:11px 20px;font-size:14px;cursor:pointer;
-  transition:border-color .15s,background .15s}
-.pit button:hover{border-color:var(--g1);color:var(--g1)}
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(20,20,20,.4);
+  text-align:center;padding:6px;line-height:1.3}
+.hostitel b{display:block;font-size:15px;font-weight:600;color:#141414}
+.hostitel span{font-size:13px;color:rgba(20,20,20,.6)}
+
+/* Marcel v životní velikosti vpravo. Výřez má průhledné pozadí, takže
+   stojí přímo v chodbě. Když soubor chybí, obrázek se nevykreslí a hero
+   zůstane textový — nic se nerozsype. */
+.marcel{position:absolute;right:clamp(-40px,2vw,80px);bottom:0;height:min(92vh,880px);
+  width:auto;object-fit:contain;object-position:bottom;pointer-events:none;
+  filter:drop-shadow(-24px 18px 46px rgba(20,20,20,.22));z-index:1}
+.vstupin{position:relative;z-index:2}
+
 .zvuk{position:fixed;right:16px;bottom:16px;z-index:41;width:42px;height:42px;border-radius:50%;
   border:1px solid var(--line2);background:var(--karta);color:var(--ink);
   cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .zvuk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-@media (max-width:760px){ .ordinace{filter:blur(6px) saturate(.85)} }
+
+@media (max-width:760px){
+  .ordinace{background-image:url('ordinace-mobil.jpg');filter:blur(4px) saturate(.95)}
+  .vstup{background-image:url('chodba-mobil.jpg');align-items:flex-start;background-position:center top}
+  .vstup:before{background:linear-gradient(180deg,rgba(255,255,255,.94) 0%,rgba(255,255,255,.86) 42%,
+                rgba(255,255,255,.35) 62%,rgba(255,255,255,0) 78%)}
+  .vstupin{padding-top:clamp(84px,14vh,140px)}
+  .vstup h2{font-size:clamp(28px,8.4vw,40px)}
+  .marcel{height:52vh;right:-18vw;opacity:.92}
+  .vstupin{padding-bottom:40vh}
+}
 button,input,select,textarea{font:inherit;color:inherit}
 p{margin:0}
 :focus-visible{outline:2px solid #4FA3E0;outline-offset:3px}
@@ -304,18 +339,24 @@ html,body{background:var(--ground);color:var(--ink)}
 
 <!-- KONCEPT: uvítací clona. Avatar, pozvání a otázka na pití. -->
 <div class="vstup" id="vstup">
+  <img class="marcel" id="marcelFoto" src="marcel.png" alt="" onerror="this.remove()">
   <div class="vstupin">
-    <div class="avatar">
-      <video id="avatarVid" muted playsinline preload="metadata" poster="marcel-poster.jpg"></video>
-      <div class="cekam" id="avatarCekam">Zde bude<br>uvítání od Marcela</div>
-    </div>
-    <h2 id="vstupH">Pohodlně se usaďte</h2>
+    <span class="eyebrow">Vstupní konzultace</span>
+    <h2>Vítejte u nás<span class="light">Posaďte se, prosím</span></h2>
     <p id="vstupP">Máme na sebe dvacet minut a nikam nespěcháme. Než začneme — dáte si něco k pití?</p>
+    <i class="bar"></i>
     <div class="pit" id="pit">
       <button type="button" data-pit="kávu">Kávu</button>
       <button type="button" data-pit="čaj">Čaj</button>
       <button type="button" data-pit="vodu">Vodu</button>
       <button type="button" data-pit="">Nic, děkuju</button>
+    </div>
+    <div class="hostitel">
+      <div class="avatar">
+        <video id="avatarVid" muted playsinline preload="metadata" poster="marcel-poster.jpg"></video>
+        <div class="cekam" id="avatarCekam">Marcel</div>
+      </div>
+      <div><b>Marcel AI</b><span>koordinátor péče</span></div>
     </div>
   </div>
 </div>
