@@ -561,7 +561,7 @@ const SCRIPT = {
 intro: [
   { t: () => `Dobrý den, ${esc(D.name)}. Vítám Vás na vstupní konzultaci v Aeternum Clinic. Jsem Marcel AI — digitální dvojče konzultanta Marcela. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
   { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
-  { t: 'Počítejte s třiceti až pětatřiceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
+  { t: 'Počítejte zhruba s třiceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
   { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
   { chips: [{ label: 'Můžeme začít', go: 'vas' }] }
 ],
@@ -616,7 +616,70 @@ vas3: [
   { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí a co už máte za sebou? Klidně stručně — lékař si to přečte před vyšetřením.' },
   { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
   { t: 'Děkuju, tohle mi pomůže. Nechám to u Vaší dokumentace, ať to lékař má před sebou.' },
-  { chips: [{ label: 'Pokračujme', go: 'howAsk', primary: true }] }
+  { chips: [{ label: 'Pokračujme', go: 'life', primary: true }] }
+],
+
+/* 2b · Jak klient teď žije.
+
+   Ptáme se tady, ne až ve formuláři po rezervaci. V rozhovoru to člověk
+   napíše líp než do políček, lékař to má před vyšetřením a je z toho
+   podklad pro plán stravy a tréninku. Formulář v klientské sekci zůstává
+   pro ty, kdo konzultací neprošli.
+
+   Klíče jsou schválně stejné jako v tom formuláři (diet, limits,
+   pastAttempts, alcohol, smoking, digestion), ať se dají přenést do
+   rezervace beze změny a klient nevyplňuje totéž podruhé.
+
+   Tři psané odpovědi a tři klepnutí. Víc sem nedáváme: konzultace má mít
+   půl hodiny, ne hodinu — zbytek dotazníku zůstal v klientské sekci. */
+life: [
+  { t: 'Ještě než se pustíme do terapie, chci vědět, jak teď žijete. Není to dotazník pro dotazník — lékař to bude mít u vyšetření před sebou, takže se Vás na to nebude ptát znovu, a vychází se z toho i při sestavování Vašeho plánu stravy a tréninku.' },
+  { t: 'Začneme jídlem. Jak vypadá Váš běžný den — snídaně, oběd, večeře, co mezi tím a co pijete? Klidně stručně a upřímně, nehodnotím Vás.' },
+  { ask: 'diet', placeholder: 'Ráno kafe, oběd v práci, večer doma…' },
+  /* Frekvenci a druh pohybu máme z e-screeningu. Ptát se na ně podruhé by
+     vypadalo, jako bychom ten dotazník nečetli — proto se tady navazuje
+     a doptává jen na to, co v něm není. */
+  { t: () => {
+      const p = String(D.pohyb || '').trim();
+      return (p ? 'Pohyb mám z dotazníku — ' + esc(p.toLowerCase()) + '. ' : '')
+        + 'Má něco, s čím se musí počítat? Záda, kolena, rameno, cokoli, co Vás u cvičení brzdí.';
+    } },
+  { ask: 'limits', placeholder: 'Nic / bolesti zad, kolena…' },
+  { t: () => `Díky. A co už máte za sebou — co jste na hubnutí zkoušel${ova()} a jak to dopadlo? Diety, cvičení, i léky, pokud nějaké byly.` },
+  { ask: 'pastAttempts', placeholder: 'Co jste zkoušel(a) a jak to dopadlo' },
+  { t: 'Výborně, tohle mi dává obrázek. Teď tři rychlé — stačí klepnout.' },
+  { t: 'Jak to máte s alkoholem?' },
+  { chips: [
+      { label: 'Nepiju', store: ['alcohol', 'nepije'], go: 'life2' },
+      { label: 'Příležitostně', store: ['alcohol', 'příležitostně'], go: 'life2' },
+      { label: 'Pár skleniček týdně', store: ['alcohol', 'pár skleniček týdně'], go: 'life2' },
+      { label: 'Skoro denně', store: ['alcohol', 'skoro denně'], go: 'life2' }
+    ] }
+],
+
+life2: [
+  { t: 'A nikotin — cigarety, vape, sáčky?' },
+  { chips: [
+      { label: 'Nic z toho', store: ['smoking', 'nekouří'], go: 'life3' },
+      { label: 'Kouřím', store: ['smoking', 'kouří'], go: 'life3' },
+      { label: 'Vape nebo sáčky', store: ['smoking', 'vape nebo nikotinové sáčky'], go: 'life3' },
+      { label: 'Už ne', store: ['smoking', 'přestal(a) kouřit'], go: 'life3' }
+    ] }
+],
+
+life3: [
+  { t: 'Poslední. Trápí Vás něco se zažíváním? Ptám se proto, že právě tohle se v prvních týdnech terapie nejčastěji ozve.' },
+  { chips: [
+      { label: 'Nic zvláštního', store: ['digestion', 'bez potíží'], go: 'lifeEnd' },
+      { label: 'Nadýmání', store: ['digestion', 'nadýmání'], go: 'lifeEnd' },
+      { label: 'Zácpa', store: ['digestion', 'zácpa'], go: 'lifeEnd' },
+      { label: 'Pálení žáhy nebo reflux', store: ['digestion', 'pálení žáhy / reflux'], go: 'lifeEnd' }
+    ] }
+],
+
+lifeEnd: [
+  { t: 'Děkuju. Tohle všechno jde do Vaší karty — lékař to uvidí před vyšetřením a nebude se Vás na to ptát znovu.' },
+  { chips: [{ label: 'Pojďme na terapii', go: 'howAsk', primary: true }] }
 ],
 
 /* 3 · Jak terapie funguje — dvě tlačítka, výklad je stejný */
