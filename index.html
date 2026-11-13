@@ -68,11 +68,15 @@ body{min-height:100dvh;line-height:1.5}
 .pit button:hover{border-color:var(--g1);color:var(--g1);background:#fff}
 
 /* Marcel čeká u textu, ne uprostřed obrazovky — jako když Vás někdo vítá. */
+/* Podpis je delší než textový sloupec, a zlomit ho doprostřed jména by
+   bylo horší než nechat ho přesáhnout — vpravo je do Marcela pořád místo. */
 .podpis{margin-top:clamp(20px,3vh,32px)!important;font-size:13.5px!important;
-  color:rgba(20,20,20,.68)!important;max-width:30em}
+  color:rgba(20,20,20,.68)!important;max-width:none;min-width:max-content;
+  white-space:nowrap}
 .podpis b{color:#141414;font-weight:600}
-.podpis span{display:block;margin-top:4px;font-size:12px;color:rgba(20,20,20,.5);
-  letter-spacing:.01em}
+@media (max-width:1259px){
+  .podpis{white-space:normal;min-width:0;max-width:34em}
+}
 
 /* Marcel v životní velikosti vpravo. Výřez má průhledné pozadí, takže
    stojí přímo v chodbě. Když soubor chybí, obrázek se nevykreslí a hero
@@ -354,8 +358,7 @@ html,body{background:var(--ground);color:var(--ink)}
       <button type="button" data-pit="vodu">Vodu</button>
       <button type="button" data-pit="">Nic, děkuju</button>
     </div>
-    <p class="podpis">Konzultací Vás provede <b>Marcel AI</b> — digitální dvojče Marcela Jurka, MBA, Ing.
-      <span>program manager · fitness coach · specialista na redukci hmotnosti, longevity a biohacking</span></p>
+    <p class="podpis">Konzultací Vás provede <b>Marcel AI</b> — digitální dvojče konzultanta: <b>Marcel Jurek, MBA, Ing.</b></p>
   </div>
 </div>
 
