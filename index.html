@@ -54,6 +54,12 @@ body{min-height:100dvh;line-height:1.5}
 .vstup.pryc{opacity:0;pointer-events:none}
 .vstupin{width:min(660px,100%);padding:0 clamp(24px,6vw,86px);position:relative;z-index:2}
 .vstup .eyebrow{color:var(--g1)}
+/* Drobny text lezi na uzsim okne primo na Marcelovi. Bila podlozka na pulku
+   kryci schopnosti ho vrati do citelna a fotku pritom nechá prosvitat. */
+.vstup .eyebrow,.vstup #vstupP,.vstup .podpis{
+  background:rgba(255,255,255,.5);border-radius:7px;
+  width:fit-content;padding:.3em .55em;margin-left:-.55em}
+.vstup .eyebrow{display:inline-block}
 .vstup h2{font-size:clamp(30px,5.2vw,54px);line-height:1.06;font-weight:700;
   letter-spacing:-.02em;margin:clamp(8px,1.4vh,16px) 0 0;color:#141414}
 .vstup h2 .light{display:block;font-weight:400;color:var(--g1);white-space:nowrap}
