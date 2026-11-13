@@ -1757,7 +1757,12 @@ async function submitAsk() {
     return;
   }
 
-  /* Volný dotaz. Odpovídá model na serveru — podklady i instrukce jsou tam,
+  /* Kolik znaků rozhovoru posíláme modelu s každým dotazem. Padesát tisíc je
+   zhruba hodina a půl hovoru — víc, než kolik konzultace trvá — takže se do
+   toho v praxi vejde celá. */
+const HIST_ZNAKU = 50000;
+
+/* Volný dotaz. Odpovídá model na serveru — podklady i instrukce jsou tam,
      ne tady, takže si je nikdo nemůže přepsat v prohlížeči.
 
      Když model z jakéhokoli důvodu odpoví chybou, dotaz nesmí spadnout do
@@ -1771,7 +1776,20 @@ async function submitAsk() {
     if (DEMO_MODE || !CFG.apiUrl || !S.id) {
       failed = 'demo';
     } else {
-      const hist = S.log.slice(-6).map(l => ({ role: l.who === 'klient' ? 'user' : 'assistant', text: l.text }));
+      /* Celý rozhovor, ne posledních pár replik. Klient se po půl hodině ptá
+         na věci, které zazněly na začátku, a model, který si je nepamatuje,
+         působí, jako by ho neposlouchal. Strop je na znaky, ne na počet
+         replik — jedna dlouhá odpověď modelu váží jako deset tlačítek. */
+      const hist = [];
+      let znaku = 0;
+      for (let i = S.log.length - 1; i >= 0; i--) {
+        const l = S.log[i];
+        const text = String(l.text || '');
+        if (!text) continue;
+        znaku += text.length;
+        if (znaku > HIST_ZNAKU) break;
+        hist.unshift({ role: l.who === 'klient' ? 'user' : 'assistant', text });
+      }
       const r = await api('advisorAsk', { id: S.id, text, history: hist, answers: S.answers }, 60000);
       answer = String(r.text || '');
     }
