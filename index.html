@@ -1772,7 +1772,7 @@ async function submitAsk() {
       failed = 'demo';
     } else {
       const hist = S.log.slice(-6).map(l => ({ role: l.who === 'klient' ? 'user' : 'assistant', text: l.text }));
-      const r = await api('advisorAsk', { id: S.id, text, history: hist }, 60000);
+      const r = await api('advisorAsk', { id: S.id, text, history: hist, answers: S.answers }, 60000);
       answer = String(r.text || '');
     }
   } catch (e) { failed = e.code || 'api'; }
@@ -1816,6 +1816,9 @@ async function persist(stage) {
   try {
     await api('econsultLog', {
       id: S.id, stage, scenario: D && D.scenario || '', hash: SCENARIO_HASH,
+      /* Co klient o sobě řekl. Do téhle chvíle to žilo jen v prohlížeči, takže
+         se ho na to lékař i Marcel AI ptali znovu. Teď to jde do jeho karty. */
+      answers: S.answers,
       variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
       consents: S.consents, log: S.log
     }, 15000);
