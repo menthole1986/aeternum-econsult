@@ -1952,8 +1952,21 @@ let prehravace = [];
 let akt = 0;
 let prelinani = null;
 
-function hudbaPrepni() {
+/* Podoba tlačítka se řídí tím, jestli hudba opravdu hraje. Volá se až
+   potom, co přehrávač odpoví — spuštění je příslib, ne hotová věc, a kdo
+   to překreslí hned, ukáže přeškrtnutou notu nad hrající hudbou. */
+function stavTlacitka() {
   const vlny = document.getElementById('zvukVlny');
+  const b = document.getElementById('zvuk');
+  if (vlny) vlny.style.opacity = hudbaHraje ? '0' : '1';
+  if (b) {
+    b.classList.toggle('ticho', !hudbaHraje);
+    b.title = hudbaHraje ? 'Ztlumit hudbu' : 'Pustit hudbu';
+    b.setAttribute('aria-pressed', hudbaHraje ? 'true' : 'false');
+  }
+}
+
+function hudbaPrepni() {
   if (!prehravace.length) {
     prehravace = [document.getElementById('lounge'), document.getElementById('lounge2')];
     if (!prehravace[0] || !prehravace[1]) { prehravace = []; return; }
@@ -1961,6 +1974,7 @@ function hudbaPrepni() {
   if (hudbaHraje) {
     prehravace.forEach(function (p) { p.pause(); });
     hudbaHraje = false;
+    stavTlacitka();
   } else {
     const a = prehravace[akt];
     /* Když soubory s hudbou chybí, přehrání selže. Nevadí — tlačítko
@@ -1970,16 +1984,9 @@ function hudbaPrepni() {
       hudbaHraje = true;
       const b = document.getElementById('zvuk');
       if (b) b.hidden = false;
-      if (vlny) vlny.style.opacity = '0';
+      stavTlacitka();
       if (a.volume < HLASITOST) zesil(a, HLASITOST, 2200);
-    }).catch(function () { hudbaHraje = false; });
-  }
-  if (vlny) vlny.style.opacity = hudbaHraje ? '0' : '1';
-  const b = document.getElementById('zvuk');
-  if (b) {
-    b.classList.toggle('ticho', !hudbaHraje);
-    b.title = hudbaHraje ? 'Ztlumit hudbu' : 'Pustit hudbu';
-    b.setAttribute('aria-pressed', hudbaHraje ? 'true' : 'false');
+    }).catch(function () { hudbaHraje = false; stavTlacitka(); });
   }
 }
 
