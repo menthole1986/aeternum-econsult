@@ -85,7 +85,12 @@ body{min-height:100dvh;line-height:1.5}
 .zvuk{position:fixed;right:16px;bottom:16px;z-index:41;width:42px;height:42px;border-radius:50%;
   border:1px solid var(--line2);background:var(--karta);color:var(--ink);
   cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.zvuk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.zvuk svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
+  stroke-linejoin:round}
+.zvuk svg circle{fill:currentColor;stroke:none}
+/* Ztlumeno pozná člověk i bez barvy: nota zešedne a přeškrtne se. */
+.zvuk.ticho{color:rgba(20,20,20,.42)}
+#zvukVlny{transition:opacity .2s}
 /* display:flex výš by přebil atribut hidden, proto to říkáme natvrdo. */
 .zvuk[hidden]{display:none}
 
@@ -354,8 +359,13 @@ html,body{background:var(--ground);color:var(--ink)}
   </div>
 </div>
 
-<button type="button" class="zvuk" id="zvuk" aria-label="Hudba na pozadí" hidden>
-  <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="zvukVlny" d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+<button type="button" class="zvuk" id="zvuk" aria-label="Hudba na pozadí" title="Ztlumit hudbu" hidden>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 17.5V5.2l10-1.8v12.1"/>
+    <circle cx="6.6" cy="17.6" r="2.6"/>
+    <circle cx="16.4" cy="15.5" r="2.6"/>
+    <path id="zvukVlny" d="M3.5 20.5 20.5 3.5"/>
+  </svg>
 </button>
 <audio id="lounge" preload="none"></audio>
 <audio id="lounge2" preload="none"></audio>
@@ -1960,11 +1970,17 @@ function hudbaPrepni() {
       hudbaHraje = true;
       const b = document.getElementById('zvuk');
       if (b) b.hidden = false;
-      if (vlny) vlny.style.opacity = '1';
+      if (vlny) vlny.style.opacity = '0';
       if (a.volume < HLASITOST) zesil(a, HLASITOST, 2200);
     }).catch(function () { hudbaHraje = false; });
   }
-  if (vlny) vlny.style.opacity = hudbaHraje ? '1' : '.25';
+  if (vlny) vlny.style.opacity = hudbaHraje ? '0' : '1';
+  const b = document.getElementById('zvuk');
+  if (b) {
+    b.classList.toggle('ticho', !hudbaHraje);
+    b.title = hudbaHraje ? 'Ztlumit hudbu' : 'Pustit hudbu';
+    b.setAttribute('aria-pressed', hudbaHraje ? 'true' : 'false');
+  }
 }
 
 /* Plynulá změna hlasitosti jednoho přehrávače. Krok po 60 ms je dost jemný
