@@ -640,7 +640,7 @@ life: [
      vypadalo, jako bychom ten dotazník nečetli — proto se tady navazuje
      a doptává jen na to, co v něm není. */
   { t: () => {
-      const p = String(D.pohyb || '').trim();
+      const p = String((D && D.pohyb) || '').trim();
       return (p ? 'Pohyb mám z dotazníku — ' + esc(p.toLowerCase()) + '. ' : '')
         + 'Má něco, s čím se musí počítat? Záda, kolena, rameno, cokoli, co Vás u cvičení brzdí.';
     } },
