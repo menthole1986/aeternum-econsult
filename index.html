@@ -358,6 +358,7 @@ html,body{background:var(--ground);color:var(--ink)}
   <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="zvukVlny" d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
 </button>
 <audio id="lounge" preload="none"></audio>
+<audio id="lounge2" preload="none"></audio>
 
 <div class="app">
   <header class="top">
@@ -1931,31 +1932,80 @@ let poradi = SKLADBY.slice().sort(function () { return Math.random() - 0.5; });
 let naRade = 0;
 let hudbaHraje = false;
 
+/* Přelínání. Skladby se nestřídají tak, že jedna dohraje a druhá začne —
+   to je v tichu slyšet a člověk se ohlédne. Posledních pár vteřin proto
+   běží obě přes sebe: jedna se ztišuje, druhá sílí, a součet zůstává
+   stejný. Proto jsou přehrávače dva a střídají se. */
+const HLASITOST = 0.18;
+const PRELIN = 5;            // vteřin, po které se skladby překrývají
+let prehravace = [];
+let akt = 0;
+let prelinani = null;
+
 function hudbaPrepni() {
-  const a = document.getElementById('lounge');
   const vlny = document.getElementById('zvukVlny');
-  if (!a) return;
-  if (hudbaHraje) { a.pause(); hudbaHraje = false; }
-  else {
+  if (!prehravace.length) {
+    prehravace = [document.getElementById('lounge'), document.getElementById('lounge2')];
+    if (!prehravace[0] || !prehravace[1]) { prehravace = []; return; }
+  }
+  if (hudbaHraje) {
+    prehravace.forEach(function (p) { p.pause(); });
+    hudbaHraje = false;
+  } else {
+    const a = prehravace[akt];
     /* Když soubory s hudbou chybí, přehrání selže. Nevadí — tlačítko
        zůstane schované a konzultace běží dál. */
-    if (!a.src) {
-      a.src = poradi[naRade];
-      a.addEventListener('ended', function () {
-        naRade = (naRade + 1) % poradi.length;
-        a.src = poradi[naRade];
-        a.play().catch(function () {});
-      });
-    }
-    a.volume = 0.18;
+    if (!a.src) { a.src = poradi[naRade]; a.volume = 0; hlidejKonec(a); }
     a.play().then(function () {
       hudbaHraje = true;
       const b = document.getElementById('zvuk');
       if (b) b.hidden = false;
       if (vlny) vlny.style.opacity = '1';
+      if (a.volume < HLASITOST) zesil(a, HLASITOST, 2200);
     }).catch(function () { hudbaHraje = false; });
   }
   if (vlny) vlny.style.opacity = hudbaHraje ? '1' : '.25';
+}
+
+/* Plynulá změna hlasitosti jednoho přehrávače. Krok po 60 ms je dost jemný
+   na to, aby se neozvalo cvaknutí, a dost hrubý, aby nic nezdržoval. */
+function zesil(p, cil, trvani, hotovo) {
+  const z = p.volume;
+  const t0 = Date.now();
+  const krok = setInterval(function () {
+    const d = Math.min(1, (Date.now() - t0) / trvani);
+    p.volume = Math.max(0, Math.min(1, z + (cil - z) * d));
+    if (d >= 1) { clearInterval(krok); if (hotovo) hotovo(); }
+  }, 60);
+  return krok;
+}
+
+function hlidejKonec(p) {
+  p.addEventListener('timeupdate', function tik() {
+    if (!p.duration || !isFinite(p.duration)) return;
+    if (p.currentTime < p.duration - PRELIN) return;
+    p.removeEventListener('timeupdate', tik);
+    prelij(p);
+  });
+}
+
+function prelij(stary) {
+  if (prelinani) return;
+  prelinani = true;
+  akt = 1 - akt;
+  naRade = (naRade + 1) % poradi.length;
+  const novy = prehravace[akt];
+  novy.src = poradi[naRade];
+  novy.volume = 0;
+  hlidejKonec(novy);
+  novy.play().catch(function () {});
+  zesil(novy, HLASITOST, PRELIN * 1000);
+  zesil(stary, 0, PRELIN * 1000, function () {
+    stary.pause();
+    stary.removeAttribute('src');
+    stary.load();
+    prelinani = null;
+  });
 }
 
 function vstoupit(piti) {
