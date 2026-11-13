@@ -1920,11 +1920,13 @@ async function boot() {
    návštěvu. Produkční index.html se tím nemění, tohle je samostatný soubor. */
 const PITI = { 'kávu': 'Kávu Vám podám', 'čaj': 'Čaj Vám podám', 'vodu': 'Vodu Vám podám' };
 
-/* Tři skladby za sebou v náhodném pořadí. Jedna by se za dvacet minut
-   zopakovala desetkrát a to už člověk slyší; takhle se vrátí nejdřív
-   po šesti minutách a nikdy nezačíná stejně. Mono a 80 kbps schválně —
-   je to kulisa pod hovorem, ne poslech, a na mobilních datech to není cítit. */
-const SKLADBY = ['lounge1.m4a', 'lounge2.m4a', 'lounge3.m4a'];
+/* Sedm skladeb za sebou v náhodném pořadí. Jedna má kolem dvou minut, takže
+   by se za dvacetiminutovou konzultaci zopakovala desetkrát a to už člověk
+   slyší. Takhle se první vrátí nejdřív po čtvrt hodině, což je skoro vždycky
+   až po konci hovoru, a začíná se pokaždé jinak. Mono a 80 kbps schválně —
+   je to kulisa pod hovorem, ne poslech, a stahuje se vždy jen ta, která hraje. */
+const SKLADBY = ['lounge1.m4a', 'lounge2.m4a', 'lounge3.m4a', 'lounge4.m4a',
+                 'lounge5.m4a', 'lounge6.m4a', 'lounge7.m4a'];
 let poradi = SKLADBY.slice().sort(function () { return Math.random() - 0.5; });
 let naRade = 0;
 let hudbaHraje = false;
