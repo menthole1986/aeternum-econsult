@@ -357,7 +357,7 @@ html,body{background:var(--ground);color:var(--ink)}
   <div class="vstupin">
     <span class="eyebrow">Vstupní konzultace</span>
     <h2>Vítejte u nás<span class="light">Posaďte se, prosím</span></h2>
-    <p id="vstupP">Máme na sebe dvacet minut a nikam nespěcháme. Než začneme — dáte si něco k pití?</p>
+    <p id="vstupP">Máme na sebe třicet minut a nikam nespěcháme. Než začneme — dáte si něco k pití?</p>
     <i class="bar"></i>
     <div class="pit" id="pit">
       <button type="button" data-pit="kávu">Kávu</button>
@@ -561,7 +561,7 @@ const SCRIPT = {
 intro: [
   { t: () => `Dobrý den, ${esc(D.name)}. Jsem Marcel AI — digitální kopie Marcela, koordinátora péče Aeternum Clinic. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
   { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
-  { t: 'Počítejte s dvaceti až pětadvaceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
+  { t: 'Počítejte s třiceti až pětatřiceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
   { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
   { chips: [{ label: 'Můžeme začít', go: 'vas' }] }
 ],
@@ -1942,9 +1942,9 @@ async function boot() {
 const PITI = { 'kávu': 'Kávu Vám podám', 'čaj': 'Čaj Vám podám', 'vodu': 'Vodu Vám podám' };
 
 /* Sedm skladeb za sebou v náhodném pořadí. Jedna má kolem dvou minut, takže
-   by se za dvacetiminutovou konzultaci zopakovala desetkrát a to už člověk
-   slyší. Takhle se první vrátí nejdřív po čtvrt hodině, což je skoro vždycky
-   až po konci hovoru, a začíná se pokaždé jinak. Mono a 80 kbps schválně —
+   by se za půlhodinovou konzultaci zopakovala patnáctkrát a to už člověk
+   slyší. Takhle se první vrátí nejdřív po čtvrt hodině, takže se smyčka
+   za celý hovor otočí nanejvýš jednou, a začíná se pokaždé jinak. Mono a 80 kbps schválně —
    je to kulisa pod hovorem, ne poslech, a stahuje se vždy jen ta, která hraje. */
 const SKLADBY = ['lounge1.m4a', 'lounge2.m4a', 'lounge3.m4a', 'lounge4.m4a',
                  'lounge5.m4a', 'lounge6.m4a', 'lounge7.m4a'];
