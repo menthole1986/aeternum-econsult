@@ -706,7 +706,7 @@ how: [
       <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
     </div>` },
   { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytváří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
-  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má lék vedlejší účinky?', faq: 'side' }] }
+  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug', primary: true }, { label: 'Jaké má lék vedlejší účinky?', faq: 'side' }] }
 ],
 
 /* Rozdíl mezi preparáty a co vychází klientovi */
@@ -715,7 +715,8 @@ drug: [
   { t: 'V klinických studiích dosáhlo Wegovy průměrného úbytku váhy kolem <b>15 %</b> počáteční hmotnosti, u Mounjara se díky duálnímu mechanismu dosahovalo zhruba <b>20 %</b>. Výsledky jsou samozřejmě individuální. Oba léky jsou vázané na lékařský předpis.' },
   { t: () => `Podle Vašich odpovědí Vám vychází <span class="hl">${esc(D.drug)}</span> — ${esc(D.drugWhy)}.` },
   { t: 'Konečné slovo má ale vždycky lékař. Může doporučení změnit podle krevních testů a podle toho, co u Vás uvidí při vyšetření. Já Vám tady říkám, co vychází z dotazníku, ne co Vám bude předepsáno.' },
-  { chips: [{ label: 'Zatím je vše jasné, pokračujme', go: () => maPmos() ? 'pmos' : 'form' }] }
+  { chips: [{ label: 'Zatím je vše jasné, pokračujme', go: () => maPmos() ? 'pmos' : 'form', primary: true },
+           { label: 'Co když mi to nezabere?', faq: 'nowork' }] }
 ],
 
 /* 3b · PMOS (PCOS). Ukaze se jen klientce, ktera ho ve screeningu uvedla.
@@ -741,7 +742,7 @@ form: [
   { t: 'Teď prakticky — jak to vlastně budete užívat.' },
   { t: 'Lék je v <b>aplikačním peru</b>. Jedno pero vystačí na <b>jeden měsíc</b> a jsou v něm <b>čtyři dávky</b>.' },
   { t: 'Aplikuje se <b>jednou týdně</b>, podkožně, malou injekční jehlou — podobně jako inzulin — nejčastěji do břicha nebo stehna. Ideálně vždy ve stejný den a přibližně ve stejnou dobu. Většina lidí si nastaví připomínku v telefonu a za měsíc už na to ani nemyslí.' },
-  { chips: [{ label: 'Jasné', go: 'dose' }, { label: 'Bojím se jehel, bolí to?', faq: 'needle' }] }
+  { chips: [{ label: 'Jasné', go: 'dose', primary: true }, { label: 'Bojím se jehel, bolí to?', faq: 'needle' }] }
 ],
 
 /* 5 a 6 · Dávkování */
@@ -750,7 +751,9 @@ dose: [
   { t: 'Pokud se váha zastaví a chutě přetrvávají, přistoupíme ke zvýšení. Cílem je vždycky <b>nejvyšší optimální dávka bez vedlejších účinků</b> — ne nejvyšší možná.' },
   { t: 'A tohle si prosím zapamatujte: <b>vyšší dávka neznamená víc hubnutí.</b> Jde spíš o to, jak se u ní cítíte Vy. Když na nejnižší dávce stabilně hubnete a nemáte chutě na nesmysly, je všechno v pořádku a vyšší dávka obvykle není potřeba.' },
   { t: 'Dávku zvyšujeme ve dvou případech: když přijdou velké chutě, nebo když se <b>váha zastaví na víc než 28 dní</b>. V takové chvíli nám dáte vědět a lékař rozhodne o úpravě dávkování na další měsíc.' },
-  { chips: [{ label: 'Rozumím', go: 'expect' }, { label: 'Co když zapomenu dávku?', faq: 'miss' }] }
+  { chips: [{ label: 'Rozumím', go: 'expect', primary: true },
+           { label: 'Co když zapomenu dávku?', faq: 'miss' },
+           { label: 'Co když se mi vrátí chutě?', faq: 'cravings' }] }
 ],
 
 /* 7, 8 a 9 · Co od toho čekat */
@@ -765,7 +768,9 @@ expect: [
       <div class="kv"><span>Odhadovaná délka</span><b>${D.months} ${mesice(D.months)}</b></div>
     </div>` },
   { t: 'A ještě jedna věc, která zní nelogicky, ale je zásadní: <b>vždycky doporučujeme pomalejší redukci než drastickou a rychlou.</b> U rychlého hubnutí hrozí povislá kůže a výrazně vyšší riziko jo‑jo efektu. Pomaleji znamená trvaleji.' },
-  { chips: [{ label: 'Dává smysl, kolik to stojí?', go: 'plan' }] }
+  { chips: [{ label: 'Dává smysl, kolik to stojí?', go: 'plan', primary: true },
+           { label: 'Jak rychle budu hubnout?', faq: 'speed' },
+           { label: 'Přijdu o svaly?', faq: 'muscle' }] }
 ],
 
 /* 10 · Kalkulačka a varianty */
@@ -788,7 +793,8 @@ price: [
   { t: 'Platí se <b>kartou</b>. Při zahájení programu zadáte kartu jednou do zabezpečené platební brány a odsouhlasíte opakovanou platbu — další měsíce už se částka strhne sama, vždycky ve stejný den. Údaje o kartě vidí jen platební brána, my se k nim nedostaneme.' },
   { t: 'Ke každé platbě Vám přijde <b>doklad e‑mailem</b>. Opakovanou platbu můžete <b>kdykoli zrušit</b> — jedním klikem v e‑mailu nebo tím, že nám napíšete. Nic tím neporušíte a nic nedoplácíte.' },
   { t: 'Děláme to takhle proto, že měsíční faktura je nejčastější důvod, proč terapie zbytečně vypadne — někdo zapomene zaplatit, lék se neobjedná a vznikne pauza, kterou tělo pozná. Tomuhle se tím vyhneme.' },
-  { chips: [{ label: 'Co všechno v té ceně je?', go: 'benefits' }] }
+  { chips: [{ label: 'Co všechno v té ceně je?', go: 'benefits', primary: true },
+           { label: 'Hradí to pojišťovna?', faq: 'insurance' }] }
 ],
 
 /* 12 · Benefity programu */
@@ -796,7 +802,9 @@ benefits: [
   { t: 'V ceně programu máte tohle:',
     card: () => planCards() },
   { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b>. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Stejně tak ho jde zkrátit nebo prodloužit podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
-  { chips: [{ label: 'Jak to probíhá dál?', go: 'care' }] }
+  { chips: [{ label: 'Jak to probíhá dál?', go: 'care', primary: true },
+           { label: 'Musím k tomu držet dietu?', faq: 'diet' },
+           { label: 'Můžu program kdykoli ukončit?', faq: 'quit' }] }
 ],
 
 /* 13 · Individuální vedení a měsíční zpětná vazba */
@@ -817,7 +825,8 @@ care: [
   { t: 'Po zahájení programu dostanete přístup do <b>své klientské sekce</b>. Je to Vaše místo: vidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
     dal: 'To se mi líbí' },
   { t: () => `Máte na to připravené místo ve <b>své klientské sekci</b> a vždycky Vám přijde e‑mail s připomenutím, abyste na to nemusel${ova()} myslet. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
-  { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy' }] }
+  { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy', primary: true },
+           { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' }] }
 ],
 
 /* 14 · Výdej léčiva */
