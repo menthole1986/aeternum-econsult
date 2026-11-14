@@ -559,9 +559,10 @@ const SCRIPT = {
 
 /* 1 · Kde se nacházíme */
 intro: [
-  { t: () => `Dobrý den, ${esc(D.name)}. Vítám Vás na vstupní konzultaci v Aeternum Clinic. Jsem Marcel AI — digitální dvojče konzultanta Marcela. Vyškolil mě sám podle svých vlastních zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Lékař nejsem.` },
-  { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás tři kroky: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>vstupní screening</b> — krevní testy a vyšetření lékařem — a nakonec <b>zahájení programu</b>. Nahoře to máte vidět po celou dobu.' },
-  { t: 'Počítejte zhruba s třiceti minutami, pokud si projdeme všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
+  { t: () => `Dobrý den, ${esc(D.name)}. Vítám Vás na vstupní konzultaci v Aeternum Clinic. Jsem Marcel AI — digitální dvojče Marcela, koordinátora programů péče. Vyškolil mě sám podle svých zkušeností a konzultací s klienty, takže Vám program vysvětlím stejně jako on. Provedu Vás úvodem do programu redukce hmotnosti s moderní medikací — s léky <b>Wegovy</b> nebo <b>Mounjaro</b>.` },
+  { t: 'A hned na začátku jedna věc: nejsem lékař. Můžu Vám vysvětlit, jak program funguje a co stojí — ale nemůžu určit dávku, posoudit, jestli je terapie pro Vás vhodná, ani nic předepsat. To dělá lékař při vyšetření.' },
+  { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás <b>čtyři kroky</b>: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>krevní testy</b>, na které si musíte zajít, potom <b>vyšetření lékařem</b> — osobně, nebo online — a nakonec <b>zahájení programu péče</b>. Nahoře to máte vidět po celou dobu.' },
+  { t: 'Počítejte zhruba s třiceti minutami, abychom si prošli všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
   { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
   { chips: [{ label: 'Můžeme začít', go: 'vas' }] }
 ],
@@ -569,6 +570,8 @@ intro: [
 /* 2 · Zdvořilostní otázka a co klienta přivádí */
 vas: [
   { t: 'Než se pustíme do terapie, rád bych Vás trochu poznal — ať Vám pak neříkám obecné věci, které se Vás netýkají.' },
+  { t: 'Co děláte za práci? Stačí pár slov.' },
+  { ask: 'job', placeholder: 'Napište mi to stručně…' },
   { t: 'Jak vypadá Váš běžný den? Vyberte, co se blíží nejvíc.' },
   { chips: [
       { label: 'Většinu dne sedím', store: ['rezim', 'sedavé zaměstnání'], go: 'vas2' },
@@ -613,7 +616,7 @@ vas3: [
       if (e === 'vedení odborníkem') return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
       return 'Rozumím, díky. Vrátím se k tomu, až si budeme říkat, co od programu čekat.';
     } },
-  { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí a co už máte za sebou? Klidně stručně — lékař si to přečte před vyšetřením.' },
+  { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí? Klidně stručně — lékař si to přečte před vyšetřením a naživo to pak můžete doplnit.' },
   { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
   { t: 'Děkuju, tohle mi pomůže. Nechám to u Vaší dokumentace, ať to lékař má před sebou.' },
   { chips: [{ label: 'Pokračujme', go: 'life', primary: true }] }
@@ -633,7 +636,7 @@ vas3: [
    Tři psané odpovědi a tři klepnutí. Víc sem nedáváme: konzultace má mít
    půl hodiny, ne hodinu — zbytek dotazníku zůstal v klientské sekci. */
 life: [
-  { t: 'Ještě než se pustíme do terapie, chci vědět, jak teď žijete. Není to dotazník pro dotazník — lékař to bude mít u vyšetření před sebou, takže se Vás na to nebude ptát znovu, a vychází se z toho i při sestavování Vašeho plánu stravy a tréninku.' },
+  { t: 'Ještě než se pustíme do terapie, rád bych se zeptal, jak teď žijete. Stačí stručně — ať si o Vás udělám představu a lékař se na Váš případ líp připraví. Vychází se z toho i při sestavování Vašeho plánu stravy a tréninku.' },
   { t: 'Začneme jídlem. Jak vypadá Váš běžný den — snídaně, oběd, večeře, co mezi tím a co pijete? Klidně stručně a upřímně, nehodnotím Vás.' },
   { ask: 'diet', placeholder: 'Ráno kafe, oběd v práci, večer doma…' },
   /* Frekvenci a druh pohybu máme z e-screeningu. Ptát se na ně podruhé by
@@ -702,16 +705,17 @@ how: [
       <div class="card"><b>Zpomalují vyprazdňování žaludku</b><span>Jídlo v žaludku zůstává déle. Po menší porci se cítíte plní výrazně delší dobu.</span></div>
       <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
     </div>` },
-  { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytvoří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Terapie je vázaná na lékařský předpis a vede ji lékař.</span>` },
+  { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytvoří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
   { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má vedlejší účinky?', faq: 'side' }] }
 ],
 
 /* Rozdíl mezi preparáty a co vychází klientovi */
 drug: [
-  { t: 'Rozdíl mezi těmi dvěma léky je jednoduchý. <b>Wegovy</b> působí na jeden hormonální receptor (GLP‑1). <b>Mounjaro</b> působí současně na dva (GLP‑1 a GIP), což u většiny pacientů vedlo v klinických studiích k o něco vyššímu úbytku váhy. Oba jsou vázané na lékařský předpis.' },
+  { t: 'Obvykle se klienti ptají i na rozdíl mezi těmi dvěma léky. A ten je jednoduchý. <b>Wegovy</b> působí na jeden hormonální receptor (GLP‑1). <b>Mounjaro</b> působí současně na dva (GLP‑1 a GIP).' },
+  { t: 'V klinických studiích dosáhlo Wegovy průměrného úbytku váhy kolem <b>15 %</b> počáteční hmotnosti, u Mounjara se díky duálnímu mechanismu dosahovalo zhruba <b>20 %</b>. Výsledky jsou samozřejmě individuální. Oba léky jsou vázané na lékařský předpis.' },
   { t: () => `Podle Vašich odpovědí Vám vychází <span class="hl">${esc(D.drug)}</span> — ${esc(D.drugWhy)}.` },
   { t: 'Konečné slovo má ale vždycky lékař. Může doporučení změnit podle krevních testů a podle toho, co u Vás uvidí při vyšetření. Já Vám tady říkám, co vychází z dotazníku, ne co Vám bude předepsáno.' },
-  { chips: [{ label: 'Dobře, jak se to podává?', go: () => maPmos() ? 'pmos' : 'form' }] }
+  { chips: [{ label: 'Zatím je vše jasné, pokračujme', go: () => maPmos() ? 'pmos' : 'form' }] }
 ],
 
 /* 3b · PMOS (PCOS). Ukaze se jen klientce, ktera ho ve screeningu uvedla.
@@ -729,7 +733,7 @@ pmos: [
     </div>` },
   { t: 'A dvě věci, které s Vámi musí probrat lékař na vstupním vyšetření, takže si je prosím schovejte na něj: <b>jakou užíváte hormonální antikoncepci</b> a jak jste na tom s <b>plánem těhotenství</b>. Tahle terapie se s těhotenstvím nekombinuje — kdyby se Vám ten plán během programu změnil, musíme to vědět hned a lék se vysazuje.' },
   { t: 'Že u Vás jde o PMOS už lékař ví — máme to z Vašeho dotazníku a uvidí to i s krevními testy ze vstupního screeningu. Nemusíte to znovu vysvětlovat.' },
-  { chips: [{ label: 'Dobře, jak se to podává?', go: 'form' }] }
+  { chips: [{ label: 'Zatím je vše jasné, pokračujme', go: 'form' }] }
 ],
 
 /* 4 · Forma a aplikace */
