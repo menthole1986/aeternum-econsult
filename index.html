@@ -787,7 +787,10 @@ expect: [
 
 /* 10 · Kalkulačka a varianty */
 plan: [
-  { t: () => `Teď k penězům. Podle naší kalkulace a predikce nám vychází, že pro dosažení Vašeho cíle bude potřeba <b>délka programu ${D.months} ${mesice(D.months)}</b> — počítejte radši s rezervou dvou měsíců navíc na individuální odezvu a na případnou udržovací fázi.` },
+  /* Odhad délky počítá se 2,5 kg za měsíc, zatímco o kus výš mluvíme o tempu
+     2 až 4 kg. Není to rozpor, ale je potřeba to říct — jinak si klient
+     spočítá, že mu program vychází delší, než by podle tempa musel být. */
+  { t: () => `Teď k penězům. Podle naší kalkulace a predikce nám vychází, že pro dosažení Vašeho cíle bude potřeba <b>délka programu ${D.months} ${mesice(D.months)}</b> — počítejte radši s rezervou dvou měsíců navíc na individuální odezvu a na případnou udržovací fázi. Délku schválně počítáme spodní polovinou toho tempa; když to půjde rychleji, program prostě dřív ukončíte.` },
   { t: 'Programy se liší hlavně tím, co je v nich. <b>Cena programu za měsíc je neměnná a platí po celou dobu terapie.</b>' },
   { t: () => `Pro představu: abyste se dostal${ova()} do pásma normálního BMI, tedy někam k hodnotě ${String(CFG.healthyBmi).replace('.', ',')}, je to <b>${bmiTarget()} kg</b>. Nemusí to být Váš cíl — jen ať víte, kde to pásmo začíná.` },
   /* `vars` musí být poslední beat kapitoly: `play` u něj skončí a další
@@ -848,12 +851,17 @@ care: [
   { t: () => `A pro východ republiky nabízíme i <b>concierge vyšetření</b>: lékař přijede přímo za Vámi domů nebo do kanceláře. Do ${CFG.conciergeRadiusKm} km od Brna nebo Olomouce stojí <b>${fmt(CFG.conciergePrice)} Kč</b>, při výjezdu jinam po republice se k té částce připočítává <b>${CFG.conciergePerKm} Kč za kilometr</b> z nejbližšího z těch dvou center.`,
     dal: 'To mi dává smysl' },
   { t: 'Abychom mohli a uměli celý program vést na dálku, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
-  /* Klientská sekce zatím neběží. Dokud nebude, mluvíme o ní v budoucím
-     čase — slíbit klientovi přístup, který po zaplacení nedostane, je
-     horší než o ní chvíli mlčet. */
+  /* Klientská sekce je hotová a nasazená, ale klientům ji sami od sebe
+     nerozesíláme — odkaz chodí jednotlivě, když je potřeba (výběr termínu
+     kontroly, návrat do programu). Proto o ní mluvíme v budoucím čase:
+     slíbit přístup, který klient po zaplacení nedostane, je horší než o ní
+     chvíli mlčet. Stejně to má napsané i server v podkladech pro model. */
   { t: 'Do budoucna připravujeme vlastní online platformu — <b>Vaši klientskou sekci</b>. Uvidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
     dal: 'To se mi líbí' },
-  { t: () => `Než bude hotová, běží zpětná vazba e‑mailem: vždycky Vám přijde připomenutí, abyste na to nemusel${ova()} myslet, a stačí odpovědět. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
+  /* „Ozveme se“, ne „přijde připomenutí“: automatickou výzvu na zpětnou
+     vazbu nikdo neposílá. V denním přehledu kliniky visí, kdo nenapsal, a
+     ozve se mu člověk — tak to taky slibujeme. */
+  { t: () => `Než bude hotová, běží zpětná vazba e‑mailem: ozveme se Vám vždycky před koncem balení, abyste na to nemusel${ova()} myslet, a stačí odpovědět. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
   { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy', primary: true },
            { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' }] }
 ],
