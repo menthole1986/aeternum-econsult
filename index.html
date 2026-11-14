@@ -416,6 +416,10 @@ const CFG = {
   screeningPrice: 4970,                         // stejné číslo jako CONFIG.ENTRY_SCREENING_PRICE na serveru
   consultPrice: 570,                            // konzultace se živým koordinátorem
   advisorPrice: 121,                            // 100 Kč + 21 % DPH, odečítá se z první platby za program
+  /* Volitelný doplněk Aeternum GLP-1 infuze. Není součástí žádného programu
+     a server ho neposílá — je to samostatná služba na klinice v Praze. */
+  infusionPrice: 14790,
+  infusionCount: 6,
   // Obchodní podmínky. Server posílá platnou adresu; tahle je záloha,
   // kdyby odpověď nedorazila. Prázdno = odkaz se nikde neukáže.
   termsUrl: 'https://www.aeternumclinic.cz/_files/ugd/58be90_9f9915d451c54eb09770f75488dd0a31.pdf',
@@ -807,7 +811,12 @@ benefits: [
   { t: 'V ceně programu máte tohle:',
     card: () => planCards() },
   { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b>. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Stejně tak ho jde zkrátit nebo prodloužit podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
+  /* Infuze v ceně žádného programu není a terapie na ní nestojí. Říkáme to
+     jako doplněk, ne jako součást — a rovnou s tím, že se jezdí do Prahy,
+     ať si to člověk z druhého konce republiky umí přepočítat. */
+  { t: () => `A ještě jedna věc, která v ceně programu <b>není</b>, ale dá se k němu přikoupit: <b>Aeternum GLP‑1 infuze</b>. Je to měsíční infuzní podpora složená přímo na období redukce — podává se u nás na klinice v Praze.` },
   { chips: [{ label: 'Jak to probíhá dál?', go: 'care', primary: true },
+           { label: 'Co ta infuze obsahuje?', faq: 'infuze' },
            { label: 'Musím k tomu držet dietu?', faq: 'diet' }] }
 ],
 
@@ -846,14 +855,14 @@ pharmacy: [
   { t: 'Postup je každý měsíc stejný:',
     card: () => S.variant && S.variant.drugIncluded
       ? `<div class="plan">
-          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
-          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>1. Faktura na další měsíc</span><b>e‑mailem, s předstihem</b></div>
+          <div class="kv"><span>2. Úhrada faktury</span><b>převodem</b></div>
           <div class="kv"><span>3. Objednáme léčivo</span><b>my, za Vás</b></div>
           <div class="kv"><span>4. Vyzvednutí</span><b>lékárna BENU Chlumčanského</b></div>
         </div>`
       : `<div class="plan">
-          <div class="kv"><span>1. Platba za program péče</span><b>z karty, automaticky</b></div>
-          <div class="kv"><span>2. Doklad o platbě</span><b>e‑mailem</b></div>
+          <div class="kv"><span>1. Faktura na další měsíc</span><b>e‑mailem, s předstihem</b></div>
+          <div class="kv"><span>2. Úhrada faktury</span><b>převodem</b></div>
           <div class="kv"><span>3. Vystavíme e‑recept</span><b>my, za Vás</b></div>
           <div class="kv"><span>4. Vyzvednutí a úhrada</span><b>kterákoli lékárna</b></div>
         </div>` },
@@ -903,6 +912,7 @@ screening: [
     dal: 'Dobře, rozumím, můžeme dál' },
   { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
   { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
+  { t: 'A nejsou jen sítem. <b>Podle nich se určuje, jakou dávkou začnete</b> a jak rychle se dá zvyšovat — bez nich by to byl odhad.' },
   /* Sami ji děláme jenom v ordinaci, takže kdo jde na vyšetření online, si
      ji musí zařídit sám a dopředu — proto o ní mluvíme tady, ne až na
      vyšetření. */
@@ -927,6 +937,7 @@ faq: [
       { label: 'Co když mi to nezabere?', faq: 'nowork' },
       { label: 'Přijdu o svaly?', faq: 'muscle' },
       { label: 'Co když se mi vrátí chutě?', faq: 'cravings' },
+      { label: 'Máte něco navíc na podporu terapie?', faq: 'infuze' },
       { label: 'Všemu rozumím, pojďme k rezervaci', go: 'included', primary: true }
     ] }
 ],
@@ -985,6 +996,12 @@ book: [
 bookLater: [
   { t: 'Naprosto v pořádku, nikam Vás netlačím.' },
   { t: () => `Konzultace Vám běží ještě ${hodin(D.hoursLeft || CFG.advisorHours || 72)} a odkaz na ni máte v e-mailu — můžete se sem kdykoli vrátit a dokončit to v klidu. Ptát se mě můžete dál, jsem tu.` },
+  /* Nejčastější nevyslovený důvod, proč to člověk odloží: strach, že zaplatí
+     screening a pak se dozví, že na terapii není vhodný. Nemá ho proč mít —
+     kdyby v odpovědích něco bylo, scénář ho zastaví o patnáct kapitol dřív
+     a k rezervaci se vůbec nedostane. Říkáme to tedy nahlas. */
+  { t: () => `A jestli Vás brzdí obava, že nakonec nebudete vhodn${D && D.sex === 'M' ? 'ým adeptem' : 'ou adeptkou'} — z Vašeho vstupního screeningu nic takového nevyplývá. Spíš naopak. Kdyby v odpovědích byla překážka, zastavil bych Vás hned na začátku a o termínu bychom se tu vůbec nebavili.` },
+  { t: 'Vstupní screening to jen potvrdí v číslech. A není to razítko navíc: <b>z krevních výsledků lékař určuje, jakou dávkou začnete</b> a jak rychle se dá zvyšovat. Bez nich by to byl odhad — a to u léku na předpis dělat nechceme.' },
   { chips: [
       { label: 'Ještě se na něco zeptám', prompt: 'Povídejte, co Vás zajímá.' },
       { label: 'Tak pojďme k termínu', go: 'bookForm', primary: true }
@@ -993,6 +1010,10 @@ bookLater: [
 
 bookForm: [
   { t: 'Výborně. Vyšetření můžete mít osobně u nás v Praze, nebo online přes video — lékař má v obou případech stejné podklady a rozhoduje stejně.' },
+  /* Volba tady rozhoduje, kdy klient přijede na tu jednu povinnou osobní
+     návštěvu. Říká se to i ve `care`, ale tady padá rozhodnutí — kdo to
+     tam přeskočil nebo zapomněl, musí to vědět ve chvíli, kdy kliká. */
+  { t: () => `Jen ať to máte srovnané: <b>jednou za celou terapii se potřebujeme vidět osobně</b>. Když přijedete teď, máte to za sebou. Když zvolíte online, uvidíme se až na <b>kontrolním vyšetření na konci třetího měsíce</b> — a to už osobně v Praze.` },
   { t: () => D.praha
       ? 'Vy jste z Prahy, takže se nabízí osobně. Jak to chcete?'
       : 'Vzhledem k tomu, odkud jste, bude nejspíš pohodlnější online. Jak to chcete?' },
@@ -1153,6 +1174,14 @@ const FAQ = {
         + 'Říkám to radši dopředu, ať víte, co Vás to celé bude stát.'),
   diet: () => 'Nemusíte držet žádnou dietu a nebudu Vám dávat jídelníček, který se nedá dodržet. Lék sám sníží '
     + 'chuť k jídlu — to podstatné je využít to a jíst dost bílkovin, aby se neubíralo svalstvo. ' + protokolVeta(),
+  /* Jediná placená věc mimo program, o které Marcel AI mluví. Popisujeme
+     složení a k čemu to je, ne co to udělá — účinek nikdo negarantuje
+     a slib „bez vedlejších účinků" z letáku se sem nepřenáší. */
+  infuze: () => `Ano. Jmenuje se <b>Aeternum GLP‑1</b> a je to volitelný doplněk k programu, ne jeho součást — terapie na něm nestojí a bez něj funguje stejně. `
+    + `V jedné infuzi je hloubková hydratace s elektrolyty, vysokodávkovaný vitamin C s glutathionem, L‑karnitin s B‑komplexem a aminokyseliny s hořčíkem a zinkem. `
+    + `Smyslem je podržet energii a výživu svalové hmoty v době, kdy jíte výrazně míň než dřív. `
+    + `Kúra je ${CFG.infusionCount}měsíční, tedy ${CFG.infusionCount} infuzí, a stojí <b>${fmt(CFG.infusionPrice)} Kč</b>. `
+    + `Podává se na klinice v Praze, takže počítejte s tím, že na každou infuzi musíte přijet. Jestli je pro Vás vhodná, řekne lékař při vyšetření.`,
   nowork: 'Stává se to u menší části lidí. Proto jsou v programu pravidelné kontroly — když se po několika týdnech nic neděje, lékař upraví dávku nebo zváží změnu preparátu. Nikdo Vás nenechá půl roku na něčem, co nefunguje.'
 };
 
