@@ -788,9 +788,16 @@ price: [
       ? `Vybral${ova()} jste si variantu <b>${esc(S.variant.name)}</b> na ${S.variant.months} ${mesice(S.variant.months)} za <span class="hl">${fmt(S.variant.price)} Kč</span> měsíčně.`
       : 'Ještě jste si variantu nevybral' + ova() + ' — můžete se k ní kdykoli vrátit, ale pojďme si říct, jak placení funguje obecně.' },
   { t: () => `Důležité: ta cena je <b>za měsíc</b>, ne celková částka dopředu. Nic neplatíte na začátku v jednom balíku.` },
-  { t: 'Platí se <b>kartou</b>. Při zahájení programu zadáte kartu jednou do zabezpečené platební brány a odsouhlasíte opakovanou platbu — další měsíce už se částka strhne sama, vždycky ve stejný den. Údaje o kartě vidí jen platební brána, my se k nim nedostaneme.' },
-  { t: 'Ke každé platbě Vám přijde <b>doklad e‑mailem</b>. Opakovanou platbu můžete <b>kdykoli zrušit</b> — jedním klikem v e‑mailu nebo tím, že nám napíšete. Nic tím neporušíte a nic nedoplácíte.' },
-  { t: 'Děláme to takhle proto, že měsíční faktura je nejčastější důvod, proč terapie zbytečně vypadne — někdo zapomene zaplatit, lék se neobjedná a vznikne pauza, kterou tělo pozná. Tomuhle se tím vyhneme.' },
+  { t: 'Program se platí <b>po měsících, na fakturu</b>. Žádná záloha dopředu a žádná částka za celý program najednou.' },
+  /* Dva modely jako u vydeje leciva: u telemediciny vystavujeme e-recept a
+     klient si lek kupuje sam, objednavame jen tam, kde je leciva v cene.
+     Slibit objednavku vsem by znamenalo slibit ji i tomu, kdo si pro lek
+     chodi na vlastni triko. */
+  { t: () => 'Faktura na další období Vám přijde <b>s měsíčním předstihem</b> — je zároveň Vaším daňovým dokladem. ' +
+      (S.variant && S.variant.drugIncluded
+        ? 'Na jejím základě pak objednáváme léčivo na další měsíc, aby na Vás v lékárně čekalo včas a v terapii nevznikla pauza.'
+        : 'Na jejím základě Vám pak vystavíme <b>e‑recept</b> na další měsíc, abyste si léčivo mohl' + ova() + ' vyzvednout včas a v terapii nevznikla pauza.') },
+  { t: 'Kartou se u nás platí jenom <b>vstupní screening</b>, a to rovnou při rezervaci termínu. Program kartou neplatíte.' },
   { chips: [{ label: 'Co všechno v té ceně je?', go: 'benefits', primary: true },
            { label: 'Hradí to pojišťovna?', faq: 'insurance' }] }
 ],
