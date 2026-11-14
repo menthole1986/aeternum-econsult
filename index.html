@@ -417,8 +417,11 @@ const CFG = {
   consultPrice: 570,                            // konzultace se živým koordinátorem
   advisorPrice: 121,                            // 100 Kč + 21 % DPH, odečítá se z první platby za program
   /* Volitelný doplněk Aeternum GLP-1 infuze. Není součástí žádného programu
-     a server ho neposílá — je to samostatná služba na klinice v Praze. */
+     a server ho neposílá — je to samostatná služba na klinice v Praze.
+     Nabízíme ji jen klientům z Prahy a okolí do 20 km: na každou ze šesti
+     infuzí se musí přijet, takže dál po republice to nemá smysl slibovat. */
   infusionPrice: 14790,
+  infusionRadiusKm: 20,
   /* Concierge vyšetření pro východ republiky — lékař přijede za klientem.
      Základní poplatek platí do 60 km od Brna nebo Olomouce, dál se
      připočítává kilometrovné z nejbližšího z těch dvou center. */
@@ -819,9 +822,9 @@ benefits: [
     card: () => planCards() },
   { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b> — třeba když cílové váhy dosáhnete dřív. Stejně tak ho jde prodloužit, když potřebujete dohubnout nebo delší udržovací fázi. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Všechno individuálně podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s námi a s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
   /* Infuze v ceně žádného programu není a terapie na ní nestojí. Říkáme to
-     jako doplněk, ne jako součást — a rovnou s tím, že se jezdí do Prahy,
-     ať si to člověk z druhého konce republiky umí přepočítat. */
-  { t: () => `A ještě jedna věc, která v ceně programu <b>není</b>, ale dá se k němu přikoupit: <b>Aeternum GLP‑1 infuze</b>. Je to měsíční infuzní podpora složená přímo na období redukce — podává se u nás na klinice v Praze.` },
+     jako doplněk, ne jako součást — a rovnou s tím, komu ji vůbec nabízíme,
+     ať si na ni člověk z druhého konce republiky nezvykne nadarmo. */
+  { t: () => `A ještě jedna věc, která v ceně programu <b>není</b>, ale dá se k němu přikoupit: <b>Aeternum GLP‑1 infuze</b>. Je to měsíční infuzní podpora složená přímo na období redukce. Podává se u nás na klinice v Praze a nabízíme ji <b>klientům z Prahy a okolí do ${CFG.infusionRadiusKm} km</b> — na každou infuzi se totiž musí přijet.` },
   { chips: [{ label: 'Jak to probíhá dál?', go: 'care', primary: true },
            { label: 'Co ta infuze obsahuje?', faq: 'infuze' },
            { label: 'Musím k tomu držet dietu?', faq: 'diet' }] }
@@ -1199,7 +1202,7 @@ const FAQ = {
     + `V jedné infuzi je hloubková hydratace s elektrolyty, vysokodávkovaný vitamin C s glutathionem, L‑karnitin s B‑komplexem a aminokyseliny s hořčíkem a zinkem. `
     + `Smyslem je podržet energii a výživu svalové hmoty v době, kdy jíte výrazně míň než dřív. `
     + `Kúra trvá šest měsíců, tedy šest infuzí, a stojí <b>${fmt(CFG.infusionPrice)} Kč</b>. `
-    + `Podává se na klinice v Praze, takže počítejte s tím, že na každou infuzi musíte přijet. Jestli je pro Vás vhodná, řekne lékař při vyšetření.`,
+    + `Podává se na klinice v Praze a na každou infuzi se musí přijet, takže ji nabízíme jen klientům z <b>Prahy a okolí do ${CFG.infusionRadiusKm} km</b>. Jestli je pro Vás vhodná, řekne lékař při vyšetření.`,
   /* Nejčastější námitka těsně před placením. Odpovídá se na ni na rovinu:
      screening se nevrací, protože proběhl — ale k lékaři se klient dostane
      vždycky a terapie se někdy jen odkládá, nezamítá. */
