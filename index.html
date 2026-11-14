@@ -569,7 +569,7 @@ intro: [
 
 /* 2 · Zdvořilostní otázka a co klienta přivádí */
 vas: [
-  { t: 'Než se pustíme do terapie, rád bych Vás trochu poznal — ať Vám pak neříkám obecné věci, které se Vás netýkají.' },
+  { t: 'Než se pustíme do vysvětlování, rád bych Vás trochu poznal — ať Vám pak neříkám obecné věci, které se Vás netýkají.' },
   { t: 'Co děláte za práci? Stačí pár slov.' },
   { ask: 'job', placeholder: 'Napište mi to stručně…' },
   { t: 'Jak vypadá Váš běžný den? Vyberte, co se blíží nejvíc.' },
@@ -636,7 +636,7 @@ vas3: [
    Tři psané odpovědi a tři klepnutí. Víc sem nedáváme: konzultace má mít
    půl hodiny, ne hodinu — zbytek dotazníku zůstal v klientské sekci. */
 life: [
-  { t: 'Ještě než se pustíme do terapie, rád bych se zeptal, jak teď žijete. Stačí stručně — ať si o Vás udělám představu a lékař se na Váš případ líp připraví. Vychází se z toho i při sestavování Vašeho plánu stravy a tréninku.' },
+  { t: 'Ještě než se pustíme do terapie, rád bych se zeptal, jak teď žijete. Stačí stručně — ať si o Vás udělám představu a lékař se na Váš případ líp připraví. Vychází se z toho i při doporučeních a při sestavování Vašeho jídelníčku a tréninkového plánu.' },
   { t: 'Začneme jídlem. Jak vypadá Váš běžný den — snídaně, oběd, večeře, co mezi tím a co pijete? Klidně stručně a upřímně, nehodnotím Vás.' },
   { ask: 'diet', placeholder: 'Ráno kafe, oběd v práci, večer doma…' },
   /* Frekvenci a druh pohybu máme z e-screeningu. Ptát se na ně podruhé by
@@ -705,7 +705,7 @@ how: [
       <div class="card"><b>Zpomalují vyprazdňování žaludku</b><span>Jídlo v žaludku zůstává déle. Po menší porci se cítíte plní výrazně delší dobu.</span></div>
       <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
     </div>` },
-  { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytvoří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
+  { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytváří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
   { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má lék vedlejší účinky?', faq: 'side' }] }
 ],
 
