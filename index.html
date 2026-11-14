@@ -419,7 +419,6 @@ const CFG = {
   /* Volitelný doplněk Aeternum GLP-1 infuze. Není součástí žádného programu
      a server ho neposílá — je to samostatná služba na klinice v Praze. */
   infusionPrice: 14790,
-  infusionCount: 6,
   /* Concierge vyšetření pro východ republiky — lékař přijede za klientem.
      Základní poplatek platí do 60 km od Brna nebo Olomouce, dál se
      připočítává kilometrovné z nejbližšího z těch dvou center. */
@@ -1199,7 +1198,7 @@ const FAQ = {
   infuze: () => `Ano. Jmenuje se <b>Aeternum GLP‑1</b> a je to volitelný doplněk k programu, ne jeho součást — terapie na něm nestojí a bez něj funguje stejně. `
     + `V jedné infuzi je hloubková hydratace s elektrolyty, vysokodávkovaný vitamin C s glutathionem, L‑karnitin s B‑komplexem a aminokyseliny s hořčíkem a zinkem. `
     + `Smyslem je podržet energii a výživu svalové hmoty v době, kdy jíte výrazně míň než dřív. `
-    + `Kúra je ${CFG.infusionCount}měsíční, tedy ${CFG.infusionCount} infuzí, a stojí <b>${fmt(CFG.infusionPrice)} Kč</b>. `
+    + `Kúra trvá šest měsíců, tedy šest infuzí, a stojí <b>${fmt(CFG.infusionPrice)} Kč</b>. `
     + `Podává se na klinice v Praze, takže počítejte s tím, že na každou infuzi musíte přijet. Jestli je pro Vás vhodná, řekne lékař při vyšetření.`,
   /* Nejčastější námitka těsně před placením. Odpovídá se na ni na rovinu:
      screening se nevrací, protože proběhl — ale k lékaři se klient dostane
