@@ -563,7 +563,7 @@ intro: [
   { t: 'A hned na začátku jedna věc: nejsem lékař. Můžu Vám vysvětlit, jak program funguje a co stojí — ale nemůžu určit dávku, posoudit, jestli je terapie pro Vás vhodná, ani nic předepsat. To dělá lékař při vyšetření.' },
   { t: 'Nejdřív ať víte, kde zrovna jsme. Cesta k terapii má u nás <b>čtyři kroky</b>: <b>úvodní konzultace</b>, kterou máme právě teď, pak <b>krevní testy</b>, na které si musíte zajít, potom <b>vyšetření lékařem</b> — osobně, nebo online — a nakonec <b>zahájení programu péče</b>. Nahoře to máte vidět po celou dobu.' },
   { t: 'Počítejte zhruba s třiceti minutami, abychom si prošli všechno. Kdykoli mě můžete přerušit — pole na dotaz máte pořád dole. A pokud spěcháte, klepnutím do obrazovky mě přeskočíte dopředu.' },
-  { t: () => `Z Vašeho e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
+  { t: () => `Z Vašeho předešlého e‑screeningu už vím to podstatné: výška ${D.height} cm, váha ${D.weight} kg, BMI <span class="hl">${String(D.bmi).replace('.', ',')}</span>. Chcete se dostat na ${D.target} kg, tedy shodit zhruba ${D.lose} kg.` },
   { chips: [{ label: 'Můžeme začít', go: 'vas' }] }
 ],
 
@@ -575,7 +575,7 @@ vas: [
   { t: 'Jak vypadá Váš běžný den? Vyberte, co se blíží nejvíc.' },
   { chips: [
       { label: 'Většinu dne sedím', store: ['rezim', 'sedavé zaměstnání'], go: 'vas2' },
-      { label: 'Jsem hodně na nohou', store: ['rezim', 'na nohou'], go: 'vas2' },
+      { label: 'Jsem hodně na nohou a mám aktivní práci', store: ['rezim', 'na nohou'], go: 'vas2' },
       { label: 'Pracuju na směny', store: ['rezim', 'směnný provoz'], go: 'vas2' },
       { label: 'Nedá se to říct, je to různé', store: ['rezim', 'nepravidelný režim'], go: 'vas2' }
     ] }
@@ -618,7 +618,7 @@ vas3: [
     } },
   { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí? Klidně stručně — lékař si to přečte před vyšetřením a naživo to pak můžete doplnit.' },
   { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
-  { t: 'Děkuju, tohle mi pomůže. Nechám to u Vaší dokumentace, ať to lékař má před sebou.' },
+  { t: 'Děkuju, tohle mi pomůže. Doplním to do Vaší klientské dokumentace, ať to má lékař před sebou.' },
   { chips: [{ label: 'Pokračujme', go: 'life', primary: true }] }
 ],
 
@@ -698,7 +698,7 @@ how: [
   { t: () => S.answers.glp === 'zhruba ví'
       ? 'Projdu to tedy celé i tak — ať máme jistotu, že nám nic nechybí, a hlavně ať víte i to, co se obvykle neříká.'
       : 'Vysvětlím Vám to od začátku a srozumitelně. Není to složité, jen se to většinou vykládá špatně.' },
-  { t: 'Vaše tělo po každém jídle vyplavuje <b>střevní hormony</b>, které mozku oznámí, že je najedeno. U části lidí ten signál funguje slabě — proto mají hlad i chvíli po jídle. Léky jako <b>Mounjaro</b> (účinná látka tirzepatid) nebo <b>Wegovy</b> (semaglutid) tyhle hormony napodobují.' },
+  { t: 'Vaše tělo po každém jídle vyplavuje <b>střevní hormony</b>, které mozku oznámí, že je najedeno. U části lidí ten signál funguje slabě — proto mají hlad i chvíli po jídle. Léky jako <b>Mounjaro</b> (účinná látka tirzepatid) nebo <b>Wegovy</b> (účinná látka semaglutid) tyhle hormony napodobují.' },
   { t: 'Působí třemi způsoby najednou:',
     card: () => `<div class="cards">
       <div class="card"><b>Vypínají pocit hladu v mozku</b><span>Působí na centra, která řídí chuť k jídlu. Výrazně snižují hlad, potlačují chutě na sladké a tučné a odstraňují takzvaný food noise — neustálé přemýšlení o jídle.</span></div>
@@ -706,7 +706,7 @@ how: [
       <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
     </div>` },
   { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytvoří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
-  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má vedlejší účinky?', faq: 'side' }] }
+  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug' }, { label: 'Jaké má lék vedlejší účinky?', faq: 'side' }] }
 ],
 
 /* Rozdíl mezi preparáty a co vychází klientovi */
