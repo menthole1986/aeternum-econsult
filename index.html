@@ -180,9 +180,9 @@ p{margin:0}
 .kv b{font-weight:700;text-align:right}
 
 /* ---------- ovládání ---------- */
-.dock{flex:none;padding:0 var(--gut) clamp(14px,calc(1.8*var(--u)),calc(30px*var(--k)));background:linear-gradient(180deg,rgba(25,25,27,0),rgba(25,25,27,.92) 28%)}
+.dock{flex:none;padding:clamp(10px,calc(1*var(--u)),calc(20px*var(--k))) var(--gut) clamp(14px,calc(1.8*var(--u)),calc(30px*var(--k)));background:linear-gradient(180deg,rgba(25,25,27,0),rgba(25,25,27,.92) 28%)}
 .dockin{max-width:calc(820px*var(--k));margin:0 auto}
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-bottom:14px}
 .chip{border:1.5px solid var(--line2);background:rgba(25,25,27,.6);color:var(--ink);border-radius:999px;padding:10px 18px;font-size:clamp(12.5px,calc(.88*var(--u)),calc(15px*var(--k)));font-weight:500;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
 .chip:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.06)}
 .chip.go{background:var(--grad);border-color:transparent;color:#fff;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:clamp(11.5px,calc(.78*var(--u)),calc(14px*var(--k)));padding:12px 24px}
@@ -199,9 +199,13 @@ p{margin:0}
 
 /* ---------- cesta 1-2-3 ---------- */
 .way{flex:none;padding:clamp(10px,calc(1.1*var(--u)),calc(20px*var(--k))) var(--gut) 0;display:flex;gap:clamp(8px,calc(.8*var(--u)),calc(16px*var(--k)));max-width:calc(820px*var(--k));margin:0 auto;width:100%}
-.way .st{flex:1;display:flex;gap:9px;align-items:flex-start;opacity:.34;transition:opacity .45s ease}
+/* Kroky, které klienta teprve čekají, mají být tišší, ne neviditelné.
+   Při .34 a gradientovém textu dvojka s trojkou na světlém pozadí mizely. */
+.way .st{flex:1;display:flex;gap:9px;align-items:flex-start;opacity:.62;transition:opacity .45s ease}
 .way .st.on,.way .st.done{opacity:1}
-.way .st i{flex:none;font-style:normal;font-weight:800;font-size:clamp(17px,calc(1.5*var(--u)),calc(28px*var(--k)));line-height:1;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.way .st i{flex:none;font-style:normal;font-weight:800;font-size:clamp(17px,calc(1.5*var(--u)),calc(28px*var(--k)));line-height:1;color:var(--ink)}
+/* Gradient jen na kroku, ve kterém klient zrovna je. */
+.way .st.on i,.way .st.done i{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
 .way .st .lb{min-width:0}
 .way .st b{display:block;font-size:clamp(11px,calc(.78*var(--u)),calc(14px*var(--k)));font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .way .st b .sm{display:none}
@@ -547,6 +551,7 @@ const CHAPTERS = [
   { key: 'dose', label: 'Dávkování' },
   { key: 'expect', label: 'Co čekat' },
   { key: 'plan', label: 'Váš program' },
+  { key: 'pharmacy', label: 'Výdej léčiva' },
   { key: 'benefits', label: 'Co je v ceně' },
   { key: 'care', label: 'Vedení programu' },
   { key: 'screening', label: 'Vstupní screening' },
@@ -597,7 +602,7 @@ vas2: [
   { t: () => {
       const r = S.answers.rezim || '';
       if (r === 'sedavé zaměstnání') return 'Díky. Sedavé zaměstnání je u nás nejčastější a není to Vaše chyba — jen to znamená, že pohyb musíme do programu vědomě dostat, protože se sám od sebe neobjeví.';
-      if (r === 'na nohou') return 'Díky. To je dobrý základ — jen pozor, chození celý den není totéž co silový trénink. K tomu se ještě dostanu.';
+      if (r === 'na nohou') return 'Díky. To je dobrý základ — pohybu máte přes den víc než většina lidí. Jen s tím počítejte: chození udržuje kondici, ale svaly se drží a budují prací proti odporu. K tomu se ještě dostanu.';
       if (r === 'směnný provoz') return 'Díky. U směn je nejtěžší pravidelnost jídla a spánku, a to na váhu dopadá víc, než si lidi myslí. Budeme s tím počítat.';
       if (r === 'nepravidelný režim') return 'Díky. Nepravidelnost je nejčastější důvod, proč diety padají — s tou si poradíme jinak než rozpisem na každý den.';
       /* Klient to napsal po svém. Hádat z jeho věty, do které škatulky
@@ -622,7 +627,7 @@ vas2: [
 vas3: [
   { t: () => {
       const e = S.answers.expect || '';
-      if (e === 'udržet výsledek') return 'To je podle mě ta správná odpověď. Shodit umí leccos — udržet je ta těžší půlka a program je postavený hlavně na ní.';
+      if (e === 'udržet výsledek') return 'To je podle mě ta správná odpověď. Shodit se dá kdejakým způsobem a většina z nich zabere — jenom do chvíle, než je člověk přestane dělat. Udržet výsledek je ta těžší půlka a program je postavený hlavně na ní.';
       if (e === 'zvládnout chutě') return 'Tohle slyším nejčastěji a je to přesně to, s čím tahle léčiva pomáhají nejvíc. Za chvíli si řekneme, jak to dělají.';
       if (e === 'zdraví') return 'Dobře. Čísla z krve uvidíte černé na bílém hned na začátku a pak znovu při kontrolách, takže to nezůstane u pocitu.';
       if (e === 'vedení odborníkem') return 'Rozumím. Vedení je přesně to, co dělá rozdíl oproti tomu, když si člověk něco koupí a zůstane na to sám.';
@@ -631,6 +636,27 @@ vas3: [
   { t: 'A teď mi to řekněte po svém: co Vás k nám přivádí? Klidně stručně — lékař si to přečte před vyšetřením a naživo to pak můžete doplnit.' },
   { ask: 'motivation', placeholder: 'Napište mi to vlastními slovy…' },
   { t: 'Děkuju, tohle mi pomůže. Doplním to do Vaší klientské dokumentace, ať to má lékař před sebou.' },
+  /* Odkud k nám klient přišel. Ptáme se až tady, ne ve screeningu: tam by to
+     byla další kolonka ve formuláři, který má být co nejkratší, kdežto
+     v rozhovoru to projde mimochodem. Odpověď jde do karty s ostatními. */
+  { t: () => `A mimochodem, ať to vím — jak jste se o nás dozvěděl${ova()}?` },
+  { chips: [
+      { label: 'Ve vyhledávači (Google, Seznam)', store: ['source', 'vyhledávač'], go: 'vas4' },
+      { label: 'Z reklamy online nebo na sociálních sítích', store: ['source', 'reklama online nebo sociální sítě'], go: 'vas4' },
+      { label: 'Přes umělou inteligenci (ChatGPT, Gemini a spol.)', store: ['source', 'umělá inteligence'], go: 'vas4' },
+      { label: 'Od známého', store: ['source', 'doporučení od známého'], go: 'vas4' }
+    ] }
+],
+
+vas4: [
+  { t: () => {
+      const z = S.answers.source || '';
+      if (z === 'doporučení od známého') return 'To mě těší ze všeho nejvíc. Doporučení od někoho, kdo tím prošel, je pro nás ta nejlepší vizitka.';
+      if (z === 'umělá inteligence') return 'To slyším čím dál častěji a dává mi to smysl — spousta lidí se dneska zeptá nejdřív tam. Hlavní je, že jste skončil' + ova() + ' u kliniky, která si za tím stojí jménem.';
+      if (z === 'vyhledávač') return 'Dobře. Ve vyhledávači nás lidi hledají nejčastěji — hlavně že jste se dostal' + ova() + ' až sem.';
+      if (z === 'reklama online nebo sociální sítě') return 'Dobře, díky. Reklama Vás sem dostala, ale rozhodnout se budete podle toho, co si tu teď projdeme.';
+      return 'Děkuju. Pomáhá nám vědět, kde nás lidi hledají.';
+    } },
   { chips: [{ label: 'Pokračujme', go: 'life', primary: true }] }
 ],
 
@@ -660,7 +686,14 @@ life: [
         + 'Má něco, s čím se musí počítat? Záda, kolena, rameno, cokoli, co Vás u cvičení brzdí.';
     } },
   { ask: 'limits', placeholder: 'Nic / bolesti zad, kolena…' },
-  { t: () => `Díky. A co už máte za sebou — co jste na hubnutí zkoušel${ova()} a jak to dopadlo? Diety, cvičení, i léky, pokud nějaké byly.` },
+  /* Když klient napíše, že ho nic nebrzdí, je škoda to minout mlčky — je to
+     Marcelova věta z dokumentu. U ostatních odpovědí radši nic: hádat
+     z jedné věty, jak vážné ty potíže jsou, by bylo horší než mlčet. */
+  { t: () => /^(nic|ne|nemam|nemám|nic zvláštního|žádné|zadne|žádná|zadna|v pohodě|vpohode|0|-)\b/i
+      .test(String(S.answers.limits || '').trim())
+      ? 'Tak to máte velké štěstí. Držím Vám palce, ať to tak zůstane ještě dlouho 🙂'
+      : '' },
+  { t: () => `Každopádně díky. A co už máte za sebou — co jste na hubnutí zkoušel${ova()} a jak to dopadlo? Diety, cvičení, i léky, pokud nějaké byly.` },
   { ask: 'pastAttempts', placeholder: () => `Co jste zkoušel${ova()} a jak to dopadlo` },
   { t: 'Výborně, tohle mi dává obrázek. Teď tři rychlé — stačí klepnout.' },
   { t: 'Jak to máte s alkoholem?' },
@@ -710,15 +743,23 @@ how: [
   { t: () => S.answers.glp === 'zhruba ví'
       ? 'Projdu to tedy celé i tak — ať máme jistotu, že nám nic nechybí, a hlavně ať víte i to, co se obvykle neříká.'
       : 'Vysvětlím Vám to od začátku a srozumitelně. Není to složité, jen se to většinou vykládá špatně.' },
-  { t: 'Vaše tělo po každém jídle vyplavuje <b>střevní hormony</b>, které mozku oznámí, že je najedeno. U části lidí ten signál funguje slabě — proto mají hlad i chvíli po jídle. Léky jako <b>Mounjaro</b> (účinná látka tirzepatid) nebo <b>Wegovy</b> (účinná látka semaglutid) tyhle hormony napodobují.' },
+  { t: 'Vaše tělo po každém jídle vyplavuje <b>střevní hormony</b>, které mozku oznámí, že je najedeno. U části lidí ten signál funguje slabě — proto mají hlad i chvíli po jídle. Léky jako <b>Wegovy</b> (účinná látka semaglutid, působí na receptory GLP‑1) nebo <b>Mounjaro</b> (účinná látka tirzepatid, působí na GLP‑1 a současně na GIP) tyhle hormony napodobují.' },
   { t: 'Působí třemi způsoby najednou:',
     card: () => `<div class="cards">
       <div class="card"><b>Vypínají pocit hladu v mozku</b><span>Působí na centra, která řídí chuť k jídlu. Výrazně snižují hlad, potlačují chutě na sladké a tučné a odstraňují takzvaný food noise — neustálé přemýšlení o jídle.</span></div>
       <div class="card"><b>Zpomalují vyprazdňování žaludku</b><span>Jídlo v žaludku zůstává déle. Po menší porci se cítíte plní výrazně delší dobu.</span></div>
       <div class="card"><b>Zlepšují práci s inzulinem</b><span>Pomáhají tělu lépe regulovat hladinu cukru v krvi a efektivněji zpracovávat energii.</span></div>
     </div>` },
+  /* Čtvrtý mechanismus schválně bez čísel — ta přijdou o kapitolu dál
+     u porovnání preparátů a dvakrát po sobě by zněla jako přemlouvání. */
+  { t: 'Tyhle tři mechanismy mají oba léky společné. U <b>Mounjara</b> se k nim díky receptoru GIP přidává ještě čtvrtý rozměr: přímější vliv na zpracování tuků a souhra obou hormonů, kvůli které bývá výsledek o kousek vyšší. Za chvíli si ty dva preparáty porovnáme.' },
   { t: () => `A teď to nejdůležitější, co Vám málokdo řekne: <b>lék sám o sobě tuky nepálí a váhu neredukuje.</b> Nedělá za Vás práci. Co dělá je, že ve Vašem těle vytváří prostředí, ve kterém redukce <i>může</i> proběhnout — ztiší hlad, srovná cukr a umožní Vám jíst míň, aniž byste trpěl${ova()} hlady. O samotné spalování tuku se pak postará tělo.<span class="note">Léky jsou vázané na lékařský předpis a terapii vede lékař.</span>` },
-  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug', primary: true }, { label: 'Jaké má lék vedlejší účinky?', faq: 'side' }] }
+  /* Proč tohle není další dieta. Říká se to tady, hned za mechanismem:
+     klient má za sebou většinou několik pokusů a potřebuje slyšet, čím se
+     tenhle liší, dřív než se začne bavit o penězích. */
+  { t: 'A ještě jedna věc, kvůli které tohle není další dieta. Každá dieta stojí a padá na <b>kalorickém deficitu</b> — a právě ten je na ní to nejtěžší, protože deficit se pozná hladem a hlad se vůlí dlouho přetlačovat nedá. Proto diety selhávají.' },
+  { t: () => `S Wegovy nebo Mounjarem je kalorický deficit najednou ta nejjednodušší část — přijde skoro ${sam()}, protože hlad zmizí. Objeví se ale opačný problém, se kterým nikdo nepočítá: <b>dojíst</b>. Hlavně bílkoviny, ať tělo nesahá po svalech. K tomu se ještě dostaneme.` },
+  { chips: [{ label: 'Rozumím, pokračujme', go: 'drug', primary: true }, { label: 'Mají tyhle léky vedlejší účinky?', faq: 'side' }] }
 ],
 
 /* Rozdíl mezi preparáty a co vychází klientovi */
@@ -810,69 +851,22 @@ price: [
      klient si lek kupuje sam, objednavame jen tam, kde je leciva v cene.
      Slibit objednavku vsem by znamenalo slibit ji i tomu, kdo si pro lek
      chodi na vlastni triko. */
+  { t: 'Kartou se u nás platí jenom <b>vstupní screening</b>, a to rovnou dnes po téhle konzultaci, při rezervaci termínu.' },
   { t: () => 'Faktura na další období Vám přijde <b>s několikadenním předstihem</b> a je zároveň Vaším daňovým dokladem. ' +
       (S.variant && S.variant.drugIncluded
         ? 'Na základě její úhrady pak objednáváme léčivo na další měsíc, aby na Vás v lékárně čekalo včas a v terapii nevznikla pauza. Čekat na Vás bude v lékárně BENU Chlumčanského, v přízemí budovy — prokážete se totožností, zmíníte, že jste náš klient, a lékárnice Vám léčivo vydá.'
         : 'Na základě její úhrady Vám pak vystavíme <b>e‑recept</b> na další měsíc, abyste si léčivo mohl' + ova() + ' v kterékoli lékárně vyzvednout včas a v terapii nevznikla pauza.') },
-  { t: 'Kartou se u nás platí jenom <b>vstupní screening</b>, a to rovnou při rezervaci termínu.' },
-  { chips: [{ label: 'Co všechno v té ceně je?', go: 'benefits', primary: true },
-           { label: 'Hradí to pojišťovna?', faq: 'insurance' }] }
-],
-
-/* 12 · Benefity programu */
-benefits: [
-  { t: 'V ceně programu máte tohle:',
-    card: () => planCards() },
-  { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b> — třeba když cílové váhy dosáhnete dřív. Stejně tak ho jde prodloužit, když potřebujete dohubnout nebo delší udržovací fázi. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Všechno individuálně podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s námi a s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
-  /* Infuze v ceně žádného programu není a terapie na ní nestojí. Říkáme to
-     jako doplněk, ne jako součást — a rovnou s tím, komu ji vůbec nabízíme,
-     ať si na ni člověk z druhého konce republiky nezvykne nadarmo. */
-  { t: () => `A ještě jedna věc, která v ceně programu <b>není</b>, ale dá se k němu přikoupit: <b>Aeternum GLP‑1 infuze</b>. Je to měsíční infuzní podpora složená přímo na období redukce. Podává se u nás na klinice v Praze a nabízíme ji <b>klientům z Prahy a okolí do ${CFG.infusionRadiusKm} km</b> — na každou infuzi se totiž musí přijet.` },
-  { chips: [{ label: 'Jak to probíhá dál?', go: 'care', primary: true },
-           { label: 'Co ta infuze obsahuje?', faq: 'infuze' },
-           { label: 'Musím k tomu držet dietu?', faq: 'diet' }] }
-],
-
-/* 13 · Individuální vedení a měsíční zpětná vazba */
-care: [
-  { t: 'Terapie je u každého trochu jiná — někdo zhubne první měsíc pět kilo, někdo dvě a pak to srovná. Proto program vedeme individuálně a neřídíme se tabulkou.' },
-  /* Jedna osobní návštěva za terapii. Říkáme to tady, ne až u rezervace:
-     kdo bydlí daleko, si to musí umět naplánovat, a dozvědět se to ve
-     třetím měsíci by bylo nepříjemné překvapení. */
-  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. <b>Minimálně jednou za celou terapii se potřebujeme vidět osobně</b> — a kdy to bude, je na Vás. Buď přijedete osobně rovnou na vstupní lékařské vyšetření v Praze a zbytek terapie pak běží na dálku, nebo si vstupní vyšetření uděláte online a přijedete až na kontrolní vyšetření na konci třetího měsíce po zahájení terapie.' },
-  { t: 'Nedělá se to kvůli papírům, ale kvůli bezpečí nás všech. Lékař, který Vás vede, Vás musí minimálně jednou vidět naživo — a zároveň je to podmínka toho, abychom Vám terapii mohli vést na dálku.' },
-  /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
-     proto, aby to člověka z druhého konce republiky neodradilo hned na
-     začátku; datum ani otevření ordinace slibovat nesmíme, proto „možnost
-     vyšetření". Města zazní jen tady, o kus výš se o nich mlčí. */
-  { t: () => `A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme možnost vyšetření v Brně nebo v Olomouci</b>, abyste za tou jednou návštěvou nemusel${ova()} přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.` },
-  /* Placená služba navíc, ne součást programu. Píšeme ji hned za plán na
-     Brno a Olomouc, protože řeší totéž — vzdálenost — jen dostupně hned. */
-  { t: () => `A pro východ republiky nabízíme i <b>concierge vyšetření</b>: lékař přijede přímo za Vámi domů nebo do kanceláře. Do ${CFG.conciergeRadiusKm} km od Brna nebo Olomouce stojí <b>${fmt(CFG.conciergePrice)} Kč</b>, při výjezdu jinam po republice se k té částce připočítává <b>${CFG.conciergePerKm} Kč za kilometr</b> z nejbližšího z těch dvou center.`,
-    dal: 'To mi dává smysl' },
-  { t: 'Abychom mohli a uměli celý program vést na dálku, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
-  /* Klientská sekce je hotová a nasazená, ale klientům ji sami od sebe
-     nerozesíláme — odkaz chodí jednotlivě, když je potřeba (výběr termínu
-     kontroly, návrat do programu). Proto o ní mluvíme v budoucím čase:
-     slíbit přístup, který klient po zaplacení nedostane, je horší než o ní
-     chvíli mlčet. Stejně to má napsané i server v podkladech pro model. */
-  { t: 'Do budoucna připravujeme vlastní online platformu — <b>Vaši klientskou sekci</b>. Uvidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
-    dal: 'To se mi líbí' },
-  /* „Ozveme se“, ne „přijde připomenutí“: automatickou výzvu na zpětnou
-     vazbu nikdo neposílá. V denním přehledu kliniky visí, kdo nenapsal, a
-     ozve se mu člověk — tak to taky slibujeme. */
-  { t: () => `Než bude hotová, běží zpětná vazba e‑mailem: ozveme se Vám vždycky před koncem balení, abyste na to nemusel${ova()} myslet, a stačí odpovědět. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
   { chips: [{ label: 'A jak se dostanu k léku?', go: 'pharmacy', primary: true },
-           { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' }] }
+           { label: 'Hradí něco z toho pojišťovna?', faq: 'insurance' }] }
 ],
 
-/* 14 · Výdej léčiva */
+/* 12 · Výdej léčiva */
 pharmacy: [
   /* Dva různé modely. U telemedicíny jede e-recept: léčivo není v ceně,
      klient si ho kupuje sám v jakékoli lékárně. Dřív tu měli všichni
      popsané vyzvednutí v BENU na Bulovce — pro klienta z druhého konce
      republiky nesmysl a navíc v rozporu s kartou o kus výš. */
-  { t: 'Poslední praktická věc — jak se k léku dostanete.' },
+  { t: 'Rád Vám to vysvětlím. Je to každý měsíc stejné a nic složitého na tom není.' },
   { t: () => S.variant && S.variant.drugIncluded
       ? 'U Vašeho programu je léčivo v ceně. Objednáme ho za Vás a vyzvednete si ho v <b>lékárně BENU na Bulovce</b>, v ulici Chlumčanského v Praze 8. V lékárně už nic neplatíte.'
       : 'Léčivo si u programů na dálku <b>kupujete ' + sam() + '</b>, v režimu samoplátce. My Vám na něj vystavíme <b>e-recept</b> — a ten platí v kterékoli lékárně v České republice.' },
@@ -906,7 +900,7 @@ pharmacy: [
       if (!b.length || (S.variant && S.variant.drugIncluded)) return '';
       return '<div class="plan">' + b.map(x =>
         `<div class="kv"><span>${esc(x.dose)}</span><b>${fmt(x.plus)}–${fmt(x.retail)} Kč</b></div>`).join('') +
-        '<div class="kv"><span>Dolní cena</span><b>s kartou BENU PLUS</b></div></div>';
+        '<div class="kv"><span>Dolní cena</span><b>se zákaznickou kartou lékárny</b></div></div>';
     } },
   { t: () => (D.drugPacks || []).length && !(S.variant && S.variant.drugIncluded)
       ? 'Začíná se vždycky na té nejnižší dávce. Jestli se někdy bude zvyšovat, rozhodne o tom lékař podle toho, jak Vám terapie jde — a cenu vyšší dávky Vám řekneme dřív, než ji předepíšeme.'
@@ -914,7 +908,54 @@ pharmacy: [
   { t: () => S.variant && S.variant.drugIncluded
       ? 'A ještě jedna věc. U minimálních dávek, kdy už víme, že na vyšší nejspíš nepůjdeme — a stejně tak kdykoli potom, co se terapie ustálí a dávka Vám sedí — se to dá zjednodušit: <b>objednáme víc balení najednou</b>. Odpadne tím chození do lékárny každý měsíc.'
       : 'Až se terapie ustálí a dávka Vám bude sedět, můžeme e-recept vystavit na víc balení najednou. Odpadne tím cesta do lékárny každý měsíc.' },
-  { chips: [{ label: 'Rozumím, co je třeba udělat teď?', go: 'screening' }] }
+  { chips: [{ label: 'A co všechno je teda v ceně programu?', go: 'benefits', primary: true }] }
+],
+
+/* 13 · Benefity programu */
+benefits: [
+  { t: 'V ceně programu máte tohle:',
+    card: () => planCards() },
+  { t: () => `Na flexibilitě chci zdůraznit jednu věc, protože je to u nás zásadní: <b>program můžete kdykoli ukončit</b> — třeba když cílové váhy dosáhnete dřív. Stejně tak ho jde prodloužit, když potřebujete dohubnout nebo delší udržovací fázi. Žádná výpovědní lhůta, žádná pokuta, žádné doplácení. Všechno individuálně podle toho, jak se váha vyvíjí. Jen Vás poprosím, abyste to vždycky probral${ova()} s námi a s lékařem, ať se to udělá rozumně a ne ze dne na den.` },
+  /* Infuze v ceně žádného programu není a terapie na ní nestojí. Říkáme to
+     jako doplněk, ne jako součást — a rovnou s tím, komu ji vůbec nabízíme,
+     ať si na ni člověk z druhého konce republiky nezvykne nadarmo. */
+  { t: () => `A ještě jedna věc, která v ceně programu <b>není</b>, ale dá se k němu přikoupit: <b>Aeternum GLP‑1 infuze</b>. Je to měsíční infuzní podpora složená přímo na období redukce. Podává se u nás na klinice v Praze a nabízíme ji <b>klientům z Prahy a okolí do ${CFG.infusionRadiusKm} km</b> — na každou infuzi se totiž musí přijet.` },
+  { chips: [{ label: 'Jak to probíhá dál?', go: 'care', primary: true },
+           { label: 'Co ta infuze obsahuje?', faq: 'infuze' },
+           { label: 'Musím k tomu držet dietu?', faq: 'diet' }] }
+],
+
+/* 14 · Individuální vedení a měsíční zpětná vazba */
+care: [
+  { t: 'Terapie je u každého trochu jiná — někdo zhubne první měsíc pět kilo, někdo dvě a pak to srovná. Proto program vedeme individuálně a neřídíme se tabulkou.' },
+  /* Jedna osobní návštěva za terapii. Říkáme to tady, ne až u rezervace:
+     kdo bydlí daleko, si to musí umět naplánovat, a dozvědět se to ve
+     třetím měsíci by bylo nepříjemné překvapení. */
+  { t: 'Jedna věc, kterou chci říct dopředu, ať Vás nepřekvapí. <b>Minimálně jednou za celou terapii se potřebujeme vidět osobně</b> — a kdy to bude, je na Vás. Buď přijedete osobně rovnou na vstupní lékařské vyšetření v Praze a zbytek terapie pak běží na dálku, nebo si vstupní vyšetření uděláte online a přijedete až na kontrolní vyšetření na konci třetího měsíce po zahájení terapie.' },
+  { t: 'Nedělá se to kvůli papírům, ale kvůli bezpečí nás všech. Lékař, který Vás vede, Vás musí minimálně jednou vidět naživo — a zároveň je to podmínka toho, abychom Vám terapii mohli vést na dálku.' },
+  /* Plán, ne slib — lékaře pro Brno a Olomouc teprve domlouváme. Říkáme to
+     proto, aby to člověka z druhého konce republiky neodradilo hned na
+     začátku; datum ani otevření ordinace slibovat nesmíme, proto „možnost
+     vyšetření". Města zazní jen tady, o kus výš se o nich mlčí. */
+  { t: () => `A jestli je pro Vás Praha z ruky: <b>v novém roce chystáme možnost vyšetření v Brně nebo v Olomouci</b>, abyste za tou jednou návštěvou nemusel${ova()} přes půl republiky. Zatím je to plán, ne hotová věc — jakmile budeme vědět víc, dáme Vám vědět a termín si vyberete podle toho, co Vám bude nejblíž.` },
+  /* Placená služba navíc, ne součást programu. Píšeme ji hned za plán na
+     Brno a Olomouc, protože řeší totéž — vzdálenost — jen dostupně hned. */
+  { t: () => `A pro východ republiky nabízíme i <b>concierge vyšetření</b>: lékař přijede přímo za Vámi domů nebo do kanceláře. Do ${CFG.conciergeRadiusKm} km od Brna nebo Olomouce stojí <b>${fmt(CFG.conciergePrice)} Kč</b>, při výjezdu jinam po republice se k té částce připočítává <b>${CFG.conciergePerKm} Kč za kilometr</b> z nejbližšího z těch dvou center.`,
+    dal: 'To mi dává smysl' },
+  { t: 'Abychom mohli a uměli celý program vést na dálku, potřebujeme od Vás <b>jednou měsíčně zpětnou vazbu</b>. Jak se cítíte, jestli máte chutě, jak jde váha, jestli se objevilo něco nepříjemného. Nemusí to být román, stačí pár vět.' },
+  /* Klientská sekce je hotová a nasazená, ale klientům ji sami od sebe
+     nerozesíláme — odkaz chodí jednotlivě, když je potřeba (výběr termínu
+     kontroly, návrat do programu). Proto o ní mluvíme v budoucím čase:
+     slíbit přístup, který klient po zaplacení nedostane, je horší než o ní
+     chvíli mlčet. Stejně to má napsané i server v podkladech pro model. */
+  { t: 'Do budoucna připravujeme vlastní online platformu — <b>Vaši klientskou sekci</b>. Uvidíte v ní křivku váhy, historii dávek, kdy a kde máte vyzvednout léčivo, a najdete tam všechny doklady i dokumenty pohromadě. A napíšete nám odtamtud, kdykoli něco potřebujete — nemusíte hledat, komu volat.',
+    dal: 'To se mi líbí' },
+  /* „Ozveme se“, ne „přijde připomenutí“: automatickou výzvu na zpětnou
+     vazbu nikdo neposílá. V denním přehledu kliniky visí, kdo nenapsal, a
+     ozve se mu člověk — tak to taky slibujeme. */
+  { t: () => `Než bude hotová, chodí zpětná vazba e‑mailem: ozveme se Vám vždycky před koncem balení, abyste na to nemusel${ova()} myslet. Napíšete nám ji odkazem z toho e‑mailu — do schránky odpovídat nemusíte. Lékař si to přečte před rozhodnutím o dalším měsíci.` },
+  { chips: [{ label: 'Rozumím, co je třeba udělat teď?', go: 'screening', primary: true },
+           { label: 'Co když po vysazení přiberu zpátky?', faq: 'yoyo' }] }
 ],
 
 /* Vstupní screening */
@@ -943,7 +984,7 @@ screening: [
      vyšetření. */
   { t: 'A ještě jedna věc, kterou Vám <b>vřele doporučuju</b>, i když povinná není. Jestli si k vyšetření stihnete v předstihu zajistit <b>analýzu složení těla</b> — měření na InBody nebo podobném přístroji — pomůže nám to Váš případ posoudit přesněji. Uvidíme poměr svalů a tuku, ne jen číslo na váze.' },
   { t: 'Za poplatek kolem 200 až 250 Kč ji dělají například fitness centra nebo některé polikliniky. Sami ji zatím provádíme jenom osobně v ordinaci — a tam je zdarma.' },
-  { chips: [{ label: 'Rozumím', go: 'faq' }] }
+  { chips: [{ label: 'Rozumím, pokusím se to zajistit', go: 'faq' }] }
 ],
 
 /* 15 · Prostor na dotazy */
@@ -973,7 +1014,7 @@ included: [
   { t: 'Výborně. Ještě než to potvrdíte, shrnu, co za tu částku dostanete.' },
   { t: () => `Za <b>${fmt(CFG.screeningPrice)} Kč</b>:`,
     card: () => `<div class="plan">
-      <div class="kv"><span>Žádanka na odběr krve</span><b>e‑mailem hned teď</b></div>
+      <div class="kv"><span>Žádanka na odběr krve</span><b>e‑mailem po konzultaci</b></div>
       <div class="kv"><span>Odběr a rozbor v laboratoři Synlab</span><b>v ceně</b></div>
       <div class="kv"><span>Lékařské vyšetření</span><b>${D.examMinutes || 45} minut</b></div>
       <div class="kv"><span>Vyhodnocení výsledků lékařem</span><b>v ceně</b></div>
@@ -1217,7 +1258,9 @@ const FAQ = {
   refund: () => `Řeknu to na rovinu, ať nevznikne nedorozumění. Pokud Vám lékař po vyšetření terapii nedoporučí, platba za screening se nevrací — ta služba proběhla, laboratoř i lékař svou práci odvedli a Vy odcházíte s informací o svém zdraví, kterou jste předtím neměl${ova()}. Co se nestane je, že byste zaplatil${ova()} a nikdo se Vám nevěnoval: k lékaři se po uhrazení screeningu dostanete vždycky. A ještě jedna věc z praxe — někdy terapii nezamítneme, jen doporučíme odložit o pár měsíců, dokud nebudou doplňující výsledky z endokrinologie, kardiologie nebo genetiky. Jakmile je máme a je všechno v pořádku, terapii zahajujeme.`,
   human: () => `Nejsem člověk. Jsem digitální dvojče Marcela, koordinátora programů péče v Aeternum Clinic. Říkám Vám přesně to, co by Vám řekl on při konzultaci naživo — nic si nevymýšlím. Nejsem lékař a nedávám lékařské rady. O tom, jestli je terapie pro Vás vhodná, rozhoduje vždycky lékař při vyšetření. A kdybyste přesto chtěl${ova()} mluvit s živým člověkem, máte na to plné právo: stačí znovu projít e-screening a na jeho konci zvolit konzultaci s živým konzultantem.`,
   tablets: () => `U téhle skupiny léčiv zatím ne — podávají se výhradně podkožní injekcí perem, jednou týdně, a platí to pro oba přípravky, se kterými pracujeme. Chápu, proč se ptáte, a řeknu rovnou to podstatné: většina lidí, kteří se jehly předem báli, po první aplikaci říká, že to prakticky necítili. Jehla je kratší a tenčí než při odběru krve a z pera ji ani nevidíte. První aplikaci s Vámi projdeme při zahájení programu. A až se tabletová forma na trhu objeví — což čekáme — a lékař ji bude považovat za vhodnou, dáme Vám vědět.`,
-  nowork: 'Stává se to u menší části lidí. Proto jsou v programu pravidelné kontroly — když se po několika týdnech nic neděje, lékař upraví dávku nebo zváží změnu preparátu. Nikdo Vás nenechá půl roku na něčem, co nefunguje.'
+  /* „U nás na klinice se to zatím nestalo" je Marcelova věta a 14. 11. 2026
+     ji schválil i pro Marcela AI. Stejně to má napsané podklad VD-14. */
+  nowork: 'Tohle je docela častý dotaz. Stává se to u menší části lidí a u nás na klinice se to zatím nestalo. I proto jsou v programu pravidelné kontroly — když se po několika týdnech nic neděje, lékař upraví dávku nebo zváží změnu preparátu. Nikdo Vás nenechá půl roku na něčem, co nefunguje. Nečekejte ale od léku zázrak: je to berlička, kus práce musí jít i od Vás.'
 };
 
 function mesice(n) { return n === 1 ? 'měsíc' : (n >= 2 && n <= 4 ? 'měsíce' : 'měsíců'); }
@@ -1265,12 +1308,14 @@ document.addEventListener('pointerdown', e => {
   if (!skipNow || e.target.closest('.dock')) return;
   skipNow();
 });
-/* Jak dlouho se tváří, že píše. Skutečný člověk u delší věty přemýšlí dýl
-   a neodpovídá na takt metronomu, proto délka plus trocha náhody. Strop je
-   nahoře proto, že čekání nad čtyři vteřiny už není rozmýšlení, ale porucha. */
+/* Jak dlouho se tváří, že píše. Skutečný člověk u delší věty přemýšlí dýl,
+   ale neodpovídá na takt metronomu: jednou to vystřelí, jindy se zasekne.
+   Proto délka textu jen jako základ a nad ní široká náhoda — stejné čekání
+   u každé repliky je to, co tečkám dodá strojový rytmus. Strop drží i tu
+   nejdelší repliku pod třemi vteřinami; nad tím to není rozmýšlení. */
 const pace = txt => {
   const n = String(txt).replace(/<[^>]*>/g, '').length;
-  return Math.round(Math.min(4000, 700 + n * 19) * (0.85 + Math.random() * 0.3));
+  return Math.round(Math.min(2400, 380 + n * 12) * (0.55 + Math.random() * 0.85));
 };
 
 /* Kolik zpráv za sebou smí napsat, než nechá klienta reagovat. Bez tohohle
@@ -1654,9 +1699,9 @@ function payCard(r, lidsky) {
 }
 
 /* ---------- běh scénáře ---------- */
-const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', howAsk: 'how', how: 'how', drug: 'drug', pmos: 'drug',
+const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', vas4: 'vas', howAsk: 'how', how: 'how', drug: 'drug', pmos: 'drug',
   form: 'form', dose: 'dose', expect: 'expect', plan: 'plan', price: 'plan', benefits: 'benefits',
-  care: 'care', pharmacy: 'care', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
+  care: 'care', pharmacy: 'pharmacy', screening: 'screening', faq: 'faq', included: 'faq', consent: 'faq',
   book: 'book', bookLater: 'book', bookForm: 'book', bookLab: 'book',
   bookSlots: 'book', blocked: 'intro' };
 
@@ -1683,7 +1728,12 @@ async function play(key) {
     if (beat.lab) { renderLabForm(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
-    if (run >= MAX_RUN && i < beats.length - 1) {
+    /* Konec běhu: buď dvě repliky, nebo replika, která má v `dal` vlastní
+       odpověď klienta. Ta se dřív neukázala skoro nikdy — přerušení padlo
+       pokaždé jinam než na ni. `run > 0` hlídá návrat: po klepnutí se
+       pokračuje přesně touhle replikou a přerušit se znovu nesmí. */
+    const vlastniDal = i > 0 && beats[i - 1] && beats[i - 1].dal;
+    if (run > 0 && (run >= MAX_RUN || vlastniDal) && i < beats.length - 1) {
       S.beat = i; save();
       setChips([{ label: dalLabel(beats[i - 1]), go: key, resume: true }]);
       busy = false;
@@ -1955,16 +2005,23 @@ const HIST_ZNAKU = 50000;
 
   // Odpověď nepřišla. Předáme dotaz lidem a řekneme to rovnou.
   let sent = false;
+  /* Kam se obrátit, když na otázku nedokážu odpovědět. Říkáme i to, že
+     konzultace pořád běží — klient jinak nabyde dojmu, že odejde-li teď
+     k telefonu, o rozdělanou konzultaci přijde. */
+  const kontakt = () => `Konzultace Vám běží ještě ${hodin(D && D.hoursLeft || CFG.advisorHours || 72)}, takže na to máte čas: ` +
+    `napište na ${esc(CFG.email)} — obvykle odpovídáme do 24 hodin — nebo rovnou zavolejte na ${esc(CFG.phone)}, to je rychlejší. ` +
+    `Zavolat můžete klidně hned teď, během konzultace; když budeme na příjmu, budeme se Vám věnovat.`;
+  const kontaktKratce = () => `zavolejte na ${esc(CFG.phone)} — telefonem to bývá nejrychlejší a volat můžete i teď během konzultace.`;
   try {
     if (CFG.apiUrl && S.id && !DEMO_MODE) { await api('question', { id: S.id, text }, 15000); sent = true; }
   } catch (e) { /* hláška níž to řekne i tak, dotaz zůstává v přepisu */ }
   await wait(400);
   t.remove();
   bubble(failed === 'advisor_limit'
-    ? `Tolik otázek už jsem dneska zodpověděl — radši Vás teď předám kolegům. Napište na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)}.`
+    ? `Tolik otázek už jsem dneska zodpověděl — radši Vás teď předám kolegům. ${kontakt()}`
     : sent
-    ? 'Na tuhle otázku Vám radši odpoví člověk — poslal jsem ji kolegům na kliniku a ozveme se e-mailem, obvykle do druhého dne. Zatím můžeme pokračovat dál.'
-    : `Tuhle otázku si poznamenávám, ale radši ji pošlete i na ${esc(CFG.email)} nebo zavolejte na ${esc(CFG.phone)} — ať nezapadne.`);
+    ? `Na tuhle otázku Vám radši odpoví člověk — poslal jsem ji kolegům na kliniku a ozveme se e-mailem, obvykle do 24 hodin. Zatím můžeme pokračovat dál, a jestli to spěchá, ${kontaktKratce()}`
+    : `Tuhle otázku si poznamenávám, ale ať nezapadne, pošlete ji radši i přímo nám. ${kontakt()}`);
   busy = false;
   backToFlow();
 }
