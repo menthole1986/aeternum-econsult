@@ -513,6 +513,9 @@ const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat
      stránky se dřív volba ztratila a rezervace tiše spadla zpátky na
      „osobně v Praze“, i když si klient vybral video. */
   form: '',
+  /* Lidská podoba termínu, který už klientovi doopravdy držíme. Dokud je
+     prázdná, žádná rezervace nestojí. */
+  drzim: '',
   /* Údaje pro laboratoř. Drží se stejně jako forma — konzultace platí 72 hodin
      a klient se do ní vrací, takže se nesmí ztratit obnovením stránky. */
   labDob: '', labRc: '', labConsent: false,
@@ -537,6 +540,9 @@ const KLIENT = URLP.get('id') || '';
 const storageKey = () => CFG.storageKey + (KLIENT ? ':' + KLIENT : '');
 
 function save() {
+  /* Otisk textů, podle kterých rozhovor běžel. Kdyby se scénář mezitím
+     změnil, pozná se to při návratu — viz `jinyScenar()`. */
+  try { S.hash = SCENARIO_HASH; } catch (e) {}
   try { localStorage.setItem(storageKey(), JSON.stringify({ kdy: Date.now(), stav: S })); } catch (e) {}
 }
 
@@ -548,13 +554,20 @@ function zacitZnovu() {
   try { localStorage.removeItem(storageKey()); } catch (e) {}
   location.reload();
 }
+/* Otisk scénáře, se kterým rozhovor běžel, než se stránka otevřela.
+   `S.hash` se při každém uložení přepíše na ten dnešní, takže porovnávat
+   jde jen takhle — stranou, hned při načtení. */
+let hashPriNacteni = '';
+
 function load() {
   try {
     const r = localStorage.getItem(storageKey());
     if (r) {
       const u = JSON.parse(r);
-      if (u && u.stav && Date.now() - (u.kdy || 0) < PLATNOST_MS) S = Object.assign(blank(), u.stav);
-      else localStorage.removeItem(storageKey());
+      if (u && u.stav && Date.now() - (u.kdy || 0) < PLATNOST_MS) {
+        S = Object.assign(blank(), u.stav);
+        hashPriNacteni = u.stav.hash || '';
+      } else localStorage.removeItem(storageKey());
     }
   } catch (e) {}
   SLOTS.form = S.form || '';
@@ -1480,6 +1493,12 @@ function renderConsents() {
   const row = bubble('<div class="cons" id="cons">' + CONSENTS.map((c, i) =>
     `<label><input type="checkbox" data-k="${c.k}" data-i="${i}"><span>${esc(consentText(c))}${c.odkaz && podminky() ? ' ' + odkazPodminky('Otevřít') : ''}</span></label>`).join('') + '</div>');
   const box = row.querySelector('#cons');
+  /* Co klient odklikl minule, zůstává odkliknuté. Nutit ho projít souhlasy
+     podruhé jen proto, že zavřel okno, vypadá, že jsme na něj zapomněli —
+     a uložené jsou pořád ty jeho, i s textem, který u nich viděl. */
+  Array.from(box.querySelectorAll('input')).forEach(function (i) {
+    if (S.consents && S.consents[i.dataset.k]) i.checked = true;
+  });
   box.addEventListener('change', () => {
     const all = Array.from(box.querySelectorAll('input'));
     /* Ukládá se vyhodnocený text, ne předpis — do důkazní stopy patří přesně
@@ -1491,7 +1510,10 @@ function renderConsents() {
     const done = all.every(i => i.checked);
     setChips(done ? [{ label: 'Potvrdit a pokračovat k platbě', go: 'book', consent: true, primary: true }] : []);
   });
-  setChips([]);
+  // Když jsou po návratu odklikané všechny, tlačítko musí být rovnou vidět.
+  const vse = Array.from(box.querySelectorAll('input'));
+  setChips(vse.length && vse.every(i => i.checked)
+    ? [{ label: 'Potvrdit a pokračovat k platbě', go: 'book', consent: true, primary: true }] : []);
 }
 
 /* Datum narození a rodné číslo. Víc po klientovi nechceme — jméno, adresu
@@ -1693,6 +1715,10 @@ async function pickSlot(isoUtc) {
   }
   SLOTS.picked = lidsky; SLOTS.vs = r.vs;
   S.labRc = '';                              // v prohlížeči ho dál nedržíme
+  /* Od téhle chvíle je kapitola s termíny vyřízená. Kdyby se klient vrátil,
+     nesmí mu nabídka termínů naskočit znovu. */
+  S.drzim = lidsky;
+  S.kde = (SCRIPT[S.chapter] || []).length;
   save();
 
   await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
@@ -1785,7 +1811,14 @@ async function play(key) {
     if (beat.chips) { S.kde = i; save(); pauza(); setChips(beat.chips); break; }
     if (beat.ask) { S.kde = i; save(); pauza(); askMode(beat); busy = false; return; }
     if (beat.vars) { S.kde = i; save(); pauza(); await renderVariants(); busy = false; return; }
-    if (beat.slots) { S.kde = i; save(); pauza(); await renderSlots(); busy = false; return; }
+    if (beat.slots) {
+      /* Termín už držíme. Vykreslit nabídku znovu by znamenalo druhou
+         rezervaci s druhým VS a druhým QR kódem — klient by měl na jednu
+         návštěvu dvě platby a v kalendáři by blokoval dva termíny. Platbu
+         má v přepisu, který se mu právě překreslil. */
+      if (S.drzim) { S.kde = beats.length; save(); break; }
+      S.kde = i; save(); pauza(); await renderSlots(); busy = false; return;
+    }
     if (beat.cons) { S.kde = i; save(); pauza(); renderConsents(); busy = false; return; }
     if (beat.lab) { S.kde = i; save(); pauza(); renderLabForm(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
@@ -1848,7 +1881,8 @@ function askMode(beat) {
    viděl, i s tučným a s kartou; podle něj se rozhovor překreslí, až se
    klient vrátí. Když se neliší, neukládá se — přepis by zdvojnásobil. */
 function logLine(who, text, html, opts) {
-  const r = { who: who, text: String(text == null ? '' : text).replace(/<[^>]*>/g, ''), at: Date.now() };
+  const r = { who: who, text: String(text == null ? '' : text).replace(/<[^>]*>/g, ''),
+    k: S.chapter || '', at: Date.now() };
   const h = String(html == null ? (text == null ? '' : text) : html);
   if (h !== r.text) r.html = h;
   if (opts && opts.cls) r.cls = opts.cls;
@@ -1940,6 +1974,9 @@ function backToFlow() {
   /* Kapitola, která končí interakcí — výběr termínu, souhlasy, formulář pro
      laboratoř, výběr programu — žádnou nabídku nemá. Po dotazu by klient
      zůstal úplně bez tlačítek a vypadalo by to jako zaseknuté. */
+  /* „Zpátky k termínům" se po zabrání termínu nenabízí — vedlo by to na
+     druhou rezervaci. */
+  if (beats.some(b => b.slots) && S.drzim) return;
   if (beats.some(b => b.slots || b.cons || b.lab || b.vars)) {
     setChips([{ label: zpatkyLabel(beats), go: k, resume: true }]);
   }
@@ -2302,6 +2339,7 @@ function prevzitZalohu(ze) {
   const tady = (S.log && S.log.length) || 0;
   if (tam <= tady) return;
   const sid = S.sid;
+  hashPriNacteni = ze.hash || '';
   S = Object.assign(blank(), ze);
   S.sid = sid;                     // sid patří téhle stránce, ne záloze
   S.id = URLP.get('id') || S.id;
@@ -2373,6 +2411,7 @@ function uvitaniZpatky(pit) {
    na první repliku, přepíše se serverová kopie prázdným začátkem. */
 function odznova() {
   const sid = S.sid;
+  hashPriNacteni = '';
   S = blank();
   S.sid = sid;
   SLOTS.form = '';
@@ -2394,11 +2433,12 @@ function clonaPryc() {
 
    Kreslí se z `html` v přepisu, ne z holého textu: jinak by klient přišel
    o tučné i o karty s cenami. Marcel 15. 11. 2026. */
-function prekreslit() {
+function prekreslit(vynechat) {
   const radky = S.log || [];
   let kreslil = false;
   radky.forEach(function (l) {
     if (l.meta) return;
+    if (vynechat && l.k === vynechat) return;
     const html = l.html || esc(String(l.text || ''));
     if (!html) return;
     bubble(html, { me: l.who === 'klient', cls: l.cls, tiche: true });
@@ -2414,14 +2454,26 @@ function prekreslit() {
   requestAnimationFrame(scroll);
 }
 
+/* Běžel rozhovor podle jiné verze scénáře, než je teď ve stránce? Pozice je
+   pořadové číslo repliky v kapitole — když se ta kapitola mezitím přepsala,
+   ukazuje to číslo jinam a klient by kus výkladu přeskočil, nebo slyšel
+   půlku dvakrát. Konzultace žije 72 hodin, takže se to stane pokaždé, když
+   během nich nasadíme novou verzi. */
+function jinyScenar() { return !!(hashPriNacteni && hashPriNacteni !== SCENARIO_HASH); }
+
 function spustit() {
   if (!D) return;                   // chybu už ukázal panel
   if (D.blocked) { play('blocked'); persist('kontraindikace'); return; }
   if (jeRozdelana()) {
-    prekreslit();
+    const znovu = jinyScenar();
+    /* Při změně scénáře se rozdělaná kapitola pustí celá znovu, a z přepisu
+       se proto ukáže jen to, co jí předcházelo — jinak by stála dvakrát
+       pod sebou. Starší kapitoly zůstávají tak, jak je klient slyšel. */
+    prekreslit(znovu ? S.chapter : null);
     /* Navazuje se na replice, u které klient stál — ne od začátku kapitoly.
        Jinak by se část rozhovoru řekla podruhé, hned pod svým přepisem. */
-    S.beat = S.kde || 0;
+    S.beat = znovu ? 0 : (S.kde || 0);
+    if (znovu) S.kde = 0;
   }
   play(S.chapter && SCRIPT[S.chapter] ? S.chapter : 'intro');
 }
