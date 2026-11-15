@@ -72,6 +72,19 @@ body{min-height:100dvh;line-height:1.5}
   color:#141414;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:500;
   cursor:pointer;backdrop-filter:blur(4px);transition:border-color .15s,background .15s,color .15s}
 .pit button:hover{border-color:var(--g1);color:var(--g1);background:#fff}
+/* První tlačítko návratu je to, co klient skoro vždycky chce — navázat.
+   Druhé („začít znovu") má zůstat dostupné, ne lákavé. */
+.pit button.hlavni,.pit button.hlavni:hover{border-color:transparent;color:#fff;font-weight:600;
+  background:var(--grad)}
+/* Než víme, jestli má klient něco rozdělaného, nemá si vybírat pití —
+   mohl by začít dřív, než se stihneme podívat do jeho karty. */
+.hleda{margin-top:clamp(20px,3vh,34px)!important;color:rgba(20,20,20,.55)!important;
+  font-size:14px!important;display:flex;align-items:center;gap:9px}
+.hleda u{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:rgba(20,20,20,.38);animation:hledaBod 1.2s infinite ease-in-out}
+.hleda u:nth-child(2){animation-delay:.18s}
+.hleda u:nth-child(3){animation-delay:.36s}
+@keyframes hledaBod{0%,70%,100%{opacity:.28;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
 
 /* Marcel čeká u textu, ne uprostřed obrazovky — jako když Vás někdo vítá. */
 /* Podpis je delší než textový sloupec, a zlomit ho doprostřed jména by
@@ -365,12 +378,8 @@ html,body{background:var(--ground);color:var(--ink)}
     <h2>Vítejte u nás<span class="light">Posaďte se, prosím</span></h2>
     <p id="vstupP">Zabere nám to dvacet až třicet minut a nikam nespěcháme. Kdyby Vám do toho něco vstoupilo, vrátíte se ke konzultaci kdykoli během 72 hodin a navážeme tam, kde jsme skončili. Než začneme — dáte si něco (virtuálního) k pití?</p>
     <i class="bar"></i>
-    <div class="pit" id="pit">
-      <button type="button" data-pit="kávu">Kávu</button>
-      <button type="button" data-pit="čaj">Čaj</button>
-      <button type="button" data-pit="vodu">Vodu</button>
-      <button type="button" data-pit="">Nic, děkuju</button>
-    </div>
+    <p class="hleda" id="hleda"><u></u><u></u><u></u>Moment, dívám se do Vaší karty…</p>
+    <div class="pit" id="pit" hidden></div>
     <p class="podpis">Konzultací Vás provede <b>Marcel AI</b> — digitální dvojče konzultanta: <b>Marcel Jurek, MBA, Ing.</b></p>
   </div>
 </div>
@@ -2067,6 +2076,22 @@ const HIST_ZNAKU = 50000;
    Přepis, verze scénáře, souhlasy a vybraná varianta. Posílá se v milnících,
    ne po každé replice — ať to nebombarduje backend. Když se nepovede, jede se
    dál: klient o konzultaci nepřijde kvůli tomu, že se nezapsal log. */
+/* Co se posílá k nám jako záložka. Celý stav rozhovoru bez dvou věcí:
+   bez `sid`, který patří k jednomu běhu stránky a jinde by byl k ničemu,
+   a hlavně bez rodného čísla — to stránka zahazuje hned, jak ho odešle do
+   žádanky, a na Disk nemá co chodit vůbec. */
+function zaloha() {
+  const k = Object.assign({}, S);
+  delete k.sid;
+  delete k.labRc;
+  /* Přepis se posílá vedle, v `log`. Server si ho do zálohy doplní sám —
+     posílat ho dvakrát je u hodinové konzultace pokaždé pár desítek
+     kilobajtů navíc. */
+  delete k.log;
+  k.kdy = Date.now();
+  return k;
+}
+
 let lastSaved = 0;
 async function persist(stage) {
   if (!CFG.apiUrl || !S.id || DEMO_MODE) return;
@@ -2079,7 +2104,11 @@ async function persist(stage) {
          se ho na to lékař i Marcel AI ptali znovu. Teď to jde do jeho karty. */
       answers: S.answers,
       variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
-      consents: S.consents, log: S.log
+      consents: S.consents, log: S.log,
+      /* Záložka, podle které klient naváže z jiného zařízení. Prohlížeč na
+         mobilu o konzultaci rozdělané v práci neví nic — tohle je jediné
+         místo, kde se to dá uchovat. */
+      state: zaloha()
     }, 15000);
   } catch (e) { /* důkazní stopa se doplní při dalším milníku */ }
 }
@@ -2159,7 +2188,14 @@ function lockedPanel(expired) {
     'Objednat konzultaci ›</a></div>');
 }
 
-async function boot() {
+/* ── Start konzultace ───────────────────────────────────────────────────────
+ *
+ *  Do karty klienta se díváme hned, jak se stránka otevře — ještě než klepne
+ *  na pití. Dřív se čekalo až na to klepnutí, takže o rozdělané konzultaci
+ *  jsme se dozvěděli, až když už běžela, a nebylo kdy se zeptat, jestli chce
+ *  navázat. Proto je mezi uvítáním a tlačítky krátké „dívám se do karty“.
+ */
+async function pripravit() {
   load();
   if (URLP.get('id')) S.id = URLP.get('id');
 
@@ -2170,10 +2206,9 @@ async function boot() {
 
   if (DEMO_MODE || !S.id) { D = DEMO; }
   else {
-    const t = typing();
     try { D = await api('econsult', { id: S.id }); }
     catch (e) {
-      t.remove();
+      clonaPryc();
       if (e.code === 'advisor_off') { offPanel(); return; }
       if (e.code === 'advisor_locked' || e.code === 'advisor_expired') {
         lockedPanel(e.code === 'advisor_expired');
@@ -2182,25 +2217,118 @@ async function boot() {
       dataError(e.code === 'not_found' ? 'Screening s tímto odkazem jsme nenašli.' : '');
       return;
     }
-    t.remove();
+    prevzitZalohu(D.state);
     /* Kolik času zbývá, musí klient vidět, ne hádat. Je to zároveň jediné
        místo, kde se to dá říct nevtíravě — spodní řádek stránky. */
     if (D.hoursLeft) {
-      /* Na uvítací obrazovce stojí natvrdo 72 hodin, protože se ukáže dřív,
-         než doběhne dotaz na server. Jakmile víme, kolik času klientovi
-         doopravdy zbývá, přepíšeme to — kdo se vrací druhý den, nemá číst
-         o dvaasedmdesáti hodinách. */
-      const vp = $('#vstupP');
-      if (vp) vp.textContent = 'Zabere nám to dvacet až třicet minut a nikam nespěcháme. ' +
-        'Kdyby Vám do toho něco vstoupilo, vrátíte se ke konzultaci kdykoli ještě ' +
-        hodin(D.hoursLeft) + ' a navážeme tam, kde jsme skončili. Než začneme — dáte si něco (virtuálního) k pití?';
       const hint = $('#hint');
       if (hint) hint.textContent = 'Marcel AI je digitální dvojče konzultanta Marcela. ' +
         'Konzultace je zaplacená a vrátit se k ní můžete ještě ' + hodin(D.hoursLeft) + '. ' +
         'O vhodnosti terapie vždy rozhoduje lékař.';
     }
   }
+  uvitani();
+}
 
+/* Záložka ze serveru. Klient mohl konzultaci rozdělat na jiném zařízení —
+   v práci na počítači, dokončit večer na mobilu. Tenhle prohlížeč o tom neví
+   nic, takže ta serverová je pak jediná, kterou máme.
+
+   Když máme obě, rozhoduje počet replik, ne čas. Hodiny na dvou zařízeních
+   se můžou rozcházet, ale rozhovor jde jen dopředu — delší je ten pozdější. */
+function prevzitZalohu(ze) {
+  if (!ze || typeof ze !== 'object' || !SCRIPT[ze.chapter]) return;
+  const tam = (ze.log && ze.log.length) || 0;
+  const tady = (S.log && S.log.length) || 0;
+  if (tam <= tady) return;
+  const sid = S.sid;
+  S = Object.assign(blank(), ze);
+  S.sid = sid;                     // sid patří téhle stránce, ne záloze
+  S.id = URLP.get('id') || S.id;
+  S.labRc = '';                    // rodné číslo v záloze není a být nesmí
+  SLOTS.form = S.form || '';
+  save();
+}
+
+/* Má klient co dokončovat? Konzultace rozdělaná v úvodu za řeč nestojí —
+   tam ještě nic nepadlo. A komu terapii nedoporučujeme, tomu není co
+   nabízet k navázání. */
+function jeRozdelana() {
+  if (D && D.blocked) return false;
+  return !!(S.chapter && SCRIPT[S.chapter] && S.chapter !== 'intro');
+}
+
+function kdeSkoncil() {
+  const klic = CHAPTER_OF[S.chapter] || S.chapter;
+  const k = CHAPTERS.filter(c => c.key === klic)[0];
+  return k ? k.label : '';
+}
+
+/* Dvě uvítání. Kdo přichází poprvé, dostane pozvání a otázku na pití. Kdo se
+   vrací k rozdělané konzultaci, dostane rovnou na výběr: navázat, nebo začít
+   znovu. Vítat ho podruhé jako nového by vypadalo, že jsme zapomněli, že
+   tu byl. Marcel 15. 11. 2026. */
+function uvitani() {
+  const hleda = $('#hleda');
+  if (hleda) hleda.remove();
+  const pit = $('#pit');
+  if (!pit) return;
+  pit.hidden = false;
+  if (jeRozdelana()) uvitaniZpatky(pit); else uvitaniPoprve(pit);
+}
+
+function uvitaniPoprve(pit) {
+  /* Na clonu se natvrdo napsalo 72 hodin, protože se ukáže dřív, než doběhne
+     dotaz na server. Teď víme, kolik času zbývá doopravdy. */
+  const vp = $('#vstupP');
+  if (vp && D && D.hoursLeft) {
+    vp.textContent = 'Zabere nám to dvacet až třicet minut a nikam nespěcháme. ' +
+      'Kdyby Vám do toho něco vstoupilo, vrátíte se ke konzultaci kdykoli ještě ' +
+      hodin(D.hoursLeft) + ' a navážeme tam, kde jsme skončili. ' +
+      'Než začneme — dáte si něco (virtuálního) k pití?';
+  }
+  pit.innerHTML =
+    '<button type="button" data-start="1">Kávu</button>' +
+    '<button type="button" data-start="1">Čaj</button>' +
+    '<button type="button" data-start="1">Vodu</button>' +
+    '<button type="button" data-start="1">Nic, děkuju</button>';
+}
+
+function uvitaniZpatky(pit) {
+  const h = $('.vstup h2');
+  if (h) h.innerHTML = 'Vítejte zpátky<span class="light">Konzultace na Vás čeká</span>';
+  const vp = $('#vstupP');
+  const kde = kdeSkoncil();
+  if (vp) {
+    vp.innerHTML = 'Minule jsme se spolu dostali' + (kde ? ' k části <b>' + esc(kde) + '</b>' : ' kus cesty') + '. ' +
+      (D && D.hoursLeft ? 'Konzultace Vám běží ještě ' + esc(hodin(D.hoursLeft)) + ', takže nikam nespěcháme. ' : '') +
+      'Můžeme navázat přesně tam, nebo projít celou konzultaci znovu od začátku.';
+  }
+  pit.innerHTML =
+    '<button type="button" class="hlavni" data-start="1">Navážeme, kde jsme skončili</button>' +
+    '<button type="button" data-znovu="1">Projít to znovu od začátku</button>';
+}
+
+/* Celá konzultace znovu. Zahodí se i záložka u nás — jakmile klient ťukne
+   na první repliku, přepíše se serverová kopie prázdným začátkem. */
+function odznova() {
+  const sid = S.sid;
+  S = blank();
+  S.sid = sid;
+  SLOTS.form = '';
+  save();
+  vstoupit();
+}
+
+function clonaPryc() {
+  const clona = document.getElementById('vstup');
+  if (!clona) return;
+  clona.classList.add('pryc');
+  setTimeout(function () { clona.remove(); }, 800);
+}
+
+function spustit() {
+  if (!D) return;                   // chybu už ukázal panel
   if (D.blocked) { play('blocked'); persist('kontraindikace'); return; }
   play(S.chapter && SCRIPT[S.chapter] ? S.chapter : 'intro');
 }
@@ -2209,8 +2337,6 @@ async function boot() {
    dá najevo, že je připravený — a teprve pak se rozjede scénář. Je to jediné
    místo, kde se čeká schválně: dvě vteřiny ticha na začátku dělají z formuláře
    návštěvu. Produkční index.html se tím nemění, tohle je samostatný soubor. */
-const PITI = { 'kávu': 'Kávu Vám podám', 'čaj': 'Čaj Vám podám', 'vodu': 'Vodu Vám podám' };
-
 /* Sedm skladeb za sebou v náhodném pořadí. Jedna má kolem dvou minut, takže
    by se za půlhodinovou konzultaci zopakovala patnáctkrát a to už člověk
    slyší. Takhle se první vrátí nejdřív po čtvrt hodině, takže se smyčka
@@ -2311,23 +2437,12 @@ function prelij(stary) {
   });
 }
 
-function vstoupit(piti) {
-  const clona = document.getElementById('vstup');
-  if (clona) {
-    clona.classList.add('pryc');
-    setTimeout(function () { clona.remove(); }, 800);
-  }
+function vstoupit() {
+  clonaPryc();
   /* Tlačítko hudby se ukáže, až když hudba opravdu hraje. Dokud soubor
      nemáme, klient o ničem neví — nerozdělaná věc se nemá nabízet. */
   hudbaPrepni();
-  /* Volba pití se promítne do první repliky, ať je vidět, že poslouchal. */
-  if (piti && PITI[piti]) {
-    /* Až za pozdrav, ne před něj. Napřed se člověk představí, pak teprve
-       nabídne kávu — obráceně to působí, jako by skočil do dveří. */
-    SCRIPT.intro = [SCRIPT.intro[0], { t: PITI[piti] + ' hned, jak začneme.' }]
-      .concat(SCRIPT.intro.slice(1));
-  }
-  boot();
+  spustit();
 }
 
 (function () {
@@ -2351,10 +2466,12 @@ function vstoupit(piti) {
   }
   if (pit) {
     pit.addEventListener('click', function (e) {
-      const b = e.target.closest('button[data-pit]');
-      if (b) vstoupit(b.getAttribute('data-pit'));
+      if (e.target.closest('button[data-znovu]')) { odznova(); return; }
+      if (e.target.closest('button[data-start]')) vstoupit();
     });
   }
+  /* Do karty se díváme hned, ne až po klepnutí na pití. */
+  pripravit();
 })();
 
 /* ---------- české sirotky ----------------------------------------------
