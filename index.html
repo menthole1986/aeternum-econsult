@@ -1782,12 +1782,12 @@ async function play(key) {
     /* Čekáme na klienta. Značka zůstane na téhle replice, takže po návratu
        se nabídka nebo formulář ukáže znovu — a nic, co už slyšel, se
        neřekne podruhé. */
-    if (beat.chips) { S.kde = i; save(); setChips(beat.chips); break; }
-    if (beat.ask) { S.kde = i; save(); askMode(beat); busy = false; return; }
-    if (beat.vars) { S.kde = i; save(); await renderVariants(); busy = false; return; }
-    if (beat.slots) { S.kde = i; save(); await renderSlots(); busy = false; return; }
-    if (beat.cons) { S.kde = i; save(); renderConsents(); busy = false; return; }
-    if (beat.lab) { S.kde = i; save(); renderLabForm(); busy = false; return; }
+    if (beat.chips) { S.kde = i; save(); pauza(); setChips(beat.chips); break; }
+    if (beat.ask) { S.kde = i; save(); pauza(); askMode(beat); busy = false; return; }
+    if (beat.vars) { S.kde = i; save(); pauza(); await renderVariants(); busy = false; return; }
+    if (beat.slots) { S.kde = i; save(); pauza(); await renderSlots(); busy = false; return; }
+    if (beat.cons) { S.kde = i; save(); pauza(); renderConsents(); busy = false; return; }
+    if (beat.lab) { S.kde = i; save(); pauza(); renderLabForm(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
     /* Konec běhu: buď dvě repliky, nebo replika, která má v `dal` vlastní
@@ -1796,7 +1796,7 @@ async function play(key) {
        pokračuje přesně touhle replikou a přerušit se znovu nesmí. */
     const vlastniDal = i > 0 && beats[i - 1] && beats[i - 1].dal;
     if (run > 0 && (run >= MAX_RUN || vlastniDal) && i < beats.length - 1) {
-      S.beat = i; S.kde = i; save();
+      S.beat = i; S.kde = i; save(); pauza();
       setChips([{ label: dalLabel(beats[i - 1]), go: key, resume: true }]);
       busy = false;
       return;
@@ -2009,6 +2009,11 @@ async function submitAsk() {
       await wait(240);
     }
     busy = false;
+    /* Tahle smyčka běží mimo `play`, takže se na server dlouho nehlásila
+       vůbec: odpověď klienta i celý zbytek kapitoly za ní zůstaly jen
+       v prohlížeči. Na druhém zařízení se ho pak Marcel AI zeptal podruhé
+       na to samé. */
+    pauza();
     return;
   }
 
@@ -2125,24 +2130,47 @@ function zaloha() {
 }
 
 let lastSaved = 0;
-async function persist(stage) {
-  if (!CFG.apiUrl || !S.id || DEMO_MODE) return;
-  if (Date.now() - lastSaved < 1500) return;
+/* Konec běhu. Klient teď kouká na nabídku, na formulář nebo na otázku a
+   může u toho zůstat hodinu — nebo zavřít okno a vrátit se večer na mobilu.
+   Tohle je přesně ta chvíle, kdy musí mít záložku i server, jinak by se mu
+   na druhém zařízení pár replik řeklo znovu. Proto `hned`: pauza se nesmí
+   zahodit škrtítkem, které jinak drží nápor zpráv na uzdě.
+   Marcel 15. 11. 2026. */
+function pauza() { persist(S.chapter || 'pauza', true); }
+
+/* Zápisy jdou jeden po druhém, ne přes sebe. Server u každého přepíše řádek
+   v tabulce i záložku na Disku, a kdyby dorazily v opačném pořadí, zůstal by
+   mu ten starší stav — tedy klient vrácený o kus zpátky. */
+let fronta_ = Promise.resolve();
+
+function persist(stage, hned) {
+  if (!CFG.apiUrl || !S.id || DEMO_MODE) return fronta_;
+  if (!hned && Date.now() - lastSaved < 1500) return fronta_;
   lastSaved = Date.now();
+  const telo = zapis_(stage);
+  fronta_ = fronta_.then(function () { return odeslat_(telo); });
+  return fronta_;
+}
+
+async function odeslat_(telo) {
   try {
-    await api('econsultLog', {
-      id: S.id, stage, scenario: D && D.scenario || '', hash: SCENARIO_HASH,
-      /* Co klient o sobě řekl. Do téhle chvíle to žilo jen v prohlížeči, takže
-         se ho na to lékař i Marcel AI ptali znovu. Teď to jde do jeho karty. */
-      answers: S.answers,
-      variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
-      consents: S.consents, log: S.log,
-      /* Záložka, podle které klient naváže z jiného zařízení. Prohlížeč na
-         mobilu o konzultaci rozdělané v práci neví nic — tohle je jediné
-         místo, kde se to dá uchovat. */
-      state: zaloha()
-    }, 15000);
+    await api('econsultLog', telo, 15000);
   } catch (e) { /* důkazní stopa se doplní při dalším milníku */ }
+}
+
+function zapis_(stage) {
+  return {
+    id: S.id, stage: stage, scenario: D && D.scenario || '', hash: SCENARIO_HASH,
+    /* Co klient o sobě řekl. Do téhle chvíle to žilo jen v prohlížeči, takže
+       se ho na to lékař i Marcel AI ptali znovu. Teď to jde do jeho karty. */
+    answers: S.answers,
+    variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
+    consents: S.consents, log: S.log,
+    /* Záložka, podle které klient naváže z jiného zařízení. Prohlížeč na
+       mobilu o konzultaci rozdělané v práci neví nic — tohle je jediné
+       místo, kde se to dá uchovat. */
+    state: zaloha()
+  };
 }
 
 /* Otisk textů scénáře. Když se texty změní, změní se i otisk — u starého
