@@ -1820,9 +1820,17 @@ async function play(key) {
     if (beat.slots) {
       /* Termín už držíme. Vykreslit nabídku znovu by znamenalo druhou
          rezervaci s druhým VS a druhým QR kódem — klient by měl na jednu
-         návštěvu dvě platby a v kalendáři by blokoval dva termíny. Platbu
-         má v přepisu, který se mu právě překreslil. */
-      if (S.drzim) { S.kde = beats.length; save(); break; }
+         návštěvu dvě platby a v kalendáři by blokoval dva termíny.
+
+         Kdo se vrátil k rozdělané konzultaci, má platbu v přepisu, který se
+         mu právě překreslil, a nepotřebuje slyšet nic. Kdo se sem dostal
+         jinak — na cizím počítači, kde žádný přepis není — by zůstal stát
+         před prázdnem, takže mu řekneme, co s tím. */
+      if (S.drzim) {
+        S.kde = beats.length; save();
+        if (!S.log.some(l => l.k === key && !l.meta)) await marcelSays(drzenyTermin());
+        break;
+      }
       S.kde = i; save(); pauza(); await renderSlots(); busy = false; return;
     }
     if (beat.cons) { S.kde = i; save(); pauza(); renderConsents(); busy = false; return; }
@@ -2339,6 +2347,7 @@ async function pripravit() {
       return;
     }
     prevzitZalohu(D.state);
+    srovnatTermin();
     /* Kolik času zbývá, musí klient vidět, ne hádat. Je to zároveň jediné
        místo, kde se to dá říct nevtíravě — spodní řádek stránky. */
     if (D.hoursLeft) {
@@ -2370,6 +2379,47 @@ function prevzitZalohu(ze) {
   S.labRc = '';                    // rodné číslo v záloze není a být nesmí
   SLOTS.form = S.form || '';
   save();
+}
+
+/* O termínu rozhoduje server, ne paměť prohlížeče. Ta ví jen to, že si klient
+   někdy vybral — nikoli jestli rezervace ještě platí.
+
+   Dvě věci se tím hlídají. Kdo termín drží, nesmí dostat nabídku znovu: vznikl
+   by druhý variabilní symbol, druhá událost v kalendáři a dvě zabraná okna pro
+   jednoho člověka. A komu rezervace nezaplacená vypršela, tomu se nabídka
+   musí vrátit — jinak by zůstal stát u termínu, který už nikdo nedrží. */
+function srovnatTermin() {
+  const drzi = D && D.examHold;
+  if (drzi) {
+    if (!S.drzim) { S.drzim = drzi.slot ? lidskyTermin(drzi.slot) : 'vybraný termín'; save(); }
+    return;
+  }
+  if (!S.drzim) return;
+  S.drzim = '';
+  const beats = SCRIPT[S.chapter] || [];
+  if (beats.some(b => b.slots)) S.kde = 0;
+  save();
+}
+
+/* Když klientovi nemáme čím ukázat platbu — přepis na tomhle zařízení není —
+   pošleme ho do správy rezervace. Tam termín vidí, zaplatí i přesune. */
+function drzenyTermin() {
+  const drzi = (D && D.examHold) || {};
+  const kdy = esc(S.drzim || (drzi.slot ? lidskyTermin(drzi.slot) : 'vyšetření'));
+  if (drzi.paid) {
+    return 'Termín <b>' + kdy + '</b> Vám držím a vyšetření máte zaplacené. ' +
+      (drzi.url ? 'Kdybyste ho potřeboval' + ova() + ' přesunout, máte to ve <a href="' + esc(drzi.url) +
+        '" target="_blank" rel="noopener">své rezervaci</a>.' : '');
+  }
+  return 'Termín <b>' + kdy + '</b> Vám pořád držím — podruhé si ho vybírat nemusíte. ' +
+    'Potvrdí se v okamžiku, kdy dorazí platba' + (drzi.vs ? ' pod variabilním symbolem <b>' + esc(drzi.vs) + '</b>' : '') + '. ' +
+    (drzi.url ? 'Zaplatit i přesunout termín můžete ve <a href="' + esc(drzi.url) +
+      '" target="_blank" rel="noopener">své rezervaci</a>.' : '');
+}
+
+function lidskyTermin(iso) {
+  const d = parseSlot(iso);
+  return slotDay(d) + ' ' + slotDate(d) + ' v ' + slotTime(d);
 }
 
 /* Má klient co dokončovat? Konzultace rozdělaná v úvodu za řeč nestojí —
@@ -2424,6 +2474,20 @@ function uvitaniZpatky(pit) {
   const h = $('.vstup h2');
   if (h) h.innerHTML = 'Vítejte zpátky<span class="light">Konzultace na Vás čeká</span>';
   const vp = $('#vstupP');
+  const drzi = D && D.examHold;
+  if (drzi) {
+    /* Termín už má. Celou konzultaci znovu tady nenabízíme: jediné, co je za
+       ní, je výběr termínu, a ten by si klient vybral podruhé. */
+    if (vp) {
+      vp.innerHTML = 'Minule jsme to spolu dotáhli až k rezervaci a termín <b>' +
+        esc(S.drzim || (drzi.slot ? lidskyTermin(drzi.slot) : 'vyšetření')) + '</b> Vám ' +
+        (drzi.paid ? 'potvrzeně držím' : 'pořád držím') + '. ' +
+        (D.hoursLeft ? 'Ke konzultaci se můžete vracet ještě ' + esc(hodin(D.hoursLeft)) + '. ' : '') +
+        'Můžeme se k ní vrátit tam, kde jsme skončili.';
+    }
+    pit.innerHTML = '<button type="button" class="hlavni" data-start="1">Ano, vrátíme se k ní</button>';
+    return;
+  }
   const kde = kdeSkoncil();
   if (vp) {
     vp.innerHTML = 'Minule jsme se spolu dostali' + (kde ? ' k části <b>' + esc(kde) + '</b>' : ' kus cesty') + '. ' +
