@@ -168,6 +168,11 @@ p{margin:0}
 .row.me .bub{border-radius:20px 20px 6px 20px;background:var(--grad-135);border-color:transparent;color:#fff;font-weight:500}
 .bub b{font-weight:700}
 .bub .hl{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+/* Kde se navázalo po návratu. Tenká linka s popiskem uprostřed — klient
+   má poznat, co už slyšel, a co je nové. */
+.navrat{display:flex;align-items:center;gap:12px;margin:clamp(14px,2vh,22px) 0 clamp(6px,1vh,12px)}
+.navrat:before,.navrat:after{content:'';flex:1;height:1px;background:var(--line)}
+.navrat span{font-size:12.5px;color:var(--muted);white-space:nowrap}
 .bub ul{margin:8px 0 0;padding-left:18px}
 .bub li{margin-bottom:6px}
 .bub .note{display:block;margin-top:10px;font-size:.84em;color:var(--muted)}
@@ -498,7 +503,11 @@ function countUp(el, to, ms = 900) {
 }
 
 /* ---------- stav ---------- */
-const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat: 0, log: [], answers: {},
+/* `beat` je pauza uvnitř běžící kapitoly — kam se vrátit, když klient
+   přeruší výklad tlačítkem. `kde` je něco jiného: která replika kapitoly
+   je právě na obrazovce. Podle ní se naváže po návratu, aby se repliky,
+   které už klient viděl, neřekly podruhé. Marcel 15. 11. 2026. */
+const blank = () => ({ sid: newSid(), id: URLP.get('id') || '', chapter: 0, beat: 0, kde: 0, log: [], answers: {},
   /* Zvolená forma vyšetření patří do uloženého stavu, ne jen do paměti
      stránky. Konzultace platí 72 hodin a klient se k ní vrací — po obnovení
      stránky se dřív volba ztratila a rezervace tiše spadla zpátky na
@@ -1326,8 +1335,10 @@ function bubble(html, opts = {}) {
   b.innerHTML = typo(html);
   row.appendChild(b);
   $('#inner').appendChild(row);
-  if (!opts.me) buzz();
-  scroll();
+  /* Překreslení po návratu je dvacet bublin naráz. Zabzučet u každé z nich
+     by byl rachot a posouvat obraz u každé zbytečná práce. */
+  if (!opts.me && !opts.tiche) buzz();
+  if (!opts.tiche) scroll();
   return row;
 }
 
@@ -1441,7 +1452,8 @@ async function renderVariants() {
     S.variant = { name: v.name, months: v.months, price: v.price,
       key: v.key, drugIncluded: !!v.drugIncluded }; save();
     buzz(12);
-    logLine('klient', 'Vybral variantu ' + v.name + ' · ' + v.months + ' měsíců · ' + v.price + ' Kč/měs.');
+    logLine('klient', 'Vybral variantu ' + v.name + ' · ' + v.months + ' měsíců · ' + v.price + ' Kč/měs.',
+      null, { jenPrepis: true });
     /* Na `price` — kapitola o měsíční platbě kartou. Dřív se odsud skákalo
        rovnou na `benefits` a celý výklad o tom, jak se platí a že jde
        platbu kdykoli zrušit, klient nikdy neviděl. */
@@ -1642,7 +1654,7 @@ async function renderSlots(expand) {
 async function pickSlot(isoUtc) {
   const d = new Date(isoUtc);
   const lidsky = slotDay(d) + ' ' + slotDate(d) + ' v ' + slotTime(d);
-  logLine('klient', 'Vybral termín ' + lidsky);
+  logLine('klient', 'Vybral termín ' + lidsky, null, { jenPrepis: true });
   const local = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
     String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') +
     ':' + String(d.getMinutes()).padStart(2, '0');
@@ -1754,6 +1766,7 @@ const CHAPTER_OF = { intro: 'intro', vas: 'vas', vas2: 'vas', vas3: 'vas', vas4:
 async function play(key) {
   if (busy) return;
   busy = true;
+  if (S.chapter !== key) S.kde = 0;      // v jiné kapitole se začíná od začátku
   S.chapter = key; save();
   persist(key);
   renderProgress(CHAPTER_OF[key] || key);
@@ -1766,12 +1779,15 @@ async function play(key) {
   let run = 0;
   for (; i < beats.length; i++) {
     const beat = beats[i];
-    if (beat.chips) { setChips(beat.chips); break; }
-    if (beat.ask) { askMode(beat); busy = false; return; }
-    if (beat.vars) { await renderVariants(); busy = false; return; }
-    if (beat.slots) { await renderSlots(); busy = false; return; }
-    if (beat.cons) { renderConsents(); busy = false; return; }
-    if (beat.lab) { renderLabForm(); busy = false; return; }
+    /* Čekáme na klienta. Značka zůstane na téhle replice, takže po návratu
+       se nabídka nebo formulář ukáže znovu — a nic, co už slyšel, se
+       neřekne podruhé. */
+    if (beat.chips) { S.kde = i; save(); setChips(beat.chips); break; }
+    if (beat.ask) { S.kde = i; save(); askMode(beat); busy = false; return; }
+    if (beat.vars) { S.kde = i; save(); await renderVariants(); busy = false; return; }
+    if (beat.slots) { S.kde = i; save(); await renderSlots(); busy = false; return; }
+    if (beat.cons) { S.kde = i; save(); renderConsents(); busy = false; return; }
+    if (beat.lab) { S.kde = i; save(); renderLabForm(); busy = false; return; }
     /* Dvě zprávy a dost: dál až když klient dá vědět, že čte. Poslední
        repliku kapitoly nepřerušujeme, za ní stejně následuje nabídka. */
     /* Konec běhu: buď dvě repliky, nebo replika, která má v `dal` vlastní
@@ -1780,7 +1796,7 @@ async function play(key) {
        pokračuje přesně touhle replikou a přerušit se znovu nesmí. */
     const vlastniDal = i > 0 && beats[i - 1] && beats[i - 1].dal;
     if (run > 0 && (run >= MAX_RUN || vlastniDal) && i < beats.length - 1) {
-      S.beat = i; save();
+      S.beat = i; S.kde = i; save();
       setChips([{ label: dalLabel(beats[i - 1]), go: key, resume: true }]);
       busy = false;
       return;
@@ -1794,7 +1810,8 @@ async function play(key) {
     await wait(pace(txt));
     t.remove();
     bubble(txt + karta, { cls: beat.cls });
-    logLine('marcel', txt);
+    logLine('marcel', txt, txt + karta, { cls: beat.cls });
+    S.kde = i + 1; save();
     if (beat.final) { finalScreen(key); }
     run++;
     await wait(420);
@@ -1826,8 +1843,20 @@ function askMode(beat) {
   requestAnimationFrame(scroll);
 }
 
-function logLine(who, text) {
-  S.log.push({ who, text: String(text).replace(/<[^>]*>/g, ''), at: Date.now() });
+/* Dvě podoby jedné repliky. `text` je holý — ten jde do přepisu, protože
+   přepis je důkaz a čte ho člověk. `html` je bublina tak, jak ji klient
+   viděl, i s tučným a s kartou; podle něj se rozhovor překreslí, až se
+   klient vrátí. Když se neliší, neukládá se — přepis by zdvojnásobil. */
+function logLine(who, text, html, opts) {
+  const r = { who: who, text: String(text == null ? '' : text).replace(/<[^>]*>/g, ''), at: Date.now() };
+  const h = String(html == null ? (text == null ? '' : text) : html);
+  if (h !== r.text) r.html = h;
+  if (opts && opts.cls) r.cls = opts.cls;
+  /* Výběr varianty a termínu se zapisuje do přepisu, ale bublinu nikdy
+     neměl — na obrazovce je vidět karta, ne věta „Vybral variantu…“.
+     Při překreslení se proto přeskočí. */
+  if (opts && opts.jenPrepis) r.meta = 1;
+  S.log.push(r);
   if (S.log.length > 400) S.log.shift();
   save();
 }
@@ -1843,7 +1872,7 @@ document.addEventListener('click', async e => {
      nepatří — přepis je důkaz o tom, co klientovi řekl a co odsouhlasil. */
   if (!c.resume) {
     bubble(esc(c.label), { me: true });
-    logLine('klient', c.label);
+    logLine('klient', c.label, esc(c.label));
   }
   setChips([]);
   if (c.store) { S.answers[c.store[0]] = c.store[1]; save(); }
@@ -1857,7 +1886,7 @@ document.addEventListener('click', async e => {
     await wait(pace(c.prompt));
     t.remove();
     bubble(c.prompt);
-    logLine('marcel', c.prompt);
+    logLine('marcel', c.prompt, c.prompt);
     busy = false;
     const ta = $('#ask');
     ta.placeholder = 'Napište mi, co Vám na tom nesedí…';
@@ -1888,8 +1917,9 @@ async function answerFaq(key) {
   const t = typing();
   await wait(pace(answer));
   t.remove();
-  bubble(answer || 'Na tohle Vám radši odpoví lékař — poznamenám si to.');
-  logLine('marcel', answer);
+  const vyslo = answer || 'Na tohle Vám radši odpoví lékař — poznamenám si to.';
+  bubble(vyslo);
+  logLine('marcel', answer, vyslo);
   busy = false;
   await wait(200);
   backToFlow();
@@ -1940,7 +1970,7 @@ async function submitAsk() {
   if (!text) return;
   ta.value = ''; ta.style.height = 'auto';
   bubble(esc(text), { me: true });
-  logLine('klient', text);
+  logLine('klient', text, esc(text));
 
   /* Klient napsal uprostřed toho, co Marcel zrovna píše. Jeho bublina
      naskočila hned — vidí, že zpráva dorazila — a my počkáme, až Marcel
@@ -1965,8 +1995,8 @@ async function submitAsk() {
     busy = true;
     for (let i = from; i < beats.length; i++) {
       const b = beats[i];
-      if (b.chips) { setChips(b.chips); break; }
-      if (b.ask) { askMode(b); break; }
+      if (b.chips) { S.kde = i; save(); setChips(b.chips); break; }
+      if (b.ask) { S.kde = i; save(); askMode(b); break; }
       const txt = typeof b.t === 'function' ? b.t() : b.t;
       const karta = b.card ? (typeof b.card === 'function' ? b.card() : b.card) : '';
       if (!txt && !karta) continue;
@@ -1974,7 +2004,8 @@ async function submitAsk() {
       await wait(pace(txt));
       t.remove();
       bubble(txt + karta, { cls: b.cls });
-      logLine('marcel', txt);
+      logLine('marcel', txt, txt + karta, { cls: b.cls });
+      S.kde = i + 1; save();
       await wait(240);
     }
     busy = false;
@@ -2041,8 +2072,9 @@ const HIST_ZNAKU = 50000;
   if (answer) {
     t.remove();
     // Model píše odstavce, ne HTML. Prázdný řádek dělá nový odstavec.
-    bubble(answer.split(/\n{2,}/).map(x => esc(x.trim()).replace(/\n/g, '<br>')).filter(Boolean).join('<br><br>'));
-    logLine('marcel', answer);
+    const vysazeno = answer.split(/\n{2,}/).map(x => esc(x.trim()).replace(/\n/g, '<br>')).filter(Boolean).join('<br><br>');
+    bubble(vysazeno);
+    logLine('marcel', answer, vysazeno);
     busy = false;
     backToFlow();
     persist('dotaz');
@@ -2327,9 +2359,42 @@ function clonaPryc() {
   setTimeout(function () { clona.remove(); }, 800);
 }
 
+/* Překreslení rozhovoru po návratu. Klient se vrací do místnosti, kde už
+   spolu mluvili — prázdná obrazovka s pokračováním uprostřed vypadá, jako
+   by se předtím nestalo nic. Vykreslí se naráz, bez psaní a bez bzučení,
+   a pod to přijde linka, aby bylo poznat, kde se navázalo.
+
+   Kreslí se z `html` v přepisu, ne z holého textu: jinak by klient přišel
+   o tučné i o karty s cenami. Marcel 15. 11. 2026. */
+function prekreslit() {
+  const radky = S.log || [];
+  let kreslil = false;
+  radky.forEach(function (l) {
+    if (l.meta) return;
+    const html = l.html || esc(String(l.text || ''));
+    if (!html) return;
+    bubble(html, { me: l.who === 'klient', cls: l.cls, tiche: true });
+    kreslil = true;
+  });
+  if (!kreslil) return;
+  const d = document.createElement('div');
+  d.className = 'navrat';
+  d.innerHTML = '<span>Tady jsme minule skončili</span>';
+  $('#inner').appendChild(d);
+  /* Naráz se posune až nakonec. Když se navazuje na nabídce, žádná nová
+     bublina už nepřijde a bez tohohle by klient koukal na začátek. */
+  requestAnimationFrame(scroll);
+}
+
 function spustit() {
   if (!D) return;                   // chybu už ukázal panel
   if (D.blocked) { play('blocked'); persist('kontraindikace'); return; }
+  if (jeRozdelana()) {
+    prekreslit();
+    /* Navazuje se na replice, u které klient stál — ne od začátku kapitoly.
+       Jinak by se část rozhovoru řekla podruhé, hned pod svým přepisem. */
+    S.beat = S.kde || 0;
+  }
   play(S.chapter && SCRIPT[S.chapter] ? S.chapter : 'intro');
 }
 /* ── KONCEPT: vstup do ordinace ────────────────────────────────────────────
