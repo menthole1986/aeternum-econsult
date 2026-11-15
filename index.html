@@ -363,7 +363,7 @@ html,body{background:var(--ground);color:var(--ink)}
   <div class="vstupin">
     <span class="eyebrow">Vstupní konzultace</span>
     <h2>Vítejte u nás<span class="light">Posaďte se, prosím</span></h2>
-    <p id="vstupP">Máme na sebe třicet minut a nikam nespěcháme. Než začneme — dáte si něco k pití?</p>
+    <p id="vstupP">Zabere nám to dvacet až třicet minut a nikam nespěcháme. Kdyby Vám do toho něco vstoupilo, vrátíte se ke konzultaci kdykoli během 72 hodin a navážeme tam, kde jsme skončili. Než začneme — dáte si něco (virtuálního) k pití?</p>
     <i class="bar"></i>
     <div class="pit" id="pit">
       <button type="button" data-pit="kávu">Kávu</button>
@@ -503,18 +503,42 @@ let S = blank();
 let D = null;                       // data z e‑screeningu
 let busy = false;
 
-function save() { try { sessionStorage.setItem(CFG.storageKey, JSON.stringify(S)); } catch (e) {} }
+/* Kde se rozhovor drží. Dřív to byla sessionStorage, která žije jen dokud
+   je otevřená ta jedna karta prohlížeče. Klient, který zavřel okno a druhý
+   den přišel znovu z odkazu v e-mailu, tak začínal od začátku — přestože má
+   konzultaci zaplacenou na 72 hodin a slibujeme mu, že naváže tam, kde
+   skončil. Drží se proto v localStorage, která zavření okna přežije.
+   Marcel 15. 11. 2026.
+
+   Klíč nese ID screeningu: na jednom počítači se tak může vystřídat víc
+   lidí a nevlezou si jeden druhému do rozhovoru. Stav starší než platnost
+   konzultace se zahodí — navazovat na něco, co klientovi dávno doběhlo,
+   by ho jen mátlo. */
+const PLATNOST_MS = 72 * 3600 * 1000;
+const KLIENT = URLP.get('id') || '';
+const storageKey = () => CFG.storageKey + (KLIENT ? ':' + KLIENT : '');
+
+function save() {
+  try { localStorage.setItem(storageKey(), JSON.stringify({ kdy: Date.now(), stav: S })); } catch (e) {}
+}
 
 /* Karta si rozhovor pamatuje, takže po reloadu naskočí tam, kde skončil —
    i s replikami ze starší verze stránky. Při zkoušení to mate: vypadá to,
    že oprava nenaběhla. Tlačítko je proto jen v ukázce; klientovi, který má
    konzultaci zaplacenou, by smazalo rozhovor, za který zaplatil. */
 function zacitZnovu() {
-  try { sessionStorage.removeItem(CFG.storageKey); } catch (e) {}
+  try { localStorage.removeItem(storageKey()); } catch (e) {}
   location.reload();
 }
 function load() {
-  try { const r = sessionStorage.getItem(CFG.storageKey); if (r) S = Object.assign(blank(), JSON.parse(r)); } catch (e) {}
+  try {
+    const r = localStorage.getItem(storageKey());
+    if (r) {
+      const u = JSON.parse(r);
+      if (u && u.stav && Date.now() - (u.kdy || 0) < PLATNOST_MS) S = Object.assign(blank(), u.stav);
+      else localStorage.removeItem(storageKey());
+    }
+  } catch (e) {}
   SLOTS.form = S.form || '';
 }
 
@@ -2162,6 +2186,14 @@ async function boot() {
     /* Kolik času zbývá, musí klient vidět, ne hádat. Je to zároveň jediné
        místo, kde se to dá říct nevtíravě — spodní řádek stránky. */
     if (D.hoursLeft) {
+      /* Na uvítací obrazovce stojí natvrdo 72 hodin, protože se ukáže dřív,
+         než doběhne dotaz na server. Jakmile víme, kolik času klientovi
+         doopravdy zbývá, přepíšeme to — kdo se vrací druhý den, nemá číst
+         o dvaasedmdesáti hodinách. */
+      const vp = $('#vstupP');
+      if (vp) vp.textContent = 'Zabere nám to dvacet až třicet minut a nikam nespěcháme. ' +
+        'Kdyby Vám do toho něco vstoupilo, vrátíte se ke konzultaci kdykoli ještě ' +
+        hodin(D.hoursLeft) + ' a navážeme tam, kde jsme skončili. Než začneme — dáte si něco (virtuálního) k pití?';
       const hint = $('#hint');
       if (hint) hint.textContent = 'Marcel AI je digitální dvojče konzultanta Marcela. ' +
         'Konzultace je zaplacená a vrátit se k ní můžete ještě ' + hodin(D.hoursLeft) + '. ' +
