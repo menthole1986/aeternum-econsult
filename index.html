@@ -204,8 +204,10 @@ p{margin:0}
 .way .st{flex:1;display:flex;gap:9px;align-items:flex-start;opacity:.62;transition:opacity .45s ease}
 .way .st.on,.way .st.done{opacity:1}
 .way .st i{flex:none;font-style:normal;font-weight:800;font-size:clamp(17px,calc(1.5*var(--u)),calc(28px*var(--k)));line-height:1;color:var(--ink)}
-/* Gradient jen na kroku, ve kterém klient zrovna je. */
-.way .st.on i,.way .st.done i{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* Žádný gradient na číslech. Průhledný text s obtiskem přechodu se vykreslí
+   tence a bledě, takže jednička u rozdělaného kroku vypadala slabší než
+   dvojka s trojkou — přesně naopak, než měla. Marcel 15. 11. 2026.
+   Krok, ve kterém klient je, poznat jde: má plnou sytost a pruh pod popiskem. */
 .way .st .lb{min-width:0}
 .way .st b{display:block;font-size:clamp(11px,calc(.78*var(--u)),calc(14px*var(--k)));font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .way .st b .sm{display:none}
