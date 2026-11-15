@@ -2175,24 +2175,42 @@ let lastSaved = 0;
    Marcel 15. 11. 2026. */
 function pauza() { persist(S.chapter || 'pauza', true); }
 
-/* Zápisy jdou jeden po druhém, ne přes sebe. Server u každého přepíše řádek
-   v tabulce i záložku na Disku, a kdyby dorazily v opačném pořadí, zůstal by
-   mu ten starší stav — tedy klient vrácený o kus zpátky. */
-let fronta_ = Promise.resolve();
+/* Zápisy nesmí jít přes sebe — server u každého přepíše řádek v tabulce
+   i záložku na Disku, a kdyby dorazily v opačném pořadí, zůstal by mu ten
+   starší stav, tedy klient vrácený o kus zpátky.
+
+   Řadit je za sebe do fronty se ale neosvědčilo: jeden zápis trvá pár vteřin
+   a fronta pak byla pomalejší než klient. Server měl pozici z úvodu ve chvíli,
+   kdy byl klient o dvě kapitoly dál, a kdo zavřel okno, přišel o celý ten
+   rozdíl. Marcel 15. 11. 2026, ověřeno naostro.
+
+   Proto se nefrontuje, ale slučuje: venku je vždycky nejvýš jeden zápis
+   a čeká se jen na to, že přijde na řadu ten poslední. Co mezitím přibylo,
+   se zahodí — každý zápis je celý stav, ne přírůstek, takže se nemá co
+   ztratit. A tělo se skládá až těsně před odesláním, aby neslo to, co platí
+   teď, a ne to, co platilo, když se zápis zadával. */
+let odesilam_ = false;
+let ceka_ = false;
+let cekaStage_ = '';
 
 function persist(stage, hned) {
-  if (!CFG.apiUrl || !S.id || DEMO_MODE) return fronta_;
-  if (!hned && Date.now() - lastSaved < 1500) return fronta_;
+  if (!CFG.apiUrl || !S.id || DEMO_MODE) return;
+  if (!hned && Date.now() - lastSaved < 1500) return;
   lastSaved = Date.now();
-  const telo = zapis_(stage);
-  fronta_ = fronta_.then(function () { return odeslat_(telo); });
-  return fronta_;
+  ceka_ = true;
+  cekaStage_ = stage;
+  if (!odesilam_) odeslat_();
 }
 
-async function odeslat_(telo) {
-  try {
-    await api('econsultLog', telo, 15000);
-  } catch (e) { /* důkazní stopa se doplní při dalším milníku */ }
+async function odeslat_() {
+  odesilam_ = true;
+  while (ceka_) {
+    ceka_ = false;
+    try {
+      await api('econsultLog', zapis_(cekaStage_), 15000);
+    } catch (e) { /* důkazní stopa se doplní při dalším milníku */ }
+  }
+  odesilam_ = false;
 }
 
 function zapis_(stage) {
@@ -2353,7 +2371,11 @@ function prevzitZalohu(ze) {
    nabízet k navázání. */
 function jeRozdelana() {
   if (D && D.blocked) return false;
-  return !!(S.chapter && SCRIPT[S.chapter] && S.chapter !== 'intro');
+  if (!S.chapter || !SCRIPT[S.chapter]) return false;
+  /* V půlce úvodu ještě nic nepadlo a vítat někoho zpátky po dvou větách
+     je směšné. Od čtvrté repliky výš už to rozdělaná konzultace je. */
+  if (S.chapter === 'intro' && (S.log || []).length < 4) return false;
+  return true;
 }
 
 function kdeSkoncil() {
@@ -2464,7 +2486,20 @@ function jinyScenar() { return !!(hashPriNacteni && hashPriNacteni !== SCENARIO_
 function spustit() {
   if (!D) return;                   // chybu už ukázal panel
   if (D.blocked) { play('blocked'); persist('kontraindikace'); return; }
-  if (jeRozdelana()) {
+  if (!jeRozdelana()) {
+    /* Nenavazuje se, rozhovor tedy začne od začátku — a přepis musí začít
+       s ním. Kdyby stará stopa zůstala, úvod by v něm stál dvakrát pod
+       sebou a při příštím návratu by se dvakrát i vykreslil. Našlo se to
+       naostro 15. 11. 2026 na zkušebním screeningu. */
+    if ((S.log || []).length) {
+      const sid = S.sid;
+      hashPriNacteni = '';
+      S = blank();
+      S.sid = sid;
+      SLOTS.form = '';
+      save();
+    }
+  } else {
     const znovu = jinyScenar();
     /* Při změně scénáře se rozdělaná kapitola pustí celá znovu, a z přepisu
        se proto ukáže jen to, co jí předcházelo — jinak by stála dvakrát
