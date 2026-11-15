@@ -1266,6 +1266,17 @@ const FAQ = {
 function mesice(n) { return n === 1 ? 'měsíc' : (n >= 2 && n <= 4 ? 'měsíce' : 'měsíců'); }
 
 /* ---------- vykreslení ---------- */
+/* „e-mail" se na konci řádku láme na spojovníku a zbyde „e-" a pod tím
+   „mail". Totéž u e-receptu a e-screeningu. Pevný spojovník vypadá stejně
+   a nezlomí se; za spojovníkem musí stát písmeno, takže GLP-1 ani
+   česko-slovenský tím neprojdou. Sahá se jen na text mezi tagy — v odkazu
+   nebo v atributu by pevný spojovník nadělal škodu. */
+const SPOJOVNIK = /\b([a-zA-Zá-žÁ-Ž])-(?=[a-zá-ž])/g;
+function typo(html) {
+  return String(html).split(/(<[^>]*>)/).map((kus, i) =>
+    i % 2 ? kus : kus.replace(SPOJOVNIK, '$1\u2011')).join('');
+}
+
 function bubble(html, opts = {}) {
   const row = document.createElement('div');
   row.className = 'row' + (opts.me ? ' me' : '');
@@ -1277,7 +1288,7 @@ function bubble(html, opts = {}) {
   }
   const b = document.createElement('div');
   b.className = 'bub' + (opts.cls ? ' ' + opts.cls : '');
-  b.innerHTML = html;
+  b.innerHTML = typo(html);
   row.appendChild(b);
   $('#inner').appendChild(row);
   if (!opts.me) buzz();
