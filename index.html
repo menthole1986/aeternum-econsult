@@ -1728,13 +1728,16 @@ async function pickSlot(isoUtc) {
   save();
 
   await marcelSays('Termín <b>' + lidsky + '</b> Vám držím. Potvrdí se v okamžiku, kdy dorazí platba.');
-  await marcelSays('Než zaplatíte, dvě věci, na kterých záleží. <b>Žádanku na odběr krve</b> ' +
+  await marcelSays('Než zaplatíte, jedna věc, na které záleží. <b>Žádanku na odběr krve</b> ' +
     'Vám pošlu e-mailem hned po platbě. Na odběr si musíte osobně zajít na odběrové místo ' +
     'a výsledky bývají do 48 hodin, takže tam zajděte <b>alespoň 3–4 dny před vyšetřením</b> — ' +
     'bez výsledků Vám lékař terapii neschválí. Kdyby to nevycházelo, dejte vědět a termín posuneme.');
-  await marcelSays('A až odběr absolvujete, otevřete si svoji rezervaci — odkaz na ni máte ' +
-    'v potvrzovacím e-mailu — a klepnete tam na tlačítko <b>„Byl jsem na odběru“</b>. ' +
-    'Podle toho víme, že má vyšetření smysl. Kdo to nepotvrdí, tomu termín musíme přesunout.');
+  /* Tady stávala třetí replika: ať si klient po odběru otevře svoji rezervaci
+     a klepne na „Byl jsem na odběru". Marcel ji 16. 11. 2026 stáhl, dokud
+     klientská část neběží — slibovat klientovi tlačítko, ke kterému se
+     nedostane, je horší než mu o něm neříct. Potvrzení odběru tím nepadá:
+     odkaz na ně je v každém e-mailu kolem vyšetření. Až se to spustí,
+     replika se sem vrátí a první věta nahoře zase řekne „dvě věci". */
   await marcelSays(payCard(r, lidsky));
   persist('book-hold');
 }
