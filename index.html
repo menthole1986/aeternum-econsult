@@ -1506,6 +1506,9 @@ function renderConsents() {
     all.forEach(i => { S.consents[i.dataset.k] = i.checked
       ? { at: Date.now(), text: consentText(CONSENTS[Number(i.dataset.i)]) } : null; });
     save();
+    /* Klient odklikl souhlas a muze u toho odejit. Bez tohohle by je na
+       druhem zarizeni nasel prazdne — odklikaval by je podruhe. */
+    pauza();
     buzz(10);
     const done = all.every(i => i.checked);
     setChips(done ? [{ label: 'Potvrdit a pokračovat k platbě', go: 'book', consent: true, primary: true }] : []);
@@ -1530,6 +1533,9 @@ function renderLabForm() {
   const dob = box.querySelector('#lf-dob'), rc = box.querySelector('#lf-rc'), okb = box.querySelector('#lf-ok');
   const prepocet = function () {
     S.labDob = dob.value; S.labRc = rc.value.trim(); S.labConsent = okb.checked; save();
+    /* Totéž co u souhlasů. Rodné číslo se do zálohy nedostane ani teď —
+       `zaloha()` ho zahazuje a server ho maže ještě jednou. */
+    pauza();
     const hotovo = /^\d{4}-\d{2}-\d{2}$/.test(S.labDob || '') &&
       /^\d{6}\s*\/?\s*\d{3,4}$/.test(S.labRc || '') && S.labConsent;
     setChips(hotovo ? [{ label: 'Pokračovat na výběr termínu', go: 'bookSlots', primary: true }] : []);
