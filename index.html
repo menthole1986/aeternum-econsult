@@ -587,10 +587,10 @@ const DEMO = {
   drugWhy: 'máte vyšší BMI a zároveň jste uvedla, že se potřebujete zbavit chutí mezi jídly',
   blocked: false, blockReason: '',
   variants: [
-    { key: 'light', name: 'Telehealth Light', months: 8, price: 2970, drugIncluded: false,
-      desc: 'Lékařský dohled, e-recepty a podpora koordinátora. Bez krevních testů, tréninkového plánu a jídelníčku.' },
+    { key: 'light', name: 'Telehealth Light', months: 8, price: 4970, drugIncluded: false,
+      desc: 'Lékařský dohled, e-recepty, krevní testy a podpora koordinátora. Bez tréninkového plánu a jídelníčku.' },
     { key: 'standard', name: 'Telehealth Standard', months: 8, price: 5970, drugIncluded: false,
-      desc: 'Pravidelné kontroly a krevní testy a k tomu Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
+      desc: 'Všechno z Lightu a k tomu Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
     { key: 'premium', name: 'Telehealth Premium', months: 8, price: 6970, drugIncluded: false,
       desc: 'Všechno ze Standardu a k tomu prioritní konzultace, vlastní tým a péče o metabolické zdraví a dlouhověkost.' }
   ]
@@ -1177,7 +1177,7 @@ blocked: [
 function protokolVeta() {
   const k = S.variant && S.variant.key;
   const co = 'jídelníček na míru s přesným počtem kalorií, doporučení od výživového specialisty a tréninkový plán od fitness trenéra';
-  if (k === 'praha') return 'Dostanete ' + co + ' — v <b>Aeternum Longevity Protokolu</b>, který je součástí Vašeho programu.';
+  if (k === 'praha') return 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, který je součástí Vašeho programu.';
   if (k === 'light') return 'U programů Standard a Premium k tomu dostanete ' + co + '; v Lightu to není. '
     + 'Doporučení Vám ale dá lékař i koordinátor péče a kdykoli se dá přejít výš.';
   if (k === 'standard' || k === 'premium') return 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, '
@@ -1187,17 +1187,14 @@ function protokolVeta() {
 }
 
 /* Co je v ceně — podle vybraného programu, ne paušálně. Dřív karta slibovala
-   všem Longevity Protokol a tým s trenérem a výživovým specialistou; to má
+   všem Lifestyle Protocol a tým s trenérem a výživovým specialistou; to má
    ve skutečnosti jen Praha a Premium. Zrcadlí nabídku na www.aeternumclinic.cz. */
 const SPOLECNE = [
   ['Lékařský dohled a e-recepty', 'Pravidelné kontroly, úprava dávkování a e-recept na každý měsíc.'],
+  ['Pravidelné krevní testy a screening', 'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'],
   ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
   ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
 ];
-/* Krevní testy jsou od Standardu výš — v Lightu nejsou, a slíbit je tam
-   znamená slíbit něco, co klient nedostane. */
-const KREVNI_TESTY = ['Pravidelné krevní testy a screening',
-  'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'];
 /* Co program obsahuje a co ne, jednou větou na řádek. Totéž zrcadlí
    `PLANS[].feats` ve výsledcích screeningu — když se mění jedno, mění se
    obojí, jinak si ta dvě místa začnou odporovat. Křížek u medikace je tam
@@ -1207,8 +1204,8 @@ const PLAN_FEATS = {
     [1, 'Lékařský dohled a e-recepty'],
     [1, 'Podpora odborného koordinátora'],
     [1, 'Flexibilní program bez vázanosti'],
-    [0, 'Medikace není zahrnuta v ceně programu'],
-    [0, 'Krevní testy nejsou zahrnuty v programu']
+    [1, 'Krevní testy zahrnuty v programu'],
+    [0, 'Medikace není zahrnuta v ceně programu']
   ],
   standard: [
     [1, 'Lékařský dohled a e-recepty'],
@@ -1237,7 +1234,7 @@ const PLAN_FEATS = {
     [1, 'Medikace je v ceně programu'],
     [1, 'Osobní i online konzultace na klinice v Praze'],
     [1, 'Pravidelné krevní testy'],
-    [1, 'Aeternum Longevity Protokol'],
+    [1, 'Aeternum Lifestyle Protocol'],
     [1, 'Podpora odborného koordinátora'],
     [1, 'Flexibilní program bez vázanosti']
   ]
@@ -1253,11 +1250,11 @@ function featsHTML(v) {
 
 const PLAN_KARTY = {
   light: SPOLECNE,
-  standard: [SPOLECNE[0], KREVNI_TESTY].concat([
+  standard: SPOLECNE.slice(0, 2).concat([
     ['Aeternum Lifestyle Protocol', 'Jídelníček, suplementace a tréninkový plán sestavený z Vašeho dotazníku a krevních testů.'],
     ['Tréninkový plán od fitness trenéra', 'Postavený na tom, co opravdu zvládnete dělat.'],
     ['Jídelníček a doporučení doplňků stravy', 'Konkrétní, ne obecné rady.']
-  ], SPOLECNE.slice(1)),
+  ], SPOLECNE.slice(2)),
   premium: [
     ['Všechno ze Standardu', 'Lékařský dohled, screening, Lifestyle Protocol, jídelníček i tréninkový plán.'],
     ['Prioritní konzultace bez čekání', 'Když něco potřebujete, jdete na řadu první.'],
