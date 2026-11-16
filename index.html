@@ -903,6 +903,9 @@ price: [
       ? `Vybral${ova()} jste si variantu <b>${esc(S.variant.name)}</b> na ${S.variant.months} ${mesice(S.variant.months)} za <span class="hl">${fmt(S.variant.price)} Kč</span> měsíčně.`
       : 'Ještě jste si variantu nevybral' + ova() + ' — můžete se k ní kdykoli vrátit, ale pojďme si říct, jak placení funguje obecně.' },
   { t: 'Důležité: ta cena je <b>měsíční platba</b>, ne celková částka dopředu.' },
+  /* U Lightu se k faktuře každé třetí období připočítává odběr. Musí to
+     zaznít tady, mezi tím, co klient o placení slyší — ne až na faktuře. */
+  { t: () => bezTestu() ? testyVeta() : '' },
   { t: 'Program se platí <b>po měsících, na fakturu</b>. Žádná záloha dopředu a žádná částka za celý program najednou.' },
   /* Dva modely jako u vydeje leciva: u telemediciny vystavujeme e-recept a
      klient si lek kupuje sam, objednavame jen tam, kde je leciva v cene.
@@ -1186,6 +1189,20 @@ function protokolVeta() {
     + 'a Premium. Light ho nemá, tam zůstává lékařský dohled a podpora koordinátora.';
 }
 
+/* Průběžné krevní testy v ceně nemá Light. Klient na ně chodí stejně jako
+   ostatní, ale platí si je — každé třetí období mu k faktuře přibude odběr
+   s rozborem. Zrcadlí `labIncluded` a `CONFIG.LAB_CHECK.lab` na serveru;
+   když se mění jedno, mění se obojí. */
+const BEZ_TESTU = ['light'];
+const TESTY_CENA = 2490;
+const TESTY_PO = 3;
+function bezTestu() { return BEZ_TESTU.indexOf(S.variant && S.variant.key) >= 0; }
+function testyVeta() {
+  return 'Krevní testy v průběhu programu <b>v ceně nemáte</b>. Chodíte na ně jako klienti ostatních programů, '
+    + 'jen si je hradíte ' + sam() + ': každé ' + TESTY_PO + '. období Vám k faktuře přibude <b>' + fmt(TESTY_CENA)
+    + ' Kč</b> za odběr a rozbor krve. Vyjádření lékaře k výsledkům se nepřipočítává, lékařský dohled máte v ceně programu.';
+}
+
 /* Co je v ceně — podle vybraného programu, ne paušálně. Dřív karta slibovala
    všem Lifestyle Protocol a tým s trenérem a výživovým specialistou; to má
    ve skutečnosti jen Praha a Premium. Zrcadlí nabídku na www.aeternumclinic.cz. */
@@ -1282,9 +1299,14 @@ function planCards() {
   const lek = S.variant && S.variant.drugIncluded ? '' :
     '<div class="card"><b>Léčivo není v ceně</b><span>Kupujete si ho ' + sam() +
     ' na náš e-recept, v kterékoli lékárně a v režimu samoplátce. Cenu balení znáte dopředu.</span></div>';
+  // Co v ceně není, patří mezi karty stejně jako to, co v ceně je.
+  const testy = bezTestu()
+    ? '<div class="card"><b>Krevní testy nejsou v ceně</b><span>Chodíte na ně stejně jako ostatní, ale platíte si je: každé '
+      + TESTY_PO + '. období Vám k faktuře přibude ' + fmt(TESTY_CENA) + ' Kč za odběr a rozbor krve.</span></div>'
+    : '';
   return '<div class="cards">' +
     radky.map(r => '<div class="card"><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') +
-    lek + '</div>';
+    testy + lek + '</div>';
 }
 
 const FAQ = {
@@ -1304,6 +1326,8 @@ const FAQ = {
     + 'si hradíte ' + sam() + ', v režimu samoplátce. ' + (S.variant && S.variant.drugIncluded
       ? 'U Vámi vybraného programu je léčivo v ceně, takže v lékárně už nic nedoplácíte.'
       : 'U programů na dálku navíc není v ceně ani léčivo — to si kupujete na náš e‑recept v lékárně, v režimu samoplátce. '
+        + (bezTestu() ? 'A u Lightu ani průběžné krevní testy: každé ' + TESTY_PO + '. období se k faktuře připočítá '
+          + fmt(TESTY_CENA) + ' Kč za odběr a rozbor krve. ' : '')
         + 'Říkám to radši dopředu, ať víte, co Vás to celé bude stát.'),
   diet: () => 'Žádnou dietu držet nemusíte. Lék sám sníží chuť k jídlu — to podstatné je toho využít a jíst '
     + 'pestře a vyváženě, s dostatkem bílkovin, aby se neubíralo svalstvo. ' + protokolVeta(),
