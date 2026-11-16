@@ -588,7 +588,7 @@ const DEMO = {
   blocked: false, blockReason: '',
   variants: [
     { key: 'light', name: 'Telehealth Light', months: 8, price: 3970, drugIncluded: false,
-      desc: 'Lékařský dohled, e-recepty a podpora koordinátora. Bez průběžných krevních testů, tréninkového plánu a jídelníčku.' },
+      desc: 'Lékařský dohled, e-recepty a podpora koordinátora. Krevní testy za příplatek, bez tréninkového plánu a jídelníčku.' },
     { key: 'standard', name: 'Telehealth Standard', months: 8, price: 6970, drugIncluded: false,
       desc: 'Všechno z Lightu a k tomu pravidelné krevní testy a Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
     { key: 'premium', name: 'Telehealth Premium', months: 8, price: 8970, drugIncluded: false,
@@ -1194,9 +1194,9 @@ const SPOLECNE = [
   ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
   ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
 ];
-/* Průběžné krevní testy jsou od Standardu výš. V Lightu je klient má jen na
-   začátku, ve vstupním screeningu, a pak si je platí sám — slíbit mu je tady
-   znamená slíbit něco, co nedostane. */
+/* Průběžné krevní testy jsou od Standardu výš v ceně. V Lightu je klient
+   dostane taky, ale platí si je sám, takže je nesmíme tvrdit jako součást
+   programu — od toho je u Lightu křížek i s cenou. */
 const KREVNI_TESTY = ['Pravidelné krevní testy a screening',
   'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'];
 /* Co program obsahuje a co ne, jednou větou na řádek. Totéž zrcadlí
@@ -1209,7 +1209,7 @@ const PLAN_FEATS = {
     [1, 'Podpora odborného koordinátora'],
     [1, 'Flexibilní program bez vázanosti'],
     [0, 'Medikace není zahrnuta v ceně programu'],
-    [0, 'Pravidelné krevní testy nejsou v ceně programu']
+    [0, 'Pravidelné krevní testy za příplatek 2 490 Kč']
   ],
   standard: [
     [1, 'Lékařský dohled a e-recepty'],
