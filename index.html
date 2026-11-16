@@ -1083,7 +1083,7 @@ included: [
   /* Smlouvu pojmenujeme programem, který si klient v konzultaci vybral —
      ví pak, na co se v ní dívat. Kdo se k výběru nedostal, dostane
      původní obecnou větu. */
-  { t: () => 'Po úhradě Vám e‑mailem přijde potvrzení termínu, pokyny k odběru s kódem žádanky, <b>informovaný souhlas</b> k přečtení a <b>návrh smlouvy o zdravotní péči</b> ' +
+  { t: () => 'Po úhradě Vám e‑mailem přijde potvrzení termínu, pokyny k odběru a <b>žádanka</b>, kterou si vytisknete a vezmete na odběr, <b>informovaný souhlas</b> k přečtení a <b>návrh smlouvy o zdravotní péči</b> ' +
       (S.variant ? 'na program <b>' + esc(S.variant.name) + '</b>, který jste si vybral' + ova() + '. ' : 'podle programu, který Vám vychází. ') +
       'Podepisuje se až po vyšetření a schválení terapie — takže si to v klidu přečtete doma.' },
   { chips: [{ label: 'Co dál potřebuju vědět?', go: 'consent' }] }
