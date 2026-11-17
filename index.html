@@ -588,9 +588,9 @@ const DEMO = {
   blocked: false, blockReason: '',
   variants: [
     { key: 'light', name: 'Telehealth Light', months: 8, price: 3970, drugIncluded: false,
-      desc: 'Lékařský dohled, e-recepty a podpora koordinátora. Krevní testy za příplatek, bez tréninkového plánu a jídelníčku.' },
-    { key: 'standard', name: 'Telehealth Standard', months: 8, price: 6970, drugIncluded: false,
-      desc: 'Všechno z Lightu a k tomu pravidelné krevní testy a Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
+      desc: 'Lékařský dohled, e-recepty a pravidelné kontrolní krevní testy. Bez koordinátora péče, bez tréninkového plánu a jídelníčku.' },
+    { key: 'standard', name: 'Telehealth Standard', months: 8, price: 5970, drugIncluded: false,
+      desc: 'Všechno z Lightu a k tomu podpora koordinátora péče a Aeternum Lifestyle Protocol — tréninkový plán od trenéra a jídelníček s doplňky.', rec: true },
     { key: 'premium', name: 'Telehealth Premium', months: 8, price: 8970, drugIncluded: false,
       desc: 'Všechno ze Standardu a k tomu prioritní konzultace, vlastní tým a péče o metabolické zdraví a dlouhověkost.' }
   ]
@@ -1182,18 +1182,20 @@ function protokolVeta() {
   const co = 'jídelníček na míru s přesným počtem kalorií, doporučení od výživového specialisty a tréninkový plán od fitness trenéra';
   if (k === 'praha') return 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, který je součástí Vašeho programu.';
   if (k === 'light') return 'U programů Standard a Premium k tomu dostanete ' + co + '; v Lightu to není. '
-    + 'Doporučení Vám ale dá lékař i koordinátor péče a kdykoli se dá přejít výš.';
+    + 'Doporučení Vám ale dá lékař a kdykoli se dá přejít výš.';
   if (k === 'standard' || k === 'premium') return 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, '
     + 'který je součástí Vašeho programu.';
   return 'V <b>Aeternum Lifestyle Protocolu</b> k tomu dostanete ' + co + ' — ten je součástí programů Standard '
-    + 'a Premium. Light ho nemá, tam zůstává lékařský dohled a podpora koordinátora.';
+    + 'a Premium. Light ho nemá, tam zůstává lékařský dohled, e-recepty a kontrolní krevní testy.';
 }
 
-/* Průběžné krevní testy v ceně nemá Light. Klient na ně chodí stejně jako
-   ostatní, ale platí si je — každé třetí období mu k faktuře přibude odběr
-   s rozborem. Zrcadlí `labIncluded` a `CONFIG.LAB_CHECK.lab` na serveru;
-   když se mění jedno, mění se obojí. */
-const BEZ_TESTU = ['light'];
+/* Programy, které průběžné krevní testy v ceně nemají. Od 17. 11. 2026 žádný
+   takový není — Marcel příplatek zrušil a testy jsou v ceně všech programů
+   včetně Lightu. Seznam i věty pod ním schválně zůstávají: kdyby se příplatek
+   někdy vrátil, stačí sem dopsat klíč programu a všechna místa, kde se o tom
+   mluví, se zapnou sama. Zrcadlí `labIncluded` a `CONFIG.LAB_CHECK.lab`
+   na serveru; když se mění jedno, mění se obojí. */
+const BEZ_TESTU = [];
 const TESTY_CENA = 2490;
 const TESTY_PO = 3;
 function bezTestu() { return BEZ_TESTU.indexOf(S.variant && S.variant.key) >= 0; }
@@ -1206,14 +1208,14 @@ function testyVeta() {
 /* Co je v ceně — podle vybraného programu, ne paušálně. Dřív karta slibovala
    všem Lifestyle Protocol a tým s trenérem a výživovým specialistou; to má
    ve skutečnosti jen Praha a Premium. Zrcadlí nabídku na www.aeternumclinic.cz. */
+/* Pozor: společné to je od Standardu výš. Koordinátor péče — prostřední
+   položka — v Lightu není, proto si Light bere jen [0] a [2]. */
 const SPOLECNE = [
   ['Lékařský dohled a e-recepty', 'Pravidelné kontroly, úprava dávkování a e-recept na každý měsíc.'],
   ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
   ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
 ];
-/* Průběžné krevní testy jsou od Standardu výš v ceně. V Lightu je klient
-   dostane taky, ale platí si je sám, takže je nesmíme tvrdit jako součást
-   programu — od toho je u Lightu křížek i s cenou. */
+/* Průběžné krevní testy jsou v ceně všech programů včetně Lightu. */
 const KREVNI_TESTY = ['Pravidelné krevní testy a screening',
   'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'];
 /* Co program obsahuje a co ne, jednou větou na řádek. Totéž zrcadlí
@@ -1223,10 +1225,10 @@ const KREVNI_TESTY = ['Pravidelné krevní testy a screening',
 const PLAN_FEATS = {
   light: [
     [1, 'Lékařský dohled a e-recepty'],
-    [1, 'Podpora odborného koordinátora'],
+    [1, 'Pravidelné kontrolní krevní testy v ceně'],
     [1, 'Flexibilní program bez vázanosti'],
     [0, 'Medikace není zahrnuta v ceně programu'],
-    [0, 'Pravidelné krevní testy za příplatek 2 490 Kč']
+    [0, 'Bez podpory odborného koordinátora']
   ],
   standard: [
     [1, 'Lékařský dohled a e-recepty'],
@@ -1270,7 +1272,7 @@ function featsHTML(v) {
 }
 
 const PLAN_KARTY = {
-  light: SPOLECNE,
+  light: [SPOLECNE[0], KREVNI_TESTY, SPOLECNE[2]],
   standard: [SPOLECNE[0], KREVNI_TESTY].concat([
     ['Aeternum Lifestyle Protocol', 'Jídelníček, suplementace a tréninkový plán sestavený z Vašeho dotazníku a krevních testů.'],
     ['Tréninkový plán od fitness trenéra', 'Postavený na tom, co opravdu zvládnete dělat.'],
