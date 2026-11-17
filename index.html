@@ -2262,6 +2262,28 @@ async function odeslat_() {
   odesilam_ = false;
 }
 
+/* Mobil, tablet, nebo počítač. Rozhoduje dotyk a šířka okna, ne jméno
+   prohlížeče — to se dá přepsat a u nových zařízení stejně nesedí. Hranice
+   768 a 1024 jsou tytéž, na kterých se láme vzhled stránky, takže „mobil"
+   tady znamená přesně to, co vidí mobilní vzhled. Zjišťuje se jednou při
+   načtení: kdo otočí telefon na šířku, nemá tím přesednout na tablet.
+   Neukládá se nic dalšího — jen jedno z těch tří slov. */
+const ZARIZENI = (function () {
+  try {
+    const dotyk = (navigator.maxTouchPoints || 0) > 0 || 'ontouchstart' in window;
+    const sirka = Math.min(window.screen && window.screen.width || window.innerWidth, window.innerWidth) || 0;
+    if (!dotyk) return 'počítač';
+    if (sirka < 768) return 'mobil';
+    /* Horní hranice je 1366, ne 1024: velký iPad hlásí na výšku rovných 1024
+       a na šířku 1366, takže by s nižší hranicí spadl mezi počítače. Dotykový
+       notebook téhle šířky se naopak započítá jako tablet — těch je ale
+       výrazně míň než iPadů, takže chyba padá na správnou stranu. */
+    if (sirka <= 1366) return 'tablet';
+    return 'počítač';
+  } catch (e) { return ''; }
+})();
+function zarizeni() { return ZARIZENI; }
+
 function zapis_(stage) {
   return {
     id: S.id, stage: stage, scenario: D && D.scenario || '', hash: SCENARIO_HASH,
@@ -2269,7 +2291,7 @@ function zapis_(stage) {
        se ho na to lékař i Marcel AI ptali znovu. Teď to jde do jeho karty. */
     answers: S.answers,
     variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
-    consents: S.consents, log: S.log,
+    consents: S.consents, log: S.log, device: zarizeni(),
     /* Záložka, podle které klient naváže z jiného zařízení. Prohlížeč na
        mobilu o konzultaci rozdělané v práci neví nic — tohle je jediné
        místo, kde se to dá uchovat. */
