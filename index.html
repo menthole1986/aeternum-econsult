@@ -1109,6 +1109,16 @@ book: [
         <div class="kv"><span>Celkem jednorázově</span><b>${fmt(CFG.screeningPrice)} Kč</b></div>
       </div></div>`; } },
   { t: 'Obojí je v té částce — odběr i vyšetření. Platí se jednou a úhradou se Vám zároveň drží termín. Nic dalšího se za screening nedoplácí.' },
+  /* Co klientovi přijde a proč si to má přečíst. Patří to sem, ne až do
+     potvrzení: informovaný souhlas je nejdelší dokument, který od nás dostane,
+     a když se o něm doví až e-mailem, otevře ho málokdo. Program se jmenuje
+     tím, co si klient vybral — v návrhu smlouvy pak najde tutéž cenu. */
+  { t: () => 'Hned po naší konzultaci Vám přijde e-mail a v něm tři věci: platební údaje ke screeningu, ' +
+      '<b>informovaný souhlas s léčbou</b> a <b>návrh smlouvy o zdravotní péči</b>' +
+      (S.variant ? ' na program <b>' + esc(S.variant.name) + '</b> za <b>' + fmt(S.variant.price) + ' Kč</b> měsíčně, jak jsme se domluvili' : '') + '.' },
+  { t: () => 'Informovaný souhlas si prosím přečtěte <b>ještě před lékařským vyšetřením</b>. Je v něm i to, ' +
+      'na co jsme se tady nedostali — průběh terapie, vedlejší účinky, co od Vás budeme potřebovat. ' +
+      'Kdyby Vám po přečtení cokoliv nesedělo, řeknete to lékaři při vyšetření; podepisuje se až tam, po schválení terapie.' },
   { t: 'Rozhovor je pořád nezávazný a bez Vašeho souhlasu se nikam neposunu. Dává Vám ta částka smysl?' },
   { chips: [
       { label: 'Ano, pojďme vybrat termín', go: 'bookForm', primary: true },
@@ -2292,6 +2302,10 @@ function zapis_(stage) {
     answers: S.answers,
     variant: S.variant ? S.variant.name + ' · ' + S.variant.months + ' měs. · ' + S.variant.price + ' Kč' : '',
     consents: S.consents, log: S.log, device: zarizeni(),
+    /* Volba programu rozebraná na pole. Věta ve `variant` je pro člověka do
+       tabulky; tohle čte smlouva, aby v návrhu byla cena programu, který si
+       klient vybral, a ne ta doporučená. */
+    variantData: S.variant ? { key: S.variant.key, months: S.variant.months, price: S.variant.price } : null,
     /* Záložka, podle které klient naváže z jiného zařízení. Prohlížeč na
        mobilu o konzultaci rozdělané v práci neví nic — tohle je jediné
        místo, kde se to dá uchovat. */
