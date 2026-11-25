@@ -576,7 +576,7 @@ function load() {
 /* ---------- ukázková data, než je napojený backend ---------- */
 const DEMO = {
   scenario: 'EK-demo', name: 'Jana', fullName: 'Jana Nováková', email: 'jana@email.cz',
-  examDoctorPart: 2500,
+  examDoctorPart: 2470,
   sex: 'F', age: 42, height: 168, weight: 88, target: 72, bmi: 31.2,
   lose: 16, months: 6, drug: 'Mounjaro',
   // ?demo=1&pmos=1 otevre i kapitolu o PMOS, jinak se v demu neukaze.
@@ -588,9 +588,11 @@ const DEMO = {
   blocked: false, blockReason: '',
   variants: [
     { key: 'standard', name: 'Standard', months: 8, price: 5970, drugIncluded: false,
-      desc: 'Lékařský dohled, e-recept každý měsíc, kontrolní krevní testy a kontrola u lékaře každé tři měsíce, koordinátor péče a Aeternum Lifestyle Protocol.', rec: true },
+      desc: 'Ideální volba pro klienty, kteří chtějí mít jistotu, pravidelné kontroly a profesionální vedení po celé ČR.', rec: true },
     { key: 'premium', name: 'Premium', months: 8, price: 9970, drugIncluded: false,
-      desc: 'Všechno ze Standardu a k tomu kontrola u lékaře každý měsíc, výživový specialista a fitness trenér jednou měsíčně a prioritní termíny.' }
+      desc: 'Prémiová péče pro náročné — pravidelné kontroly a profesionální vedení na dálku po celé ČR.' },
+    { key: 'praha', name: 'All-inclusive', months: 8, price: 13970, drugIncluded: true,
+      desc: 'Individuální péče pro klienty, kteří chtějí full servis a léčivo v ceně programu. Objednáme ho za Vás a v lékárně BENU v Chlumčanského ulici na Vás čeká, dokud si ho osobně nevyzvednete.' }
   ]
 };
 
@@ -1026,7 +1028,7 @@ screening: [
        obě zapsané natvrdo a po změně ceny přestaly dávat součet: 3 170
        + 2 000 = 5 170, ale celkem svítilo 4 970. Takhle to sedí vždycky. */
     card: () => {
-      const lekar = Number(D.examDoctorPart) || 2500;
+      const lekar = Number(D.examDoctorPart) || 2470;
       return `<div class="plan">
       <div class="kv"><span>Laboratorní vyšetření krve</span><b>${fmt(CFG.screeningPrice - lekar)} Kč</b></div>
       <div class="kv"><span>Lékařské vyšetření</span><b>${fmt(lekar)} Kč</b></div>
@@ -1034,7 +1036,7 @@ screening: [
     </div>`; } },
   { t: 'Důležité: <b>screening není součástí léčby</b> a hradí se před zahájením terapie — dneska na konci tohoto rozhovoru. Je to vstupenka k posouzení, ne první platba za program.',
     dal: 'Dobře, rozumím, můžeme dál' },
-  { t: 'Jak to proběhne: hned po téhle konzultaci Vám přijde e‑mailem <b>žádanka s kódem</b>. S ním zajdete na kterékoli odběrové pracoviště Synlabu — nic tisknout nemusíte, na recepci stačí nahlásit kód a prokázat se občanským průkazem.' },
+  { t: 'Jak to proběhne: po úhradě screeningu Vám e‑mailem přijde <b>žádanka na odběr krve</b>. Laboratoř ji vystavuje dvěma způsoby: buď má objednační kód a pak nic netisknete — na recepci kód jen nahlásíte — nebo Vám přijde žádanka k vytištění. V tom e‑mailu to budete mít napsané. Zajdete s ní na kterékoli odběrové pracoviště Synlabu a prokážete se občanským průkazem.' },
   { t: 'Výsledky posílá laboratoř rovnou nám, takže se o ně nemusíte starat. Lékař je bude mít při vyšetření k dispozici společně s Vaším vstupním dotazníkem.' },
   { t: 'A nejsou jen sítem. <b>Podle nich se určuje, jakou dávkou začnete</b> a jak rychle se dá zvyšovat — bez nich by to byl odhad.' },
   /* Sami ji děláme jenom v ordinaci, takže kdo jde na vyšetření online, si
@@ -1081,7 +1083,7 @@ included: [
   /* Smlouvu pojmenujeme programem, který si klient v konzultaci vybral —
      ví pak, na co se v ní dívat. Kdo se k výběru nedostal, dostane
      původní obecnou větu. */
-  { t: () => 'Po úhradě Vám e‑mailem přijde potvrzení termínu, pokyny k odběru a <b>žádanka</b>, kterou si vytisknete a vezmete na odběr, <b>informovaný souhlas</b> k přečtení a <b>návrh smlouvy o zdravotní péči</b> ' +
+  { t: () => 'Po úhradě Vám e‑mailem přijde potvrzení termínu, pokyny k odběru a <b>žádanka</b> — buď s kódem, nebo k vytištění — <b>informovaný souhlas</b> k přečtení a <b>návrh smlouvy o zdravotní péči</b> ' +
       (S.variant ? 'na program <b>' + esc(S.variant.name) + '</b>, který jste si vybral' + ova() + '. ' : 'podle programu, který Vám vychází. ') +
       'Podepisuje se až po vyšetření a schválení terapie — takže si to v klidu přečtete doma.' },
   { chips: [{ label: 'Co dál potřebuju vědět?', go: 'consent' }] }
@@ -1095,7 +1097,7 @@ consent: [
 book: [
   { t: 'Děkuju. Zbývá poslední krok — domluvit vyšetření. Než se pustíme do termínu, chci mít jistotu, že víte přesně, za co platíte.',
     card: () => {
-      const lekar = Number(D.examDoctorPart) || 2500;
+      const lekar = Number(D.examDoctorPart) || 2470;
       return `<div class="sum">
       <div class="sh">
         <div class="se">Vstupní screening</div>
@@ -1182,13 +1184,13 @@ blocked: [
 };
 
 /* ---------- odpovědi na časté dotazy ---------- */
-/* Lifestyle Protocol mají oba programy, takže se tu nic nepodmiňuje. Rozdíl
+/* Lifestyle Protocol mají všechny tři programy, takže se tu nic nepodmiňuje. Rozdíl
    je v tom, že v Premiu k němu patří konzultace s výživovým specialistou
    a trenérem každý měsíc; ve Standardu je plán, ne schůzky. */
 function protokolVeta() {
   const k = S.variant && S.variant.key;
   const co = 'jídelníček na míru s přesným počtem kalorií, doporučení od výživového specialisty a tréninkový plán od fitness trenéra';
-  const zaklad = 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, který je součástí obou programů.';
+  const zaklad = 'Dostanete ' + co + ' — v <b>Aeternum Lifestyle Protocolu</b>, který je součástí každého z našich programů.';
   if (k === 'premium') return zaklad + ' V Premiu k němu navíc patří konzultace s výživovým specialistou a s trenérem každý měsíc.';
   return zaklad;
 }
@@ -1211,13 +1213,13 @@ function testyVeta() {
 
 /* Co je v ceně — podle vybraného programu, ne paušálně. Zrcadlí nabídku na
    www.aeternumclinic.cz a PLANS v aeternum_screening_apps_script.gs.
-   Od 24. 11. 2026 jsou programy dva a tohle je společné oběma. */
+   Tohle je společné všem programům. */
 const SPOLECNE = [
   ['Lékařský dohled a e-recepty', 'Pravidelné kontroly, úprava dávkování a e-recept na každý měsíc.'],
   ['Podpora odborného koordinátora', 'Máte se na koho obrátit i mezi kontrolami.'],
   ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku. Lze zkrátit i prodloužit.']
 ];
-/* Průběžné krevní testy jsou v ceně obou programů. */
+/* Průběžné krevní testy jsou v ceně všech programů. */
 const KREVNI_TESTY = ['Pravidelné krevní testy a screening',
   'Sledování metabolických parametrů a reakce organismu po celou dobu programu.'];
 /* Co program obsahuje a co ne, jednou větou na řádek. Totéž zrcadlí
@@ -1234,7 +1236,7 @@ const PLAN_FEATS = {
     [1, 'Tréninkový plán od fitness trenéra'],
     [1, 'Jídelníček a doporučení doplňků stravy'],
     [1, 'Flexibilní program bez vázanosti'],
-    [0, 'Medikace není zahrnuta v ceně programu']
+    [0, 'Léčivo není součástí ceny programu']
   ],
   premium: [
     [1, 'Všechno ze Standardu'],
@@ -1245,8 +1247,19 @@ const PLAN_FEATS = {
     [1, 'Tréninkový plán s detailním rozpisem'],
     [1, 'Pokročilý Aeternum Lifestyle Protocol'],
     [1, 'Prioritní termíny bez čekání'],
-    [1, 'Psycholog na vyžádání'],
-    [0, 'Medikace není zahrnuta v ceně programu']
+    [1, 'Konzultace s psychoterapeutem (na vyžádání)'],
+    [0, 'Léčivo není součástí ceny programu']
+  ],
+  /* All-inclusive se 25. 11. 2026 vrátil. Jako jediný má léčivo v ceně,
+     a proto se vyzvedává osobně v Praze. */
+  praha: [
+    [1, 'Léčivo je součástí ceny programu'],
+    [1, 'Individuální program'],
+    [1, 'Osobní a online konzultace'],
+    [1, 'Kontrola u lékaře nejméně jednou měsíčně'],
+    [1, 'Kontrolní krevní testy v ceně programu'],
+    [1, 'Aeternum Lifestyle Protocol'],
+    [1, 'Flexibilní program bez vázanosti']
   ]
 };
 
@@ -1271,7 +1284,15 @@ const PLAN_KARTY = {
     ['Pokročilý Aeternum Lifestyle Protocol', 'Cílený i na metabolické zdraví a dlouhověkost.'],
     ['Konzultace s fitness trenérem', 'Jednou měsíčně, plus tréninkový plán s detailním rozpisem.'],
     ['Konzultace s výživovým specialistou', 'Jednou měsíčně, jídelníček na míru a přesný plán suplementace.'],
-    ['Psycholog na vyžádání', 'Když si o něj řeknete, konzultaci zprostředkujeme.'],
+    ['Psychoterapeut na vyžádání', 'Když si o něj řeknete, konzultaci zprostředkujeme — během terapie zhruba jednou za tři až šest měsíců.'],
+    ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
+  ],
+  praha: [
+    ['Léčivo v ceně programu', 'Objednáme ho s předstihem a čeká na Vás v lékárně BENU, Chlumčanského 497/5, Praha 8, dokud si ho osobně nevyzvednete. V lékárně už nic neplatíte. V ceně je léčivo v síle 2,5 až 5 mg. Když lékař dávku zvedne, změní se i cena programu — u Mounjara začíná od 7,5 mg na 15 970 Kč měsíčně. Celá tabulka je v ceníku a vždycky Vám to řekneme, než se dávka zvedne.'],
+    ['Lékař nejméně jednou měsíčně', 'Osobně na klinice v Praze, nebo online — a další kontroly podle toho, jak je potřeba.'],
+    ['Osobní a online konzultace', 'Jak se Vám to zrovna hodí — na pracovišti v Praze, nebo na dálku.'],
+    KREVNI_TESTY,
+    ['Aeternum Lifestyle Protocol', 'Jídelníček, suplementace a tréninkový plán sestavený z Vašeho dotazníku a krevních testů.'],
     ['Flexibilní program bez vázanosti', 'Bez výpovědní lhůty a bez storno poplatku.']
   ]
 };
@@ -1774,7 +1795,7 @@ const odkazPodminky = (text) => podminky()
   : '';
 
 // Lékařská část screeningu; laboratorní je zbytek do celkové ceny.
-const lekarskaCast = () => Number(D && D.examDoctorPart) || 2500;
+const lekarskaCast = () => Number(D && D.examDoctorPart) || 2470;
 
 function payCard(r, lidsky) {
   /* Co klient podepisuje svou platbou, se říká před ní, ne pod tlačítkem.
